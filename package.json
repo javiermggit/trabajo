@@ -3,10 +3,19 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --port 4200 -o --configuration=local",
+    "start:development": "ng serve --port 4200 -o --configuration=development",
+    "start:testing": "ng serve --port 4200 -o --configuration=testing",
+    "start:production": "ng serve --port 4200 -o --configuration=production",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "build:development": "ng build --configuration=development --base-href /RIPS-Dev/",
+    "build:testing": "ng build --configuration=testing --base-href /RIPS-Test/",
+    "build:production": "ng build --configuration=production --base-href /RIPS/",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "stats": "ng build --stats-json & webpack-bundle-analyzer dist/my-app/stats.json",
+    "run:all": "node node_modules/@angular-architects/module-federation/src/server/mf-dev-server.js"
   },
   "private": true,
   "dependencies": {
@@ -19,11 +28,16 @@
     "@angular/platform-browser-dynamic": "^16.2.0",
     "@angular/router": "^16.2.0",
     "rxjs": "~7.8.0",
+    "primeflex": "^3.3.1",
+    "primeicons": "^7.0.0",
+    "primeng": "^16.9.1",
+    "remixicon": "^4.2.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.14",
+    "@angular-architects/module-federation": "^16.0.4",
     "@angular/cli": "^16.2.14",
     "@angular/compiler-cli": "^16.2.0",
     "@types/jasmine": "~4.3.0",
@@ -33,6 +47,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "ngx-build-plus": "^16.0.0",
     "typescript": "~5.1.3"
   }
 }
