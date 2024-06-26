@@ -1,4 +1,4 @@
-# mf-RIPS - Everest Intelligent
+# external-module - Everest Intelligent
 
 ## Contribution
 Si necesita realizar cambios en este proyecto, por favor en lo máximo posible utilizar buenas prácticas, para ello tener en cuenta la documentación de Angular: [Angular Style Guide](https://angular.dev/style-guide)

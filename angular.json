@@ -3,7 +3,7 @@
 	"version": 1,
 	"newProjectRoot": "projects",
 	"projects": {
-		"mf-RIPS": {
+		"mf-external-module": {
 			"projectType": "application",
 			"schematics": {},
 			"root": "",
@@ -13,7 +13,7 @@
 				"build": {
 					"builder": "ngx-build-plus:browser",
 					"options": {
-						"outputPath": "dist/mf-rips",
+						"outputPath": "dist/mf-external-module",
 						"index": "src/index.html",
 						"main": "src/main.ts",
 						"polyfills": [
@@ -109,30 +109,30 @@
 					"builder": "ngx-build-plus:dev-server",
 					"configurations": {
 						"development": {
-							"browserTarget": "mf-RIPS:build:development"
+							"browserTarget": "mf-external-module:build:development"
 						},
 						"testing": {
-							"browserTarget": "mf-RIPS:build:testing"
+							"browserTarget": "mf-external-module:build:testing"
 						},
 						"production": {
-							"browserTarget": "mf-RIPS:build:production",
+							"browserTarget": "mf-external-module:build:production",
 							"extraWebpackConfig": "webpack.prod.config.js"
 						},
 						"local": {
-							"browserTarget": "mf-RIPS:build:local"
+							"browserTarget": "mf-external-module:build:local"
 						}
 					},
 					"defaultConfiguration": "development",
 					"options": {
-						"port": 4201,
-						"publicHost": "http://localhost:4201",
+						"port": 4205,
+						"publicHost": "http://localhost:4205",
 						"extraWebpackConfig": "webpack.config.js"
 					}
 				},
 				"extract-i18n": {
 					"builder": "ngx-build-plus:extract-i18n",
 					"options": {
-						"browserTarget": "mf-RIPS:build",
+						"browserTarget": "mf-external-module:build",
 						"extraWebpackConfig": "webpack.config.js"
 					}
 				},

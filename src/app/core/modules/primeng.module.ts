@@ -2,20 +2,20 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // Modules
-import { ToastModule } from 'primeng/toast';
+import { ButtonModule } from 'primeng/button';
+import { RippleModule } from 'primeng/ripple';
 
 // Services
-import { MessageService } from 'primeng/api';
 
 @NgModule({
   declarations: [],
-  providers: [ MessageService ],
+  providers: [ ],
   imports: [
-    CommonModule,
-    ToastModule
+    CommonModule
   ],
   exports:[
-    ToastModule
+    ButtonModule,
+    RippleModule
   ]
 })
 export class PrimengModule { }

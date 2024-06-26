@@ -4,16 +4,17 @@ import { CommonModule } from '@angular/common';
 import { AppMfComponent } from './app-mf.component';
 import { RouterModule } from '@angular/router';
 import { routesAppmf } from './app-mf.routes';
-import { ToastService } from '../../core/services/toast.service';
 import { PrimengModule } from '../../core/modules/primeng.module';
+import { ButtonModule } from 'primeng/button';
 
 @NgModule({
   imports: [
     CommonModule,
     RouterModule.forChild(routesAppmf),
-    PrimengModule
+    PrimengModule,
   ],
   declarations: [AppMfComponent],
-  providers: [DialogService, ToastService]
+  providers: []
+
 })
 export class AppMfModule { }
