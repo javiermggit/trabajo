@@ -5,8 +5,8 @@ import { DOCUMENT } from '@angular/common';
 import Swal from 'sweetalert2';
 import { MatTableDataSource } from '@angular/material/table';
 import { Reimpresion } from 'src/app/Modelos/Reimpresion';
-import { OdontogramaVisualizacionService } from 'src/app/odontologia/odontograma-visualizacion/odontograma-visualizacion.service';
-import { Diente, VMOdontologiaOdontograma } from 'src/app/Modelos/Odontologia';
+/* import { OdontogramaVisualizacionService } from 'src/app/odontologia/odontograma-visualizacion/odontograma-visualizacion.service';
+import { Diente, VMOdontologiaOdontograma } from 'src/app/Modelos/Odontologia'; */
 /* import { HCUnificado, ReimpresionOdontologia } from 'src/app/Modelos/HCUnificado'; */
 /* import { MedicoService } from 'src/app/medico/medico.service'; */
 import { NotaAdministrativaService } from 'src/app/nota-administrativa/nota-administrativa.service';
@@ -19,8 +19,8 @@ import { Router } from '@angular/router';
 ////import { OdontologiaReimpresionService } from 'src/app/servicioImpresion/odontologia-reimpresion.service';
 //import { OdontogramaVisualizacionComponent } from 'src/app/odontologia/odontograma-visualizacion/odontograma-visualizacion.component';
 import { ValeService } from 'src/app/crecimiento-desarrollo/vale/vale.service';
-import { IndicadoresService } from 'src/app/odontologia/indicadores/indicadores.service';
-import { AntecedenteService } from 'src/app/antecedentes/antecedente.service';
+//import { IndicadoresService } from 'src/app/odontologia/indicadores/indicadores.service';
+//import { AntecedenteService } from 'src/app/antecedentes/antecedente.service';
 import { AiepiService } from 'src/app/crecimiento-desarrollo/AIEPI/aiepi.service';
 import { CrecimientoDesarrolloService } from 'src/app/crecimiento-desarrollo/crecimiento-desarrollo.service';
 import { ParametroService } from 'src/app/parametros/parametro.service';
