@@ -1,0 +1,28 @@
+//import { AppConfigService } from "./Services/app-config.service";
+
+/* export const LEGACY_PROVIDERS = [
+  { provide: 'URLHc', useFactory: (c: AppConfigService) => c.URLHc, deps: [AppConfigService] },
+  { provide: 'URLWhatsapp', useFactory: (c: AppConfigService) => c.UrlWhatsapp, deps: [AppConfigService] },
+  { provide: 'URLParametrizacionGeneral', useFactory: (c: AppConfigService) => c.UrlParametrizacionGeneral, deps: [AppConfigService] },
+  { provide: 'URLParametrizacion', useFactory: (c: AppConfigService) => c.UrlParametrizacion, deps: [AppConfigService] },
+  { provide: 'URLPaciente', useFactory: (c: AppConfigService) => c.URLPaciente, deps: [AppConfigService] },
+  { provide: 'URLMedico', useFactory: (c: AppConfigService) => c.URLMedico, deps: [AppConfigService] },
+  { provide: 'URLImpresion', useFactory: (c: AppConfigService) => c.URLImpresion, deps: [AppConfigService] },
+  { provide: 'UrlOrdenamientoHealth', useFactory: (c: AppConfigService) => c.URLOrdenamientoHealth, deps: [AppConfigService] },
+  { provide: 'UrlLogin', useFactory: (c: AppConfigService) => c.UrlLogin, deps: [AppConfigService] },
+  { provide: 'UrlMedicamento', useFactory: (c: AppConfigService) => c.URLMedicamento, deps: [AppConfigService] },
+  { provide: 'UrlTeleconsulta', useFactory: (c: AppConfigService) => c.URLTeleconsulta, deps: [AppConfigService] },
+  { provide: 'IdPais', useFactory: (c: AppConfigService) => c.getPais, deps: [AppConfigService] },
+  { provide: 'URLExtension', useFactory: (c: AppConfigService) => c.URLExtension, deps: [AppConfigService] },
+  { provide: 'URLApiCorreo', useFactory: (c: AppConfigService) => c.URLApiCorreo, deps: [AppConfigService] },
+  { provide: 'UrlAgendamiento', useFactory: (c: AppConfigService) => c.URLAgendamientoInteligente, deps: [AppConfigService] },
+  { provide: 'UrlParametrizacionRecurso', useFactory: (c: AppConfigService) => c.URLParametrizacionRecurso, deps: [AppConfigService] },
+  { provide: 'UrlPrestador', useFactory: (c: AppConfigService) => c.URLPrestador, deps: [AppConfigService] },
+  { provide: 'UrlCIsign', useFactory: (c: AppConfigService) => c.URLCISign, deps: [AppConfigService] },
+  { provide: 'UrlIntegracionDigiturno', useFactory: (c: AppConfigService) => c.URLIntegracionDigiturno, deps: [AppConfigService] },
+  { provide: 'getCliente', useFactory: (c: AppConfigService) => c.getCliente(), deps: [AppConfigService] },
+  { provide: 'urlImagen', useFactory: (c: AppConfigService) => c.URLImagen, deps: [AppConfigService] },
+  { provide: 'getInfoCliente', useFactory: (c: AppConfigService) => c.getInfoCliente(), deps: [AppConfigService] },
+  { provide: "URLMessageProvider", useFactory: (c: AppConfigService) => c.apiMessagesProvider, deps: [AppConfigService] },
+  { provide: "HCNormalizedTemplateName", useFactory: (c: AppConfigService) => c.templateName, deps: [AppConfigService]},
+]; */

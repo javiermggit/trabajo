@@ -1,0 +1,58 @@
+<div class="diente" id="diente_{{this.value}}">
+	<!-- -->
+	<div style="position: absolute;z-index: 200;">
+
+		<div class="row">
+			<div style="width: 58px; height: 23px;" (click)="cambiarCara(1)">
+				<br>
+			</div>
+		</div>
+		<div style="height: 20px;width: 58px;display: flex;">
+			<div style="width: 21px;" (click)="cambiarCara(4)">
+			</div>
+			<div style="width: 16px;" (click)="cambiarCara(5)">
+			</div>
+			<div style="width: 20px;" (click)="cambiarCara(2)">
+			</div>
+		</div>
+		<div class="row">
+			<div style="width: 58px; height: 23px;" (click)="cambiarCara(3)">
+				<br>
+			</div>
+		</div>
+
+	</div>
+	<div *ngFor="let eventoDiente of this.eventosDiente.hallazgos">
+			<img class="evento" style="z-index: 100;"
+			src="assets/img/odontograma/{{eventoDiente.evento}}/{{eventoDiente.evento}}-{{eventoDiente.cara}}{{eventoDiente.estado}}.png"
+			alt="">
+
+	 <!--	<img class="evento" style="z-index: 100;"
+			src="https://appcita.viva1a.com.co:8051/odontograma/{{eventoDiente.evento}}/{{eventoDiente.evento}}-{{eventoDiente.cara}}{{eventoDiente.estado}}.png"
+			alt=""> -->
+	</div>
+</div>
+<p id="label_{{this.value}}" (click)="seleccionarDiente(this.value)">{{this.value}}</p>
+
+
+
+
+<ng-template #content let-modal>
+	<div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title">Diagnóstico</h5>
+		</div>
+		<div class="modal-body">
+			<div class="kt-radio-list">
+				<label *ngFor="let item of this.se.diagnosticoEncontrado.diagnostico" class="kt-radio">
+					<input type="radio" name="radio1" [value]='item' [(ngModel)]="diagnostico"> {{item.descripcion}}
+					<span></span>
+				</label>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-primary" (click)="agregarDiagnostico()">Agregar</button>
+		</div>
+	</div>
+
+</ng-template>

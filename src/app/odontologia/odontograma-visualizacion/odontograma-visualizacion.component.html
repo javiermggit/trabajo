@@ -1,0 +1,1317 @@
+<ngb-accordion #acc="ngbAccordion" activeIds="colapsado">
+	<ngb-panel id="colapsado">
+
+		<ng-template ngbPanelHeader>
+
+			<h4 ngbPanelToggle class="kt-portlet__head-title titletabs">{{title}}
+			</h4>
+			<span *ngIf="!this.se.isCapturado" class="btn btn-success BotonOculto btnFloatTitletabs" 
+				(click)="cargarOdontogramas()">Capturar Odontograma</span>
+
+		</ng-template>
+		<ng-template ngbPanelContent>
+			<div class="panel-body form-horizontal">
+
+				<div class="row" *ngIf="!this.se.isCapturado  && !this.se.esControl">
+					<!--assets/img-->
+					<!-- https://appcita.viva1a.com.co:8051 -->
+					<div class="migracion col-md-1 hallazgo lineaNormal lienaAzul" (click)="seleccionarEvento('migracion', '')"
+						id="migracion">
+						<img style="width: 30px;" src="assets/img/odontograma/migracion/migracion.png"><br>
+						<span class="tituloevento">Migracion</span>
+					</div>
+
+					<div class="intrusionextrusion col-md-1 hallazgo lineaNormal"
+						(click)="seleccionarEvento('intrusionextrusion', '')" id="intrusionextrusion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/intrusionextrusion/intrusionextrusion.png"><br>
+						<span class="tituloevento">Extrusion/Intrusion</span>
+					</div>
+
+					<div class="giroversion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('giroversion', '')"
+						id="giroversion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/giroversion/giroversion.png"><br>
+						<span class="tituloevento">Giroversion</span>
+					</div>
+
+					<div class="corona col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', '')" id="corona">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+
+					<div class="erupcionar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('erupcionar', '')"
+						id="erupcionar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/erupcionar/erupcionar.png"><br>
+						<span class="tituloevento">Sin erupcionar</span>
+					</div>
+					<div class="extraido col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('extraido', '')" id="extraido">
+						<img style="width: 30px;" src="assets/img/odontograma/extraido/extraido.png"><br>
+						<span class="tituloevento">Extraido</span>
+					</div>
+
+					<div class="numerario col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('numerario', '')"
+						id="numerario">
+						<img style="width: 30px;" src="assets/img/odontograma/numerario/numerario.png"><br>
+						<span class="tituloevento">Numerario</span>
+					</div>
+
+					<div class="obturacionok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacionok', '')"
+						id="obturacionok">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacionok/obturacionok.png"><br>
+						<span class="tituloevento">Obt. ok</span>
+					</div>
+
+					<div class="restauracion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', '')"
+						id="restauracion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+
+					<div class="sellante col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', '')" id="sellante">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+
+					<div class="pontico col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', '')" id="pontico">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="incrustacion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', '')"
+						id="incrustacion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+
+
+					<div class="ok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('ok', '')" id="ok">
+						<img style="width: 30px;" src="assets/img/odontograma/ok/ok.png"><br>
+						<span class="tituloevento">Diente OK</span>
+					</div>
+					<div class="diastemar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('diastema', 'r')"
+						id="diastemar">
+						<img style="width: 30px;" src="assets/img/odontograma/diastema/diastema.png"><br>
+						<span class="tituloevento">Diastemas</span>
+					</div>
+					<div class="coronar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', 'r')" id="coronar">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona-r.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+					<div class="endodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('endodoncia', 'r')"
+						id="endodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/endodoncia/endodoncia-r.png"><br>
+						<span class="tituloevento">Endodoncia</span>
+					</div>
+					<div class="exodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodoncia', 'r')"
+						id="exodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodoncia/exodoncia-r.png"><br>
+						<span class="tituloevento">Exodoncia Simple</span>
+					</div>
+					<div class="exodonciaQxr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodonciaQx', 'r')"
+						id="exodonciaQxr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodonciaQx/exodonciaQx-r.png"><br>
+						<span class="tituloevento">Exodoncia Qx</span>
+					</div>
+					<div class="fracturar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('fractura', 'r')"
+						id="fracturar">
+						<img style="width: 30px;" src="assets/img/odontograma/fractura/fractura.png"><br>
+						<span class="tituloevento">Fractura</span>
+					</div>
+
+
+					<div class="incrustacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', 'r')"
+						id="incrustacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion-r.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+					<div class="mbsr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbs', 'r')" id="mbsr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbs/mbs.png"><br>
+						<span class="tituloevento">ICDAS 1 </span>
+					</div>
+					<div class="mbhr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbh', 'r')" id="mbhr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbh/mbh.png"><br>
+						<span class="tituloevento">ICDAS 2 </span>
+					</div>
+
+					<div class="obturacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacion', 'r')"
+						id="obturacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacion/obturacion.png"><br>
+						<span class="tituloevento">Obturacion</span>
+					</div>
+
+
+					<div class="ponticor col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', 'r')" id="ponticor">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico-r.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="resinar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('resina', 'r')" id="resinar">
+						<img style="width: 30px;" src="assets/img/odontograma/resina/resina-r.png"><br>
+						<span class="tituloevento">Resina</span>
+					</div>
+					<div class="rrr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rr', 'r')" id="rrr">
+						<img style="width: 30px;" src="assets/img/odontograma/rr/rr.png"><br>
+						<span class="tituloevento">R. Radicular</span>
+					</div>
+					<div class="rrer col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rre', 'r')" id="rrer">
+						<img style="width: 30px;" src="assets/img/odontograma/rre/rre.png"><br>
+						<span class="tituloevento">RR endodoncia</span>
+					</div>
+					<div class="restauracionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', 'r')"
+						id="restauracionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion-r.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+					<div class="sellanter col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', 'r')"
+						id="sellanter">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante-r.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+					<div class="icdas3r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas3', 'r')" id="icdas3r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas3/icdas-r.png"><br>
+						<span class="tituloevento">icdas3</span>
+					</div>
+					<div class="icdas4r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas4', 'r')" id="icdas4r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas4/icdas-r.png"><br>
+						<span class="tituloevento">icdas4</span>
+					</div>
+					<div class="icdas5r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas5', 'r')" id="icdas5r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas5/icdas-r.png"><br>
+						<span class="tituloevento">icdas5</span>
+					</div>
+					<div class="icdas6r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas6', 'r')" id="icdas6r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas6/icdas-r.png"><br>
+						<span class="tituloevento">icdas6</span>
+					</div>
+				</div>
+
+				<div class="row" *ngIf="!this.se.isCapturado  && this.se.esControl">
+					<div class="migracion col-md-1 hallazgo lineaNormal lienaAzul" (click)="seleccionarEvento('migracion', '')"
+						id="migracion">
+						<img style="width: 30px;" src="assets/img/odontograma/migracion/migracion.png"><br>
+						<span class="tituloevento">Migracion</span>
+					</div>
+
+					<div class="intrusionextrusion col-md-1 hallazgo lineaNormal"
+						(click)="seleccionarEvento('intrusionextrusion', '')" id="intrusionextrusion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/intrusionextrusion/intrusionextrusion.png"><br>
+						<span class="tituloevento">Extrusion/Intrusion</span>
+					</div>
+
+					<div class="giroversion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('giroversion', '')"
+						id="giroversion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/giroversion/giroversion.png"><br>
+						<span class="tituloevento">Giroversion</span>
+					</div>
+
+					<div class="corona col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', '')" id="corona">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+
+
+					<div class="endodoncia col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('endodoncia', '')"
+						id="endodoncia">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/endodoncia/endodoncia.png"><br>
+						<span class="tituloevento">Endodoncia</span>
+					</div>
+
+					<div class="erupcionar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('erupcionar', '')"
+						id="erupcionar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/erupcionar/erupcionar.png"><br>
+						<span class="tituloevento">Sin erupcionar</span>
+					</div>
+
+					<div class="extraido col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('extraido', '')" id="extraido">
+						<img style="width: 30px;" src="assets/img/odontograma/extraido/extraido.png"><br>
+						<span class="tituloevento">Extraido</span>
+					</div>
+
+					<div class="numerario col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('numerario', '')"
+						id="numerario">
+						<img style="width: 30px;" src="assets/img/odontograma/numerario/numerario.png"><br>
+						<span class="tituloevento">Numerario</span>
+					</div>
+
+					<div class="obturaciont col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturaciont', '')"
+						id="obturaciont">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturaciont/obturaciont.png"><br>
+						<span class="tituloevento">Obt. temp</span>
+					</div>
+					<div class="obturacionok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacionok', '')"
+						id="obturacionok">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacionok/obturacionok.png"><br>
+						<span class="tituloevento">Obt. ok</span>
+					</div>
+
+					<div class="radiografia col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('radiografia', '')"
+						id="radiografia">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/radiografia/radiografia.png"><br>
+						<span class="tituloevento">Radiografia</span>
+					</div>
+
+					<div class="restauracion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', '')"
+						id="restauracion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+
+					<div class="sellante col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', '')" id="sellante">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+
+					<div class="pontico col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', '')" id="pontico">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="exodoncia col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodoncia', '')"
+						id="exodoncia">
+						<img style="width: 30px;" src="assets/img/odontograma/exodoncia/exodoncia.png"><br>
+						<span class="tituloevento">Exodoncia simple</span>
+					</div>
+					<div class="exodonciaQx col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodonciaQx', '')"
+						id="exodonciaQx">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodonciaQx/exodonciaQx.png"><br>
+						<span class="tituloevento">Exodoncia Qx</span>
+					</div>
+					<div class="resina col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('resina', '')" id="resina">
+						<img style="width: 30px;" src="assets/img/odontograma/resina/resina.png"><br>
+						<span class="tituloevento">Resina</span>
+					</div>
+
+					<div class="incrustacion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', '')"
+						id="incrustacion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+
+					<div class="ok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('ok', '')" id="ok">
+						<img style="width: 30px;" src="assets/img/odontograma/ok/ok.png"><br>
+						<span class="tituloevento">Diente OK</span>
+					</div>
+					<div class="diastemar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('diastema', 'r')"
+						id="diastemar">
+						<img style="width: 30px;" src="assets/img/odontograma/diastema/diastema.png"><br>
+						<span class="tituloevento">Diastemas</span>
+					</div>
+
+					<div class="coronar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', 'r')" id="coronar">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona-r.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+					<div class="carier col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('carie', 'r')" id="carier">
+						<img style="width: 30px;" src="assets/img/odontograma/carie/carie-r.png"><br>
+						<span class="tituloevento">Carie</span>
+					</div>
+					<div class="endodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('endodoncia', 'r')"
+						id="endodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/endodoncia/endodoncia-r.png"><br>
+						<span class="tituloevento">Endodoncia</span>
+					</div>
+
+					<div class="exodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodoncia', 'r')"
+						id="exodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodoncia/exodoncia-r.png"><br>
+						<span class="tituloevento">Exodoncia Simple</span>
+					</div>
+
+					<div class="exodonciaQxr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodonciaQx', 'r')"
+						id="exodonciaQxr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodonciaQx/exodonciaQx-r.png"><br>
+						<span class="tituloevento">Exodoncia Qx</span>
+					</div>
+
+					<div class="fracturar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('fractura', 'r')"
+						id="fracturar">
+						<img style="width: 30px;" src="assets/img/odontograma/fractura/fractura.png"><br>
+						<span class="tituloevento">Fractura</span>
+					</div>
+
+					<div class="incrustacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', 'r')"
+						id="incrustacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion-r.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+					<div class="mbsr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbs', 'r')" id="mbsr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbs/mbs.png"><br>
+						<span class="tituloevento">ICDAS 1 </span>
+					</div>
+					<div class="mbhr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbh', 'r')" id="mbhr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbh/mbh.png"><br>
+						<span class="tituloevento">ICDAS 2 </span>
+					</div>
+					<div class="numerarior col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('numerario', 'r')"
+						id="numerarior">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/numerario/numerario-r.png"><br>
+						<span class="tituloevento">Numerario</span>
+					</div>
+					<div class="obturacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacion', 'r')"
+						id="obturacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacion/obturacion.png"><br>
+						<span class="tituloevento">Obturacion</span>
+					</div>
+
+
+					<div class="ponticor col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', 'r')" id="ponticor">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico-r.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="rrr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rr', 'r')" id="rrr">
+						<img style="width: 30px;" src="assets/img/odontograma/rr/rr.png"><br>
+						<span class="tituloevento">R. Radicular</span>
+					</div>
+					<div class="rrer col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rre', 'r')" id="rrer">
+						<img style="width: 30px;" src="assets/img/odontograma/rre/rre.png"><br>
+						<span class="tituloevento">RR endodoncia</span>
+					</div>
+					<div class="restauracionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', 'r')"
+						id="restauracionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion-r.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+					<div class="sellanter col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', 'r')"
+						id="sellanter">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante-r.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+					<div class="icdas3r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas3', 'r')" id="icdas3r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas3/icdas-r.png"><br>
+						<span class="tituloevento">icdas3</span>
+					</div>
+					<div class="icdas4r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas4', 'r')" id="icdas4r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas4/icdas-r.png"><br>
+						<span class="tituloevento">icdas4</span>
+					</div>
+					<div class="icdas5r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas5', 'r')" id="icdas5r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas5/icdas-r.png"><br>
+						<span class="tituloevento">icdas5</span>
+					</div>
+					<div class="icdas6r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas6', 'r')" id="icdas6r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas6/icdas-r.png"><br>
+						<span class="tituloevento">icdas6</span>
+					</div>
+				</div>
+
+				<br />
+				<div class="row" id="myDiv" style="zoom: 95%;">
+					<div class="row" *ngIf="this.se.isImpresion">
+						<!--assets/img-->
+						<!-- assets/img -->
+						<div class="migracion col-md-1 hallazgo lineaNormal lienaAzul" (click)="seleccionarEvento('migracion', '')"
+							id="migracion">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/migracion/migracion.png"><br>
+							<span class="tituloevento">Migracion</span>
+						</div>
+
+						<div class="intrusionextrusion col-md-1 hallazgo lineaNormal"
+							(click)="seleccionarEvento('intrusionextrusion', '')" id="intrusionextrusion">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/intrusionextrusion/intrusionextrusion.png"><br>
+							<span class="tituloevento">Extrusion/Intrusion</span>
+						</div>
+
+						<div class="giroversion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('giroversion', '')"
+							id="giroversion">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/giroversion/giroversion.png"><br>
+							<span class="tituloevento">Giroversion</span>
+						</div>
+
+						<div class="corona col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', '')" id="corona">
+							<img style="width: 30px;" src="assets/img/odontograma/corona/corona.png"><br>
+							<span class="tituloevento">Corona</span>
+						</div>
+
+						<div class="erupcionar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('erupcionar', '')"
+							id="erupcionar">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/erupcionar/erupcionar.png"><br>
+							<span class="tituloevento">Sin erupcionar</span>
+						</div>
+						<div class="extraido col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('extraido', '')"
+							id="extraido">
+							<img style="width: 30px;" src="assets/img/odontograma/extraido/extraido.png"><br>
+							<span class="tituloevento">Extraido</span>
+						</div>
+
+						<div class="numerario col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('numerario', '')"
+							id="numerario">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/numerario/numerario.png"><br>
+							<span class="tituloevento">Numerario</span>
+						</div>
+
+						<div class="obturacionok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacionok', '')"
+							id="obturacionok">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/obturacionok/obturacionok.png"><br>
+							<span class="tituloevento">Obt. ok</span>
+						</div>
+
+						<div class="restauracion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', '')"
+							id="restauracion">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/restauracion/restauracion.png"><br>
+							<span class="tituloevento">Restauracion</span>
+						</div>
+
+						<div class="sellante col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', '')"
+							id="sellante">
+							<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante.png"><br>
+							<span class="tituloevento">Sellante</span>
+						</div>
+
+						<div class="pontico col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', '')" id="pontico">
+							<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico.png"><br>
+							<span class="tituloevento">Pontico</span>
+						</div>
+
+						<div class="incrustacion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', '')"
+							id="incrustacion">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/incrustacion/incrustacion.png"><br>
+							<span class="tituloevento">Incrustacion </span>
+						</div>
+
+
+						<div class="ok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('ok', '')" id="ok">
+							<img style="width: 30px;" src="assets/img/odontograma/ok/ok.png"><br>
+							<span class="tituloevento">Diente OK</span>
+						</div>
+						<div class="diastemar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('diastema', 'r')"
+							id="diastemar">
+							<img style="width: 30px;" src="assets/img/odontograma/diastema/diastema.png"><br>
+							<span class="tituloevento">Diastemas</span>
+						</div>
+						<div class="coronar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', 'r')" id="coronar">
+							<img style="width: 30px;" src="assets/img/odontograma/corona/corona-r.png"><br>
+							<span class="tituloevento">Corona</span>
+						</div>
+						<div class="endodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('endodoncia', 'r')"
+							id="endodonciar">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/endodoncia/endodoncia-r.png"><br>
+							<span class="tituloevento">Endodoncia</span>
+						</div>
+						<div class="exodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodoncia', 'r')"
+							id="exodonciar">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/exodoncia/exodoncia-r.png"><br>
+							<span class="tituloevento">Exodoncia Simple</span>
+						</div>
+						<div class="exodonciaQxr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodonciaQx', 'r')"
+							id="exodonciaQxr">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/exodonciaQx/exodonciaQx-r.png"><br>
+							<span class="tituloevento">Exodoncia Qx</span>
+						</div>
+						<div class="fracturar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('fractura', 'r')"
+							id="fracturar">
+							<img style="width: 30px;" src="assets/img/odontograma/fractura/fractura.png"><br>
+							<span class="tituloevento">Fractura</span>
+						</div>
+
+
+						<div class="incrustacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', 'r')"
+							id="incrustacionr">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/incrustacion/incrustacion-r.png"><br>
+							<span class="tituloevento">Incrustacion </span>
+						</div>
+						<div class="mbsr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbs', 'r')" id="mbsr">
+							<img style="width: 30px;" src="assets/img/odontograma/mbs/mbs.png"><br>
+							<span class="tituloevento">ICDAS 1 </span>
+						</div>
+						<div class="mbhr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbh', 'r')" id="mbhr">
+							<img style="width: 30px;" src="assets/img/odontograma/mbh/mbh.png"><br>
+							<span class="tituloevento">ICDAS 2 </span>
+						</div>
+
+						<div class="obturacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacion', 'r')"
+							id="obturacionr">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/obturacion/obturacion.png"><br>
+							<span class="tituloevento">Obturacion</span>
+						</div>
+
+
+						<div class="ponticor col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', 'r')"
+							id="ponticor">
+							<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico-r.png"><br>
+							<span class="tituloevento">Pontico</span>
+						</div>
+
+						<div class="resinar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('resina', 'r')" id="resinar">
+							<img style="width: 30px;" src="assets/img/odontograma/resina/resina-r.png"><br>
+							<span class="tituloevento">Resina</span>
+						</div>
+						<div class="rrr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rr', 'r')" id="rrr">
+							<img style="width: 30px;" src="assets/img/odontograma/rr/rr.png"><br>
+							<span class="tituloevento">R. Radicular</span>
+						</div>
+						<div class="rrer col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rre', 'r')" id="rrer">
+							<img style="width: 30px;" src="assets/img/odontograma/rre/rre.png"><br>
+							<span class="tituloevento">RR endodoncia</span>
+						</div>
+						<div class="restauracionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', 'r')"
+							id="restauracionr">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/restauracion/restauracion-r.png"><br>
+							<span class="tituloevento">Restauracion</span>
+						</div>
+						<div class="sellanter col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', 'r')"
+							id="sellanter">
+							<img style="width: 30px;"
+								src="assets/img/odontograma/sellante/sellante-r.png"><br>
+							<span class="tituloevento">Sellante</span>
+						</div>
+						<div class="icdas3r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas3', 'r')" id="icdas3r">
+							<img style="width: 30px;" src="assets/img/odontograma/icdas3/icdas-r.png"><br>
+							<span class="tituloevento">icdas3</span>
+						</div>
+						<div class="icdas4r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas4', 'r')" id="icdas4r">
+							<img style="width: 30px;" src="assets/img/odontograma/icdas4/icdas-r.png"><br>
+							<span class="tituloevento">icdas4</span>
+						</div>
+						<div class="icdas5r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas5', 'r')" id="icdas5r">
+							<img style="width: 30px;" src="assets/img/odontograma/icdas5/icdas-r.png"><br>
+							<span class="tituloevento">icdas5</span>
+						</div>
+						<div class="icdas6r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas6', 'r')" id="icdas6r">
+							<img style="width: 30px;" src="assets/img/odontograma/icdas6/icdas-r.png"><br>
+							<span class="tituloevento">icdas6</span>
+						</div>
+					</div>
+					<div class=" col-md-9">
+						<table style="text-align: center; font-weight: bold; zoom: 130%">
+							<tr>
+								<td colspan="17">
+									<b>Vestibular</b><br /><br />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<app-dientes-visualizacion [value]="18">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="17">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="16">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="15">
+
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="14">
+
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="13">
+
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="12">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="11">
+									</app-dientes-visualizacion>
+								</td>
+								<td></td>
+								<td>
+									<app-dientes-visualizacion [value]="21">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="22">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="23">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="24">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="25">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="26">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="27">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="28">
+									</app-dientes-visualizacion>
+								</td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td>
+									<app-dientes-visualizacion [value]="55">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="54">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="53">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="52">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="51">
+									</app-dientes-visualizacion>
+								</td>
+								<td></td>
+								<td>
+									<app-dientes-visualizacion [value]="61">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="62">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="63">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="64">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="65">
+									</app-dientes-visualizacion>
+								</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td colspan="6">
+									<br /><br /><b>Derecho</b>
+								</td>
+								<td colspan="5">
+									<br /><br />
+									<b>Lingual</b>
+									<br /><br />
+								</td>
+								<td colspan="6">
+									<br /><br /><b>Izquierdo</b>
+								</td>
+							</tr>
+
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td>
+									<app-dientes-visualizacion [value]="85">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="84">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="83">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="82">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="81">
+									</app-dientes-visualizacion>
+								</td>
+								<td></td>
+								<td>
+									<app-dientes-visualizacion [value]="71">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="72">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="73">
+
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="74">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="75">
+									</app-dientes-visualizacion>
+								</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td>
+									<app-dientes-visualizacion [value]="48">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="47">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="46">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="45">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="44">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="43">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="42">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="41">
+									</app-dientes-visualizacion>
+								</td>
+								<td></td>
+								<td>
+									<app-dientes-visualizacion [value]="31">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="32">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="33">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="34">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="35">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="36">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="37">
+									</app-dientes-visualizacion>
+								</td>
+								<td>
+									<app-dientes-visualizacion [value]="38">
+									</app-dientes-visualizacion>
+								</td>
+							</tr>
+
+							<tr>
+								<td colspan="17">
+									<br /><br /> <b>Vestibular</b>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+				<br />
+
+				<div class="row" *ngIf="!this.se.isCapturado && !this.se.esControl">
+
+					<div class="migracion col-md-1 hallazgo lineaNormal lienaAzul" (click)="seleccionarEvento('migracion', '')"
+						id="migracion">
+						<img style="width: 30px;" src="assets/img/odontograma/migracion/migracion.png"><br>
+						<span class="tituloevento">Migracion</span>
+					</div>
+
+					<div class="intrusionextrusion col-md-1 hallazgo lineaNormal"
+						(click)="seleccionarEvento('intrusionextrusion', '')" id="intrusionextrusion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/intrusionextrusion/intrusionextrusion.png"><br>
+						<span class="tituloevento">Extrusion/Intrusion</span>
+					</div>
+
+					<div class="giroversion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('giroversion', '')"
+						id="giroversion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/giroversion/giroversion.png"><br>
+						<span class="tituloevento">Giroversion</span>
+					</div>
+
+					<div class="corona col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', '')" id="corona">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+
+					<div class="erupcionar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('erupcionar', '')"
+						id="erupcionar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/erupcionar/erupcionar.png"><br>
+						<span class="tituloevento">Sin erupcionar</span>
+					</div>
+					<div class="extraido col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('extraido', '')" id="extraido">
+						<img style="width: 30px;" src="assets/img/odontograma/extraido/extraido.png"><br>
+						<span class="tituloevento">Extraido</span>
+					</div>
+
+					<div class="numerario col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('numerario', '')"
+						id="numerario">
+						<img style="width: 30px;" src="assets/img/odontograma/numerario/numerario.png"><br>
+						<span class="tituloevento">Numerario</span>
+					</div>
+
+					<div class="obturacionok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacionok', '')"
+						id="obturacionok">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacionok/obturacionok.png"><br>
+						<span class="tituloevento">Obt. ok</span>
+					</div>
+
+					<div class="restauracion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', '')"
+						id="restauracion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+
+					<div class="sellante col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', '')" id="sellante">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+
+					<div class="pontico col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', '')" id="pontico">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="incrustacion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', '')"
+						id="incrustacion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+
+
+					<div class="ok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('ok', '')" id="ok">
+						<img style="width: 30px;" src="assets/img/odontograma/ok/ok.png"><br>
+						<span class="tituloevento">Diente OK</span>
+					</div>
+					<div class="diastemar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('diastema', 'r')"
+						id="diastemar">
+						<img style="width: 30px;" src="assets/img/odontograma/diastema/diastema.png"><br>
+						<span class="tituloevento">Diastemas</span>
+					</div>
+					<div class="coronar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', 'r')" id="coronar">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona-r.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+					<div class="endodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('endodoncia', 'r')"
+						id="endodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/endodoncia/endodoncia-r.png"><br>
+						<span class="tituloevento">Endodoncia</span>
+					</div>
+					<div class="exodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodoncia', 'r')"
+						id="exodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodoncia/exodoncia-r.png"><br>
+						<span class="tituloevento">Exodoncia Simple</span>
+					</div>
+					<div class="exodonciaQxr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodonciaQx', 'r')"
+						id="exodonciaQxr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodonciaQx/exodonciaQx-r.png"><br>
+						<span class="tituloevento">Exodoncia Qx</span>
+					</div>
+					<div class="fracturar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('fractura', 'r')"
+						id="fracturar">
+						<img style="width: 30px;" src="assets/img/odontograma/fractura/fractura.png"><br>
+						<span class="tituloevento">Fractura</span>
+					</div>
+
+
+					<div class="incrustacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', 'r')"
+						id="incrustacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion-r.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+					<div class="mbsr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbs', 'r')" id="mbsr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbs/mbs.png"><br>
+						<span class="tituloevento">ICDAS 1 </span>
+					</div>
+					<div class="mbhr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbh', 'r')" id="mbhr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbh/mbh.png"><br>
+						<span class="tituloevento">ICDAS 2 </span>
+					</div>
+
+					<div class="obturacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacion', 'r')"
+						id="obturacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacion/obturacion.png"><br>
+						<span class="tituloevento">Obturacion</span>
+					</div>
+
+
+					<div class="ponticor col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', 'r')" id="ponticor">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico-r.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="resinar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('resina', 'r')" id="resinar">
+						<img style="width: 30px;" src="assets/img/odontograma/resina/resina-r.png"><br>
+						<span class="tituloevento">Resina</span>
+					</div>
+					<div class="rrr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rr', 'r')" id="rrr">
+						<img style="width: 30px;" src="assets/img/odontograma/rr/rr.png"><br>
+						<span class="tituloevento">R. Radicular</span>
+					</div>
+					<div class="rrer col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rre', 'r')" id="rrer">
+						<img style="width: 30px;" src="assets/img/odontograma/rre/rre.png"><br>
+						<span class="tituloevento">RR endodoncia</span>
+					</div>
+					<div class="restauracionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', 'r')"
+						id="restauracionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion-r.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+					<div class="sellanter col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', 'r')"
+						id="sellanter">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante-r.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+					<div class="icdas3r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas3', 'r')" id="icdas3r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas3/icdas-r.png"><br>
+						<span class="tituloevento">icdas3</span>
+					</div>
+					<div class="icdas4r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas4', 'r')" id="icdas4r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas4/icdas-r.png"><br>
+						<span class="tituloevento">icdas4</span>
+					</div>
+					<div class="icdas5r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas5', 'r')" id="icdas5r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas5/icdas-r.png"><br>
+						<span class="tituloevento">icdas5</span>
+					</div>
+					<div class="icdas6r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas6', 'r')" id="icdas6r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas6/icdas-r.png"><br>
+						<span class="tituloevento">icdas6</span>
+					</div>
+				</div>
+
+				<div class="row" *ngIf="!this.se.isCapturado && this.se.esControl">
+					<div class="migracion col-md-1 hallazgo lineaNormal lienaAzul" (click)="seleccionarEvento('migracion', '')"
+						id="migracion">
+						<img style="width: 30px;" src="assets/img/odontograma/migracion/migracion.png"><br>
+						<span class="tituloevento">Migracion</span>
+					</div>
+
+					<div class="intrusionextrusion col-md-1 hallazgo lineaNormal"
+						(click)="seleccionarEvento('intrusionextrusion', '')" id="intrusionextrusion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/intrusionextrusion/intrusionextrusion.png"><br>
+						<span class="tituloevento">Extrusion/Intrusion</span>
+					</div>
+
+					<div class="giroversion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('giroversion', '')"
+						id="giroversion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/giroversion/giroversion.png"><br>
+						<span class="tituloevento">Giroversion</span>
+					</div>
+
+					<div class="corona col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', '')" id="corona">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+
+
+					<div class="endodoncia col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('endodoncia', '')"
+						id="endodoncia">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/endodoncia/endodoncia.png"><br>
+						<span class="tituloevento">Endodoncia</span>
+					</div>
+
+					<div class="erupcionar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('erupcionar', '')"
+						id="erupcionar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/erupcionar/erupcionar.png"><br>
+						<span class="tituloevento">Sin erupcionar</span>
+					</div>
+
+					<div class="extraido col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('extraido', '')" id="extraido">
+						<img style="width: 30px;" src="assets/img/odontograma/extraido/extraido.png"><br>
+						<span class="tituloevento">Extraido</span>
+					</div>
+
+					<div class="numerario col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('numerario', '')"
+						id="numerario">
+						<img style="width: 30px;" src="assets/img/odontograma/numerario/numerario.png"><br>
+						<span class="tituloevento">Numerario</span>
+					</div>
+
+					<div class="obturaciont col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturaciont', '')"
+						id="obturaciont">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturaciont/obturaciont.png"><br>
+						<span class="tituloevento">Obt. temp</span>
+					</div>
+					<div class="obturacionok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacionok', '')"
+						id="obturacionok">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacionok/obturacionok.png"><br>
+						<span class="tituloevento">Obt. ok</span>
+					</div>
+
+					<div class="radiografia col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('radiografia', '')"
+						id="radiografia">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/radiografia/radiografia.png"><br>
+						<span class="tituloevento">Radiografia</span>
+					</div>
+
+					<div class="restauracion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', '')"
+						id="restauracion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+
+					<div class="sellante col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', '')" id="sellante">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+
+					<div class="pontico col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', '')" id="pontico">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="exodoncia col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodoncia', '')"
+						id="exodoncia">
+						<img style="width: 30px;" src="assets/img/odontograma/exodoncia/exodoncia.png"><br>
+						<span class="tituloevento">Exodoncia simple</span>
+					</div>
+					<div class="exodonciaQx col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodonciaQx', '')"
+						id="exodonciaQx">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodonciaQx/exodonciaQx.png"><br>
+						<span class="tituloevento">Exodoncia Qx</span>
+					</div>
+					<div class="resina col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('resina', '')" id="resina">
+						<img style="width: 30px;" src="assets/img/odontograma/resina/resina.png"><br>
+						<span class="tituloevento">Resina</span>
+					</div>
+
+					<div class="incrustacion col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', '')"
+						id="incrustacion">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+
+					<div class="ok col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('ok', '')" id="ok">
+						<img style="width: 30px;" src="assets/img/odontograma/ok/ok.png"><br>
+						<span class="tituloevento">Diente OK</span>
+					</div>
+					<div class="diastemar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('diastema', 'r')"
+						id="diastemar">
+						<img style="width: 30px;" src="assets/img/odontograma/diastema/diastema.png"><br>
+						<span class="tituloevento">Diastemas</span>
+					</div>
+
+					<div class="coronar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('corona', 'r')" id="coronar">
+						<img style="width: 30px;" src="assets/img/odontograma/corona/corona-r.png"><br>
+						<span class="tituloevento">Corona</span>
+					</div>
+					<div class="carier col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('carie', 'r')" id="carier">
+						<img style="width: 30px;" src="assets/img/odontograma/carie/carie-r.png"><br>
+						<span class="tituloevento">Carie</span>
+					</div>
+					<div class="endodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('endodoncia', 'r')"
+						id="endodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/endodoncia/endodoncia-r.png"><br>
+						<span class="tituloevento">Endodoncia</span>
+					</div>
+
+					<div class="exodonciar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodoncia', 'r')"
+						id="exodonciar">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodoncia/exodoncia-r.png"><br>
+						<span class="tituloevento">Exodoncia Simple</span>
+					</div>
+
+					<div class="exodonciaQxr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('exodonciaQx', 'r')"
+						id="exodonciaQxr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/exodonciaQx/exodonciaQx-r.png"><br>
+						<span class="tituloevento">Exodoncia Qx</span>
+					</div>
+
+					<div class="fracturar col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('fractura', 'r')"
+						id="fracturar">
+						<img style="width: 30px;" src="assets/img/odontograma/fractura/fractura.png"><br>
+						<span class="tituloevento">Fractura</span>
+					</div>
+
+					<div class="incrustacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('incrustacion', 'r')"
+						id="incrustacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/incrustacion/incrustacion-r.png"><br>
+						<span class="tituloevento">Incrustacion </span>
+					</div>
+					<div class="mbsr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbs', 'r')" id="mbsr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbs/mbs.png"><br>
+						<span class="tituloevento">ICDAS 1 </span>
+					</div>
+					<div class="mbhr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('mbh', 'r')" id="mbhr">
+						<img style="width: 30px;" src="assets/img/odontograma/mbh/mbh.png"><br>
+						<span class="tituloevento">ICDAS 2 </span>
+					</div>
+					<div class="numerarior col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('numerario', 'r')"
+						id="numerarior">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/numerario/numerario-r.png"><br>
+						<span class="tituloevento">Numerario</span>
+					</div>
+					<div class="obturacionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('obturacion', 'r')"
+						id="obturacionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/obturacion/obturacion.png"><br>
+						<span class="tituloevento">Obturacion</span>
+					</div>
+
+
+					<div class="ponticor col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('pontico', 'r')" id="ponticor">
+						<img style="width: 30px;" src="assets/img/odontograma/pontico/pontico-r.png"><br>
+						<span class="tituloevento">Pontico</span>
+					</div>
+
+					<div class="rrr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rr', 'r')" id="rrr">
+						<img style="width: 30px;" src="assets/img/odontograma/rr/rr.png"><br>
+						<span class="tituloevento">R. Radicular</span>
+					</div>
+					<div class="rrer col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('rre', 'r')" id="rrer">
+						<img style="width: 30px;" src="assets/img/odontograma/rre/rre.png"><br>
+						<span class="tituloevento">RR endodoncia</span>
+					</div>
+					<div class="restauracionr col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('restauracion', 'r')"
+						id="restauracionr">
+						<img style="width: 30px;"
+							src="assets/img/odontograma/restauracion/restauracion-r.png"><br>
+						<span class="tituloevento">Restauracion</span>
+					</div>
+					<div class="sellanter col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('sellante', 'r')"
+						id="sellanter">
+						<img style="width: 30px;" src="assets/img/odontograma/sellante/sellante-r.png"><br>
+						<span class="tituloevento">Sellante</span>
+					</div>
+					<div class="icdas3r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas3', 'r')" id="icdas3r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas3/icdas-r.png"><br>
+						<span class="tituloevento">icdas3</span>
+					</div>
+					<div class="icdas4r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas4', 'r')" id="icdas4r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas4/icdas-r.png"><br>
+						<span class="tituloevento">icdas4</span>
+					</div>
+					<div class="icdas5r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas5', 'r')" id="icdas5r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas5/icdas-r.png"><br>
+						<span class="tituloevento">icdas5</span>
+					</div>
+					<div class="icdas6r col-md-1 hallazgo lineaNormal" (click)="seleccionarEvento('icdas6', 'r')" id="icdas6r">
+						<img style="width: 30px;" src="assets/img/odontograma/icdas6/icdas-r.png"><br>
+						<span class="tituloevento">icdas6</span>
+					</div>
+				</div>
+			</div>
+		</ng-template>
+	</ngb-panel>
+</ngb-accordion>
+
+
+<div class="row">
+	<div class="col-md-12">
+		<textarea class="form-control" [(ngModel)]="se.observacion" name="Observacion" rows="10"
+			placeholder="Ingrese una observación si es necesaria" style="border-radius:initial;" required="" required
+			#enfermedad="ngModel"></textarea>
+	</div>
+</div>
+
+<!-- <div class="row" *ngFor="let diente of se.dientes">
+    <div class="col-md-1">
+        <b>Diente {{diente.id}}</b>
+    </div>
+    <div class="col-md-10">
+        <div class="row" *ngFor="let hallazgo of diente.hallazgos">
+            <li>{{ hallazgo.evento }} - {{ hallazgo.cara }} </li> (<a class="" href="#" (click)="removerHallazgo()">remover</a>)
+        </div>
+    </div>
+</div> -->

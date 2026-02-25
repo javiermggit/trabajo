@@ -101,6 +101,7 @@
 								}
 							],
 							"extraWebpackConfig": "webpack.prod.config.js"
+							 
 						}
 					},
 					"defaultConfiguration": "production"
@@ -126,14 +127,18 @@
 					"options": {
 						"port": 4210,
 						"publicHost": "http://localhost:4210",
-						"extraWebpackConfig": "webpack.config.js"
+						"extraWebpackConfig": "webpack.config.js",
+						"proxyConfig": "proxy.conf.json"
+						
 					}
 				},
 				"extract-i18n": {
 					"builder": "ngx-build-plus:extract-i18n",
 					"options": {
 						"browserTarget": "mf-external-module:build",
-						"extraWebpackConfig": "webpack.config.js"
+						"extraWebpackConfig": "webpack.config.js",
+						"proxyConfig": "proxy.conf.json"
+						
 					}
 				},
 				"test": {

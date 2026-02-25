@@ -1,0 +1,259 @@
+<!-- HTML de prueba: PrimeNG sin bindings ni funciones -->
+
+  <header>
+    <h1 class="text-3xl font-semibold">Reimpresiones</h1>
+  </header>
+
+  
+<!-- ================= FILTROS REIMPRESIONES ================= -->
+
+<div class="grid">
+  <div class="col-12">
+    <div class="card-custom">
+      <div class="p-4">
+
+       
+
+       <div class="formgrid grid">
+
+  <!-- Tipo Documento -->
+  <div class="field col-12 md:col-6 lg:col-4">
+   <span class="p-float-label">
+      <p-dropdown
+        inputId="tipoDoc"
+        [options]="rs.ListadoTipoDocumento"
+        optionLabel="descripcion"
+        optionValue="valor"
+        [filter]="true"
+        [(ngModel)]="tipo"
+        [showClear]="true"
+        styleClass="w-full">
+      </p-dropdown>
+      <label for="tipoDoc">Tipo de documento *</label>
+    </span>
+  </div>
+
+  <!-- Número Documento -->
+  <div class="field col-12 md:col-6 lg:col-4">
+    <span class="p-float-label">
+      <p-inputNumber
+        inputId="numDoc"
+        [useGrouping]="false"
+        [(ngModel)]="identificacion"
+        styleClass="w-full">
+      </p-inputNumber>
+      <label for="numDoc">Número de documento *</label>
+    </span>
+  </div>
+
+  <!-- Especialidad -->
+  <div class="field col-12 md:col-6 lg:col-4">
+    <span class="p-float-label">
+      <p-dropdown
+        inputId="especialidad"
+        [options]="rs.listadoEspecialidad"
+        optionLabel="descripcion"
+        optionValue="id"
+        [(ngModel)]="especialidad"
+        [filter]="true"
+        [showClear]="true"
+        styleClass="w-full">
+      </p-dropdown>
+      <label for="especialidad">Especialidad</label>
+    </span>
+  </div>
+
+</div>
+
+        <!-- Botón Buscar -->
+        <div class="flex gap-3 mt-4">
+          <button
+            pButton
+            type="button"
+            label="Buscar"
+            icon="ri-search-line"
+            class="p-button-primary"
+            (click)="consultarDatoGenerales()">
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loader -->
+<div *ngIf="loadingReimpresion" class="flex justify-content-center mt-4">
+  <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
+</div>
+
+
+
+
+
+
+
+
+<!-- ================= RESULTADOS REIMPRESIONES ================= -->
+
+<div class="grid mt-4">
+
+  <!-- HISTORIAS CLÍNICAS -->
+  <div class="col-12">
+    <div class="card-custom">
+      <div class="p-4">
+
+        <div class="flex justify-content-between align-items-center mb-3">
+          <h2 class="text-xl font-semibold m-0">Historias Clínicas</h2>
+
+          <button
+            *ngIf="SwBoton"
+            pButton
+            type="button"
+            label="Imprimir todas la HC"
+            icon="ri-printer-line"
+            class="p-button-sm p-button-primary">
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table mat-table [dataSource]="dataSource" matSort class="w-full">
+
+            <ng-container matColumnDef="medico">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Médico </th>
+              <td mat-cell *matCellDef="let row"> {{row.medico}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+              <td mat-cell *matCellDef="let row">
+                {{row.fecha | date:'dd/MM/yyyy'}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="especialidad">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Especialidad </th>
+              <td mat-cell *matCellDef="let row"> {{row.especialidad}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="link">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row">
+                <button
+                  pButton
+                  type="button"
+                  icon="ri-printer-line"
+                  class="p-button-sm"
+                  (click)="imprimirHistoriaClinicaPDF(row)">
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- NOTAS ADMINISTRATIVAS -->
+  <div class="col-12 mt-4">
+    <div class="card-custom">
+      <div class="p-4">
+
+        <h2 class="text-xl font-semibold mb-3">Notas Administrativas</h2>
+
+        <div class="table-responsive">
+          <table mat-table [dataSource]="dataSource2" matSort class="w-full">
+
+            <ng-container matColumnDef="medico">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Médico </th>
+              <td mat-cell *matCellDef="let row"> {{row.medico}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+              <td mat-cell *matCellDef="let row">
+                {{row.fechaCreacion | date:'dd/MM/yyyy'}}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="especialidad">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row"></td>
+            </ng-container>
+
+            <ng-container matColumnDef="link">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row">
+                <button
+                  pButton
+                  type="button"
+                  icon="ri-printer-line"
+                  class="p-button-sm">
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- HC OTROS SISTEMAS -->
+  <div class="col-12 mt-4">
+    <div class="card-custom">
+      <div class="p-4">
+
+        <h2 class="text-xl font-semibold mb-3">Historia Clínica Otros Sistemas</h2>
+
+        <div class="table-responsive">
+          <table mat-table [dataSource]="dataSource3" matSort class="w-full">
+
+            <ng-container matColumnDef="paciente">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Paciente </th>
+              <td mat-cell *matCellDef="let row"> {{row.paciente}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="identificacion">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Identificación </th>
+              <td mat-cell *matCellDef="let row"> {{row.identificacion}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="rutaAccesoPdf">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let row">
+                <a
+                  pButton
+                  class="p-button-sm"
+                  target="_blank"
+                  [href]="row.rutaAccesoPdf"
+                  icon="ri-external-link-line">
+                </a>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsHc"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsHc;"></tr>
+
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+ 
+ 

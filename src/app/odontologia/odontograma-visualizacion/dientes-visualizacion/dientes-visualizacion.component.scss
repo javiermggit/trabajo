@@ -1,0 +1,19 @@
+p {
+    text-align: center;
+}
+
+.diente{
+    background-image: url('/assets/img/odontograma/diente/diente.png');
+    //background-image: url('/HCHealth/assets/img/odontograma/diente/diente.png');
+    //background-image: url('https://appcita.viva1a.com.co:8051/odontograma/diente/diente.png');
+    display:block;
+    width: 58px;
+    height: 70px;
+}
+
+.evento {
+    width: 58px;
+    height: 70px;
+    position: absolute;
+    display: -webkit-box;
+}

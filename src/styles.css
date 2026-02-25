@@ -1,1 +1,53 @@
-/* You can add global styles to this file, and also import other style files */
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.min.css";
+@import "primeicons/primeicons.css";
+@import "primeflex/primeflex.css";
+@import "remixicon/fonts/remixicon.css";
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #f4f6f8;
+  color: #1f2937;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.card-custom {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.card-header {
+  border-bottom: 1px solid #edf0f3;
+}
+
+.badge-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-ACTIVO {
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.status-INACTIVO {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.avatar-custom-primary {
+  background: #e8f1ff !important;
+  color: #1d4ed8 !important;
+}

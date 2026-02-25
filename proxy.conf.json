@@ -1,0 +1,61 @@
+{
+  "/APIHCHealth": {
+    "target": "http://localhost:5088",
+    "changeOrigin": true,
+    "secure": false,
+    "pathRewrite": {
+      "^/APIHCHealth": ""
+    },
+    "logLevel": "debug"
+  },
+  "/APIParametrizacionGeneralHealth": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIPacienteV2": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIMedicoHealth": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIImpresion": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIOrdenamientoHealth": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/ApiOrdenamientoV2": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIConsentimientoInformadoTs": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIEnvioCorreo": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/ApiIntegarcionEverestDigiturnoPrueba": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIParametrizacionRecurso": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  }
+}
