@@ -17,8 +17,13 @@ UrlTeleconsulta: "https://appcita.viva1a.com.co:8051/teleconsulta",
 URLExtension: "https://appcita.viva1a.com.co:8051/Directorioclicktocallapi/api",
 UrlCIsign: "/APIConsentimientoInformadoTs/api",
 URLApiCorreo: "/APIEnvioCorreo/api",
+URLWhatsapp:"/apiperez_test/ApiWhatsapp",
 UrlIntegracionDigiturno: "/ApiIntegarcionEverestDigiturnoPrueba/api",
 UrlParametrizacionRecurso: "/APIParametrizacionRecurso",
 UrlAgendamiento: "",
-  IdPais: 1
+  IdPais: 1,
+  UrlPdf:"https://everestintelligent.com:444/apidelta_test/ApiImpresionUnificada/api/Prints",
+  tituloCliente:'DELTA',
+numeroCliente:'1',
+plantillaCliente:'c2e0eac5-bfd5-4f3c-96a4-5e3e73d7e7ea'
 };

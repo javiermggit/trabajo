@@ -1,10 +1,11 @@
-import { DialogService } from 'primeng/dynamicdialog';
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { AppMfComponent } from './app-mf.component';
+import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { routesAppmf } from './app-mf.routes';
-//import { PrimengModule } from '../../core/modules/primeng.module';
+import { AppMfComponent } from './app-mf.component';
+import { ReimpresionComponent } from './reimpresion/reimpresion.component';
+import { VistahcComponent } from './vistahc/vistahc.component';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
@@ -13,14 +14,10 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { AvatarModule } from 'primeng/avatar';
 import { TabViewModule } from 'primeng/tabview';
 import { ButtonModule } from 'primeng/button';
-import { ReimpresionComponent } from './reimpresion/reimpresion.component';
-import { VistahcComponent } from './vistahc/vistahc.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
-import { MatPaginatorModule } from '@angular/material/paginator'; // si usas paginator
-import { DatePipe } from '@angular/common';
-
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   imports: [
@@ -28,7 +25,6 @@ import { DatePipe } from '@angular/common';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forChild(routesAppmf),
-    //PrimengModule,
     DropdownModule,
     InputNumberModule,
     CalendarModule,
@@ -37,20 +33,17 @@ import { DatePipe } from '@angular/common';
     AvatarModule,
     TabViewModule,
     ButtonModule,
-
-    // 🔥 Angular Material
-  MatTableModule,
-  MatSortModule,
-  MatPaginatorModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    HttpClientModule
+    
   ],
   declarations: [
     AppMfComponent,
     ReimpresionComponent,
     VistahcComponent
   ],
-  providers: [
-    DatePipe
-  ]
-
+  providers: [DatePipe]
 })
 export class AppMfModule { }

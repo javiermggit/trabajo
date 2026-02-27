@@ -2,7 +2,7 @@ const { shareAll, withModuleFederationPlugin } = require('@angular-architects/mo
 
 module.exports = withModuleFederationPlugin({
 
-  name: 'mf-external-module',
+  name: 'mf-reimpresion',
 
   exposes: {
     './Module': './src/app/mf/main/app-mf.module.ts',

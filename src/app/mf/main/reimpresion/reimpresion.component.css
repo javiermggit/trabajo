@@ -30,11 +30,11 @@
   margin-top: 0.45rem !important;
 }
 
-.reimp-filters-wrapper {
+/* .reimp-filters-wrapper {
   position: sticky;
   top: 0.4rem;
   z-index: 30;
-}
+} */
 
 .reimp-filter-card {
   backdrop-filter: blur(3px);

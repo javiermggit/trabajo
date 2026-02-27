@@ -10,7 +10,7 @@ import { CitasImpresion } from './Medico';
 import { Adolescencia } from './Adolescencia';
 import { Nota } from './Nota';
 import { epocHc } from './epoc';
-import { pyp } from '../morbilidad/morbilidad.service';
+//import { pyp } from '../morbilidad/morbilidad.service';
 
 export class HCEnfermeria {
     public citaId: string;
@@ -109,5 +109,5 @@ export class HCEnfermeria {
     citaImpresion: CitasImpresion;
     edadPaciente:number;
     public ordenamientoHC: OrdenamientoHC;
-    listadoPYP: Array<pyp>;
+    //listadoPYP: Array<pyp>;
 }

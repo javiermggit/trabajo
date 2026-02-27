@@ -4,12 +4,15 @@ import { MainComponent } from 'src/app/main/main.component';
 import { ReimpresionComponent } from './reimpresion/reimpresion.component';
 import { VistahcComponent } from './vistahc/vistahc.component';
 
-export const routesAppmf: Routes = [
-    {
-      path: "", component: AppMfComponent, children: [
-        { path: 's', component: MainComponent},
-        { path: 'reimpresion', component: ReimpresionComponent },
-        { path: 'vistahc', component: VistahcComponent },
-      ],
-    }
-  ];
+
+ export const routesAppmf: Routes = [
+  {
+    path: '',
+    component: AppMfComponent,
+    children: [
+      { path: '', redirectTo: 'reimpresion', pathMatch: 'full' },
+      { path: 'reimpresion', component: ReimpresionComponent },
+      { path: 'vistahc', component: VistahcComponent }
+    ]
+  }
+];

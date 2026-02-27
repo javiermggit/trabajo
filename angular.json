@@ -3,7 +3,7 @@
 	"version": 1,
 	"newProjectRoot": "projects",
 	"projects": {
-		"mf-external-module": {
+		"mf-reimpresion": {
 			"projectType": "application",
 			"schematics": {},
 			"root": "",
@@ -13,7 +13,7 @@
 				"build": {
 					"builder": "ngx-build-plus:browser",
 					"options": {
-						"outputPath": "dist/mf-external-module",
+						"outputPath": "dist/mf-reimpresion",
 						"index": "src/index.html",
 						"main": "src/main.ts",
 						"polyfills": [
@@ -113,17 +113,17 @@
 					"builder": "ngx-build-plus:dev-server",
 					"configurations": {
 						"development": {
-							"browserTarget": "mf-external-module:build:development"
+							"browserTarget": "mf-reimpresion:build:development"
 						},
 						"testing": {
-							"browserTarget": "mf-external-module:build:testing"
+							"browserTarget": "mf-reimpresion:build:testing"
 						},
 						"production": {
-							"browserTarget": "mf-external-module:build:production",
+							"browserTarget": "mf-reimpresion:build:production",
 							"extraWebpackConfig": "webpack.prod.config.js"
 						},
 						"local": {
-							"browserTarget": "mf-external-module:build:local"
+							"browserTarget": "mf-reimpresion:build:local"
 						}
 					},
 					"defaultConfiguration": "development",
@@ -138,7 +138,7 @@
 				"extract-i18n": {
 					"builder": "ngx-build-plus:extract-i18n",
 					"options": {
-						"browserTarget": "mf-external-module:build",
+						"browserTarget": "mf-reimpresion:build",
 						"extraWebpackConfig": "webpack.config.js",
 						"proxyConfig": "proxy.conf.json"
 						

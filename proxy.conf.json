@@ -48,6 +48,11 @@
     "changeOrigin": true,
     "secure": false
   },
+  "/apiperez_test": {
+    "target": "http://172.27.83.196:160",
+    "changeOrigin": true,
+    "secure": false
+  },
   "/ApiIntegarcionEverestDigiturnoPrueba": {
     "target": "http://172.27.83.196:160",
     "changeOrigin": true,

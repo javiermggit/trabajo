@@ -18,7 +18,7 @@ import { PacMarcacionDiscapacidadNeps } from './PacMarcacionDiscapacidadNeps';
 import { epocHc } from './epoc';
 import { ResultadoAnnar, ResultadoLaboratorioAnnar, VMFechaResultadoOrdenamiento } from './LaboratorioAnnar';
 import { GruposOrdenPropiosCx, GruposOrdenRedCx, OrdenRedCx } from './Quirofano';
-import { pyp } from '../morbilidad/morbilidad.service';
+//import { pyp } from '../morbilidad/morbilidad.service';
 export class VMAntecedente {
 	public descripcion: string;
 	public observacion: string;
@@ -1314,7 +1314,7 @@ export class HCMorbilidad extends HC {
     public  OrdenamientoHC:OrdenamientoHC;
 	public resultadoLaboratorioLeidos: Array<ResultadoAnnar>;
 
-	listadoPYP: Array<pyp>;
+	//listadoPYP: Array<pyp>;
 }
 
 export class HCSegumiento extends HCSeguimiento {
