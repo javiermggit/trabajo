@@ -1,9 +1,480 @@
-.page {
-  padding: 16px;
+:host {
+  display: block;
+  --reimp-text-strong: #0f2746;
+  --reimp-text-muted: #4f647d;
+  --reimp-surface: #ffffff;
+  --reimp-border: #dfe7f1;
+  --reimp-border-soft: #e9eff6;
+  --reimp-header-bg: #f4f8fd;
 }
 
-.actions {
-  margin-top: 16px;
+.required-asterisk {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.reimp-field-label {
+  display: block;
+  margin: 0 0 0.28rem;
+  color: var(--reimp-text-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.reimp-page-header {
+  margin: 0 0 1.1rem;
+}
+
+.reimp-search-row {
+  margin-top: 0.45rem !important;
+}
+
+.reimp-filters-wrapper {
+  position: sticky;
+  top: 0.4rem;
+  z-index: 30;
+}
+
+.reimp-filter-card {
+  backdrop-filter: blur(3px);
+}
+
+.reimp-filter-card .p-4 {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+}
+
+.reimp-page-title {
+  margin: 0;
+  color: var(--reimp-text-strong);
+  font-size: clamp(1.75rem, 2vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.reimp-section-title {
+  margin: 0;
+  color: var(--reimp-text-strong);
+  font-size: clamp(1.25rem, 1.35vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.card-custom {
+  border: 1px solid var(--reimp-border);
+  border-radius: 14px;
+  background: var(--reimp-surface);
+  box-shadow: 0 8px 24px rgba(15, 39, 70, 0.06);
+}
+
+.table-responsive {
+  margin-top: 0.65rem;
+  overflow-x: auto;
+}
+
+:host ::ng-deep .reimp-filtros .p-float-label {
   display: flex;
-  gap: 8px;
+  flex-direction: column-reverse;
+  gap: 0.28rem;
+}
+
+:host ::ng-deep .reimp-filtros .p-float-label > label {
+  position: static !important;
+  transform: none !important;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--reimp-text-muted);
+  font-weight: 600;
+  font-size: var(--reimp-label-size, 0.84rem);
+  line-height: 1.2;
+}
+
+:host ::ng-deep .reimp-filtros .field {
+  margin-bottom: 0.72rem;
+}
+
+.acciones-cinta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.26rem;
+  border-radius: 12px;
+  background: #edf3fb;
+  flex-wrap: nowrap;
+}
+
+:host ::ng-deep .reimp-btn.p-button {
+  min-height: 36px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.42rem 0.82rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: none;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+:host ::ng-deep .reimp-btn .p-button-icon {
+  font-size: 0.9rem;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-compact.p-button {
+  min-height: 34px;
+  padding: 0.38rem 0.8rem;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-action-top.p-button {
+  min-height: 38px;
+  min-width: 250px;
+  letter-spacing: 0.01em;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-action-row.p-button {
+  min-width: 122px;
+  font-weight: 700;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-search.p-button {
+  width: 140px;
+  justify-content: center;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button {
+  background: #3b7ce5;
+  border-color: #3b7ce5;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button {
+  background: #5d7392;
+  border-color: #5d7392;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-success.p-button {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+:host ::ng-deep .reimp-btn.p-button:focus {
+  box-shadow: none;
+}
+
+:host ::ng-deep .reimp-btn.p-button:hover {
+  filter: brightness(0.95);
+  transform: translateY(-0.5px);
+}
+
+:host ::ng-deep .reimp-btn.p-button.p-disabled {
+  opacity: 0.62;
+  transform: none;
+}
+
+:host ::ng-deep .reimp-filtros .p-inputtext,
+:host ::ng-deep .reimp-filtros .p-dropdown {
+  height: 36px;
+  border-radius: 10px;
+  border-color: var(--reimp-border);
+  font-size: 0.86rem;
+}
+
+:host ::ng-deep .reimp-filtros .reimp-field-plain .p-dropdown,
+:host ::ng-deep .reimp-filtros .reimp-field-plain .p-calendar .p-inputtext {
+  height: 36px;
+  border-radius: 10px;
+  border-color: var(--reimp-border);
+  font-size: 0.86rem;
+}
+
+:host ::ng-deep .reimp-filtros .reimp-field-plain .p-dropdown .p-dropdown-label,
+:host ::ng-deep .reimp-filtros .reimp-field-plain .p-calendar .p-inputtext {
+  padding-left: 0.85rem;
+}
+
+:host ::ng-deep .reimp-filtros .reimp-field-plain .p-calendar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+:host ::ng-deep .reimp-filtros .reimp-field-plain .p-calendar .p-datepicker-trigger {
+  height: 36px;
+  width: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--reimp-border);
+  background: #eef4ff;
+  color: #3b7ce5;
+}
+
+:host ::ng-deep .reimp-filtros .reimp-calendar-local .p-inputtext {
+  border-right: 0;
+}
+
+:host ::ng-deep .reimp-filtros .reimp-calendar-local .p-datepicker-trigger {
+  border-left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+:host ::ng-deep .reimp-calendar-shortcuts {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  padding: 0.35rem 0.25rem 0.1rem;
+}
+
+:host ::ng-deep .reimp-calendar-shortcuts-header {
+  border-bottom: 1px solid #e7edf6;
+  padding: 0.3rem 0.25rem 0.4rem;
+  margin-bottom: 0.2rem;
+}
+
+:host ::ng-deep .reimp-calendar-shortcuts .p-button {
+  min-height: 28px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2f5ea8;
+}
+
+:host ::ng-deep .reimp-filtros .p-inputnumber,
+:host ::ng-deep .reimp-filtros .p-inputnumber-input {
+  width: 100%;
+}
+
+:host ::ng-deep .reimp-filtros .p-inputnumber-input {
+  height: 36px;
+  border-radius: 10px;
+  padding: 0 0.75rem;
+  border-color: var(--reimp-border);
+  font-size: 0.86rem;
+}
+
+:host ::ng-deep .reimp-filtros .p-dropdown .p-dropdown-label {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 0.75rem;
+  font-size: 0.86rem;
+}
+
+:host ::ng-deep .reimp-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border: 1px solid var(--reimp-border);
+  border-radius: 12px;
+  overflow: hidden;
+  width: 100%;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-header-row,
+:host ::ng-deep .reimp-table .mat-header-row {
+  background: var(--reimp-header-bg);
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-header-cell,
+:host ::ng-deep .reimp-table .mat-header-cell {
+  color: var(--reimp-text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--reimp-border-soft);
+  padding: 0.85rem 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-cell,
+:host ::ng-deep .reimp-table .mat-cell {
+  color: #0f172a;
+  border-bottom: 1px solid var(--reimp-border-soft);
+  padding: 0.85rem 1rem;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-row:nth-child(even),
+:host ::ng-deep .reimp-table .mat-row:nth-child(even) {
+  background: #fcfdff;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-row:last-child .mat-mdc-cell,
+:host ::ng-deep .reimp-table .mat-row:last-child .mat-cell {
+  border-bottom: 0;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-row:hover,
+:host ::ng-deep .reimp-table .mat-row:hover {
+  background: #f8fbff;
+}
+
+:host ::ng-deep .reimp-table .mat-column-fecha {
+  text-align: left;
+}
+
+:host ::ng-deep .reimp-table .mat-column-fecha .mat-sort-header-container {
+  justify-content: flex-start;
+}
+
+:host ::ng-deep .reimp-table .mat-column-link,
+:host ::ng-deep .reimp-table .mat-column-rutaAccesoPdf {
+  text-align: center;
+  white-space: nowrap;
+  min-width: 230px;
+}
+
+:host ::ng-deep .reimp-section-title + .flex {
+  margin-bottom: 0.9rem;
+}
+
+.reimp-table-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.reimp-hc-local-filters {
+  margin-top: 0.2rem;
+}
+
+:host ::ng-deep .reimp-hc-local-filters .p-dropdown,
+:host ::ng-deep .reimp-hc-local-filters .p-calendar .p-inputtext {
+  height: 40px;
+  font-size: 0.9rem;
+  border-radius: 10px;
+}
+
+:host ::ng-deep .reimp-hc-local-filters .p-float-label > label {
+  color: var(--reimp-text-muted);
+  font-weight: 500;
+}
+
+.reimp-state {
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.92rem;
+  border: 1px solid var(--reimp-border);
+}
+
+.reimp-state-loading {
+  background: #f4f8ff;
+  color: #365a87;
+}
+
+.reimp-state-error {
+  background: #fff5f5;
+  color: #9f1d1d;
+  border-color: #f0cdcd;
+}
+
+.reimp-empty-cell {
+  text-align: center;
+  color: var(--reimp-text-muted);
+  font-style: italic;
+  padding: 1rem;
+}
+
+.reimp-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding-top: 0.25rem;
+}
+
+.reimp-counter {
+  color: var(--reimp-text-muted);
+  font-size: 0.88rem;
+}
+
+.reimp-pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f7faff;
+  border: 1px solid #e2eaf5;
+  border-radius: 999px;
+  padding: 0.25rem;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-page.p-button {
+  min-height: 30px;
+  padding: 0.24rem 0.62rem;
+  font-size: 0.82rem;
+  opacity: 1;
+}
+
+:host ::ng-deep .reimp-btn.reimp-pager-btn.p-button {
+  background: #ffffff;
+  border: 1px solid #d8e3f2;
+  color: #35527a;
+  border-radius: 999px;
+  min-width: 98px;
+}
+
+:host ::ng-deep .reimp-btn.reimp-pager-btn.p-button:not(.p-disabled):hover {
+  background: #edf4ff;
+  border-color: #c8d9f3;
+}
+
+:host ::ng-deep .reimp-btn.reimp-pager-btn.p-button.p-disabled {
+  opacity: 0.55;
+}
+
+.reimp-page-indicator {
+  min-width: 3.9rem;
+  text-align: center;
+  color: #2c4365;
+  font-size: 0.84rem;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #d8e3f2;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+}
+
+@media (max-width: 992px) {
+  .reimp-filters-wrapper {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .reimp-search-row {
+    width: 100%;
+  }
+
+  :host ::ng-deep .reimp-btn.reimp-btn-search.p-button {
+    width: 100%;
+  }
+
+  :host ::ng-deep .reimp-btn.reimp-btn-action-top.p-button {
+    min-width: 100%;
+  }
+
+  :host ::ng-deep .reimp-btn.reimp-btn-action-row.p-button {
+    min-width: 38px;
+    width: 38px;
+    padding: 0;
+  }
+
+  :host ::ng-deep .reimp-btn.reimp-btn-action-row.p-button .p-button-label {
+    display: none;
+  }
+
+  :host ::ng-deep .reimp-table .mat-mdc-header-cell,
+  :host ::ng-deep .reimp-table .mat-header-cell,
+  :host ::ng-deep .reimp-table .mat-mdc-cell,
+  :host ::ng-deep .reimp-table .mat-cell {
+    padding: 0.72rem 0.75rem;
+  }
+
+  .reimp-table-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reimp-pager {
+    justify-content: space-between;
+  }
 }

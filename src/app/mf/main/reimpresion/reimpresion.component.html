@@ -1,40 +1,46 @@
 <!-- HTML de prueba: PrimeNG sin bindings ni funciones -->
 
-  <header>
-    <h1 class="text-3xl font-semibold">Reimpresiones</h1>
+  <header class="reimp-page-header">
+    <h1 class="reimp-page-title">Reimpresiones</h1>
   </header>
 
   
 <!-- ================= FILTROS REIMPRESIONES ================= -->
 
-<div class="grid">
+<div class="grid reimp-filters-wrapper">
   <div class="col-12">
-    <div class="card-custom">
+    <div class="card-custom reimp-filter-card">
       <div class="p-4">
 
        
 
-       <div class="formgrid grid">
+       <div class="formgrid grid reimp-filtros">
 
   <!-- Tipo Documento -->
-  <div class="field col-12 md:col-6 lg:col-4">
+  <div class="field col-12 md:col-6 lg:col-4 reimp-field-plain">
    <span class="p-float-label">
       <p-dropdown
         inputId="tipoDoc"
+        [appendTo]="'body'"
+        [autoZIndex]="true"
+        [baseZIndex]="10000"
+        panelStyleClass="reimp-dropdown-panel"
+        [scrollHeight]="'260px'"
         [options]="rs.ListadoTipoDocumento"
         optionLabel="descripcion"
         optionValue="valor"
+        placeholder="Ninguna opción seleccionada"
         [filter]="true"
         [(ngModel)]="tipo"
         [showClear]="true"
         styleClass="w-full">
       </p-dropdown>
-      <label for="tipoDoc">Tipo de documento *</label>
+      <label for="tipoDoc">Tipo de documento <span class="required-asterisk">*</span></label>
     </span>
   </div>
 
   <!-- Número Documento -->
-  <div class="field col-12 md:col-6 lg:col-4">
+  <div class="field col-12 md:col-6 lg:col-4 reimp-field-plain">
     <span class="p-float-label">
       <p-inputNumber
         inputId="numDoc"
@@ -42,7 +48,7 @@
         [(ngModel)]="identificacion"
         styleClass="w-full">
       </p-inputNumber>
-      <label for="numDoc">Número de documento *</label>
+      <label for="numDoc">Número de documento <span class="required-asterisk">*</span></label>
     </span>
   </div>
 
@@ -51,9 +57,15 @@
     <span class="p-float-label">
       <p-dropdown
         inputId="especialidad"
+        [appendTo]="'body'"
+        [autoZIndex]="true"
+        [baseZIndex]="10000"
+        panelStyleClass="reimp-dropdown-panel"
+        [scrollHeight]="'260px'"
         [options]="rs.listadoEspecialidad"
         optionLabel="descripcion"
         optionValue="id"
+        placeholder="Seleccione especialidad"
         [(ngModel)]="especialidad"
         [filter]="true"
         [showClear]="true"
@@ -63,17 +75,88 @@
     </span>
   </div>
 
+  <!-- Médico (opcional) -->
+  <div class="field col-12 md:col-6 lg:col-4">
+    <label class="reimp-field-label" for="filtroMedico">Profesional</label>
+      <p-dropdown
+        inputId="filtroMedico"
+        [options]="profesionalesOptions"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="filtroProfesional"
+        [showClear]="true"
+        [filter]="true"
+      placeholder="Ninguna opción seleccionada"
+        (onChange)="aplicarFiltrosLocalesHC()"
+        styleClass="w-full">
+    </p-dropdown>
+  </div>
+
+  <!-- Rango de fechas (opcional) -->
+  <div class="field col-12 md:col-6 lg:col-4">
+    <label class="reimp-field-label" for="filtroFechaRango">Rango de fechas</label>
+    <p-calendar
+      #fechaRangoCalendar
+      inputId="filtroFechaRango"
+      [(ngModel)]="filtroFechaRango"
+      selectionMode="range"
+      [readonlyInput]="true"
+      [showIcon]="true"
+      [showButtonBar]="true"
+      dateFormat="dd/mm/yy"
+      appendTo="body"
+      (ngModelChange)="onRangoFechaModelChange($event)"
+      (onSelect)="onRangoFechaSelect()"
+      (onTodayClick)="onRangoFechaTodayClick()"
+      styleClass="w-full reimp-calendar-local">
+      <ng-template pTemplate="header">
+        <div class="reimp-calendar-shortcuts reimp-calendar-shortcuts-header">
+          <button
+            pButton
+            type="button"
+            label="1 mes"
+            class="p-button-text p-button-sm"
+            (click)="setDateRange(1)">
+          </button>
+          <button
+            pButton
+            type="button"
+            label="3 meses"
+            class="p-button-text p-button-sm"
+            (click)="setDateRange(3)">
+          </button>
+          <button
+            pButton
+            type="button"
+            label="6 meses"
+            class="p-button-text p-button-sm"
+            (click)="setDateRange(6)">
+          </button>
+        </div>
+      </ng-template>
+    </p-calendar>
+  </div>
+
 </div>
 
         <!-- Botón Buscar -->
-        <div class="flex gap-3 mt-4">
+        <div class="flex gap-3 mt-4 reimp-search-row">
           <button
             pButton
             type="button"
             label="Buscar"
             icon="ri-search-line"
-            class="p-button-primary"
+            class="reimp-btn reimp-btn-primary reimp-btn-search"
             (click)="consultarDatoGenerales()">
+          </button>
+
+          <button
+            pButton
+            type="button"
+            label="Limpiar filtros"
+            icon="ri-refresh-line"
+            class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+            (click)="limpiarTodosFiltros()">
           </button>
         </div>
 
@@ -103,24 +186,44 @@
     <div class="card-custom">
       <div class="p-4">
 
-        <div class="flex justify-content-between align-items-center mb-3">
-          <h2 class="text-xl font-semibold m-0">Historias Clínicas</h2>
+        <div class="mb-3">
+          <h2 class="reimp-section-title m-0 mb-2">Historias Clínicas</h2>
 
-          <button
-            *ngIf="SwBoton"
-            pButton
-            type="button"
-            label="Imprimir todas la HC"
-            icon="ri-printer-line"
-            class="p-button-sm p-button-primary">
-          </button>
+          <div *ngIf="SwBoton" class="flex flex-wrap gap-2">
+            <button
+              pButton
+              type="button"
+              label="Historia Clínica Unificada"
+              icon="ri-printer-line"
+              title="Imprimir historia clínica unificada"
+              [disabled]="loadingImpresion"
+              class="reimp-btn reimp-btn-primary reimp-btn-action-top">
+            </button>
+
+            <button
+              pButton
+              type="button"
+              label="Historia Clínica Ruta Crónica"
+              icon="ri-printer-line"
+              title="Imprimir historia clínica de ruta crónica"
+              [disabled]="loadingImpresion"
+              class="reimp-btn reimp-btn-secondary reimp-btn-action-top">
+            </button>
+          </div>
         </div>
 
-        <div class="table-responsive">
-          <table mat-table [dataSource]="dataSource" matSort class="w-full">
+        <div class="reimp-table-shell">
+          <div *ngIf="loadingHcTable" class="reimp-state reimp-state-loading">
+            Cargando historias clínicas...
+          </div>
+          <div *ngIf="!loadingHcTable && errorHcTable" class="reimp-state reimp-state-error">
+            {{ errorHcTable }}
+          </div>
+          <div class="table-responsive" *ngIf="!loadingHcTable && !errorHcTable">
+            <table mat-table [dataSource]="paginatedRows(dataSource.data, hcPage, hcPageSize)" matSort class="w-full reimp-table">
 
             <ng-container matColumnDef="medico">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Médico </th>
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Profesional </th>
               <td mat-cell *matCellDef="let row"> {{row.medico}} </td>
             </ng-container>
 
@@ -136,23 +239,58 @@
               <td mat-cell *matCellDef="let row"> {{row.especialidad}} </td>
             </ng-container>
 
-            <ng-container matColumnDef="link">
-              <th mat-header-cell *matHeaderCellDef></th>
-              <td mat-cell *matCellDef="let row">
-                <button
-                  pButton
-                  type="button"
-                  icon="ri-printer-line"
-                  class="p-button-sm"
-                  (click)="imprimirHistoriaClinicaPDF(row)">
-                </button>
-              </td>
-            </ng-container>
+           <ng-container matColumnDef="link">
+  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+  <td mat-cell *matCellDef="let row">
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <div class="acciones-cinta">
+      
+      <!-- Imprimir (igual que antes) -->
+      <button
+        pButton
+        type="button"
+        icon="ri-printer-line"
+        label="Imprimir"
+        title="Imprimir historia clínica"
+        [disabled]="loadingImpresion"
+        class="reimp-btn reimp-btn-primary reimp-btn-compact reimp-btn-action-row"
+        (click)="seleccionarTipoImpresion(row)">
+      </button>
 
-          </table>
+      <!-- Enviar (nuevo click) -->
+      <button
+        pButton
+        type="button"
+        icon="ri-send-plane-line"
+        label="Enviar"
+        title="Enviar historia clínica"
+        [disabled]="loadingImpresion"
+        (click)="abrirModalEnvio(row)"
+        class="reimp-btn reimp-btn-success reimp-btn-compact reimp-btn-action-row">
+      </button>
+
+    </div>
+
+  </td>
+</ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell reimp-empty-cell" [attr.colspan]="displayedColumns.length">
+                  Sin resultados para los filtros seleccionados.
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="reimp-table-footer" *ngIf="!loadingHcTable && !errorHcTable">
+            <span class="reimp-counter">{{ buildCounterText(dataSource.data.length, hcPage, hcPageSize) }}</span>
+            <div class="reimp-pager">
+              <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left" class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="hcPage === 1" (click)="previousPage('hc')"></button>
+              <span class="reimp-page-indicator">{{ hcPage }} / {{ totalPages(dataSource.data.length, hcPageSize) }}</span>
+              <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right" class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="!hasNextPage(dataSource.data.length, hcPage, hcPageSize)" (click)="nextPage('hc')"></button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -165,13 +303,20 @@
     <div class="card-custom">
       <div class="p-4">
 
-        <h2 class="text-xl font-semibold mb-3">Notas Administrativas</h2>
+        <h2 class="reimp-section-title mb-3">Notas Administrativas</h2>
 
-        <div class="table-responsive">
-          <table mat-table [dataSource]="dataSource2" matSort class="w-full">
+        <div class="reimp-table-shell">
+          <div *ngIf="loadingNotasTable" class="reimp-state reimp-state-loading">
+            Cargando notas administrativas...
+          </div>
+          <div *ngIf="!loadingNotasTable && errorNotasTable" class="reimp-state reimp-state-error">
+            {{ errorNotasTable }}
+          </div>
+          <div class="table-responsive" *ngIf="!loadingNotasTable && !errorNotasTable">
+            <table mat-table [dataSource]="paginatedRows(dataSource2.data, notasPage, notasPageSize)" matSort class="w-full reimp-table">
 
             <ng-container matColumnDef="medico">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Médico </th>
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Profesional </th>
               <td mat-cell *matCellDef="let row"> {{row.medico}} </td>
             </ng-container>
 
@@ -188,21 +333,35 @@
             </ng-container>
 
             <ng-container matColumnDef="link">
-              <th mat-header-cell *matHeaderCellDef></th>
+              <th mat-header-cell *matHeaderCellDef> Acciones </th>
               <td mat-cell *matCellDef="let row">
                 <button
                   pButton
                   type="button"
                   icon="ri-printer-line"
-                  class="p-button-sm">
+                  title="Imprimir nota administrativa"
+                  class="reimp-btn reimp-btn-primary reimp-btn-compact">
                 </button>
               </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-          </table>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell reimp-empty-cell" [attr.colspan]="displayedColumns.length">
+                No hay notas administrativas para este paciente.
+              </td>
+            </tr>
+            </table>
+          </div>
+          <div class="reimp-table-footer" *ngIf="!loadingNotasTable && !errorNotasTable">
+            <span class="reimp-counter">{{ buildCounterText(dataSource2.data.length, notasPage, notasPageSize) }}</span>
+            <div class="reimp-pager">
+              <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left" class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="notasPage === 1" (click)="previousPage('notas')"></button>
+              <span class="reimp-page-indicator">{{ notasPage }} / {{ totalPages(dataSource2.data.length, notasPageSize) }}</span>
+              <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right" class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="!hasNextPage(dataSource2.data.length, notasPage, notasPageSize)" (click)="nextPage('notas')"></button>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -215,10 +374,17 @@
     <div class="card-custom">
       <div class="p-4">
 
-        <h2 class="text-xl font-semibold mb-3">Historia Clínica Otros Sistemas</h2>
+        <h2 class="reimp-section-title mb-3">Historia Clínica Otros Sistemas</h2>
 
-        <div class="table-responsive">
-          <table mat-table [dataSource]="dataSource3" matSort class="w-full">
+        <div class="reimp-table-shell">
+          <div *ngIf="loadingOtrosTable" class="reimp-state reimp-state-loading">
+            Cargando historias de otros sistemas...
+          </div>
+          <div *ngIf="!loadingOtrosTable && errorOtrosTable" class="reimp-state reimp-state-error">
+            {{ errorOtrosTable }}
+          </div>
+          <div class="table-responsive" *ngIf="!loadingOtrosTable && !errorOtrosTable">
+            <table mat-table [dataSource]="paginatedRows(dataSource3.data, otrosPage, otrosPageSize)" matSort class="w-full reimp-table">
 
             <ng-container matColumnDef="paciente">
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Paciente </th>
@@ -231,11 +397,12 @@
             </ng-container>
 
             <ng-container matColumnDef="rutaAccesoPdf">
-              <th mat-header-cell *matHeaderCellDef></th>
+              <th mat-header-cell *matHeaderCellDef> Acciones </th>
               <td mat-cell *matCellDef="let row">
                 <a
                   pButton
-                  class="p-button-sm"
+                  class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                  title="Abrir historia de otro sistema"
                   target="_blank"
                   [href]="row.rutaAccesoPdf"
                   icon="ri-external-link-line">
@@ -245,8 +412,21 @@
 
             <tr mat-header-row *matHeaderRowDef="displayedColumnsHc"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumnsHc;"></tr>
-
-          </table>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell reimp-empty-cell" [attr.colspan]="displayedColumnsHc.length">
+                No hay historias clínicas en otros sistemas.
+              </td>
+            </tr>
+            </table>
+          </div>
+          <div class="reimp-table-footer" *ngIf="!loadingOtrosTable && !errorOtrosTable">
+            <span class="reimp-counter">{{ buildCounterText(dataSource3.data.length, otrosPage, otrosPageSize) }}</span>
+            <div class="reimp-pager">
+              <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left" class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="otrosPage === 1" (click)="previousPage('otros')"></button>
+              <span class="reimp-page-indicator">{{ otrosPage }} / {{ totalPages(dataSource3.data.length, otrosPageSize) }}</span>
+              <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right" class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="!hasNextPage(dataSource3.data.length, otrosPage, otrosPageSize)" (click)="nextPage('otros')"></button>
+            </div>
+          </div>
         </div>
 
       </div>

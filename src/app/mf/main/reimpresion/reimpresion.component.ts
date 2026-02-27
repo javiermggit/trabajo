@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, NgModule, OnInit, ViewChildren,QueryList } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, NgModule, OnInit, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { ReimpresionService } from './reimpresion.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT } from '@angular/common';
@@ -29,9 +29,9 @@ import { ParametroService } from 'src/app/parametros/parametro.service';
  */
 import { PreAnestesiologiaReimpresionService } from 'src/app/servicioImpresion/preanestesiologia-reimpresion.service';
 import { MorbilidadReimpresionService } from 'src/app/servicioImpresion/morbilidad-reimpresion.service';
-/* import { ProcedimientoReimpresionService } from 'src/app/servicioImpresion/procedimiento-reimpresion.service';
 import { EnfermeriaReimpresionService } from 'src/app/servicioImpresion/enfermeria-reimpresion.service';
-import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.service'; */
+import { ProcedimientoReimpresionService } from 'src/app/servicioImpresion/procedimiento-reimpresion.service';
+/*import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.service'; */
 
 
 @Component({
@@ -40,6 +40,9 @@ import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.serv
   styleUrls: ['./reimpresion.component.css']
 })
 export class ReimpresionComponent implements OnInit {
+  @ViewChild('fechaRangoCalendar') fechaRangoCalendar: any;
+  private readonly profesionalFallbackValue = '__medico_prueba__';
+  private readonly profesionalFallbackLabel = 'Medico Prueba';
   filtersFormGroup = new FormGroup({
     dateRangeControl: new FormControl<Date[] | null>(null),
   });
@@ -63,8 +66,25 @@ export class ReimpresionComponent implements OnInit {
   public dataSource3: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   displayedColumns: string[] = ['medico', 'fecha', 'especialidad', 'link'];
   displayedColumnsHc: string[] = ['paciente', 'identificacion', 'rutaAccesoPdf'];
-  
-  
+  hcDataOriginal: Reimpresion[] = [];
+  notasDataOriginal: any[] = [];
+  otrosDataOriginal: any[] = [];
+  profesionalesOptions: Array<{ label: string; value: string }> = [];
+  filtroProfesional: string | null = null;
+  filtroFechaRango: Date[] | null = null;
+  loadingHcTable: boolean = false;
+  loadingNotasTable: boolean = false;
+  loadingOtrosTable: boolean = false;
+  errorHcTable: string = '';
+  errorNotasTable: string = '';
+  errorOtrosTable: string = '';
+  hcPage: number = 1;
+  notasPage: number = 1;
+  otrosPage: number = 1;
+  hcPageSize: number = 5;
+  notasPageSize: number = 5;
+  otrosPageSize: number = 5;
+
 
   constructor(
     public rs:ReimpresionService ,
@@ -81,8 +101,8 @@ export class ReimpresionComponent implements OnInit {
     public vale: ValeService,
     //public hcUnificadas: ImpresionUnificadaHCService,
     public hcRMorbilidad: MorbilidadReimpresionService,
-    //public hcREnfermeria: EnfermeriaReimpresionService,
-    //public hcRProcedimiento: ProcedimientoReimpresionService,
+    public hcREnfermeria: EnfermeriaReimpresionService,
+    public hcRProcedimiento: ProcedimientoReimpresionService,
     /* private hcROdontologia: OdontologiaReimpresionService,
     private diente: OdontogramaVisualizacionService,
     public antecedente: AntecedenteService,
@@ -94,7 +114,9 @@ export class ReimpresionComponent implements OnInit {
    }
 
   ngOnInit(): void {
+    this.setProfesionalFallback();
     this.rs.ObtenerListadoTipoDocumento();
+    this.inicializarTipoDocumentoPorDefecto();
     this.consultarEspecialidad();
   }
 
@@ -122,16 +144,32 @@ export class ReimpresionComponent implements OnInit {
   private limpiarDataSources() {
     this.rs.reimpresion = [];
     this.dataSource = new MatTableDataSource([]);
+    this.hcDataOriginal = [];
+    this.setProfesionalFallback();
+    this.filtroFechaRango = null;
 
     this.rs.listadonotas = [];
     this.dataSource2 = new MatTableDataSource([]);
+    this.notasDataOriginal = [];
 
     this.rs.listadoHcIntegra = [];
     this.dataSource3 = new MatTableDataSource([]);
+    this.otrosDataOriginal = [];
+    this.errorHcTable = '';
+    this.errorNotasTable = '';
+    this.errorOtrosTable = '';
+    this.loadingHcTable = false;
+    this.loadingNotasTable = false;
+    this.loadingOtrosTable = false;
+    this.hcPage = 1;
+    this.notasPage = 1;
+    this.otrosPage = 1;
   }
 
    public consultarDatos() {
     this.loadingReimpresion = true;
+    this.loadingHcTable = true;
+    this.errorHcTable = '';
     this.SwBoton = false;
     this.rs.ObtenerConsulta(this.identificacion, this.tipo, this.especialidad).subscribe((x) => {
       /**se consultan aqui los datos de referencia solo los que no tiene edad
@@ -146,19 +184,28 @@ export class ReimpresionComponent implements OnInit {
         this.SwBoton = true;
         this.PacienteIdInd = x[0].pacienteId;
       }
-      this.dataSource = new MatTableDataSource(this.rs.reimpresion);
+      this.hcDataOriginal = [...this.rs.reimpresion];
+      this.construirOpcionesProfesionales();
+      this.aplicarFiltrosLocalesHC();
+      this.hcPage = 1;
       //this.changeDetectorRefs.detectChanges();
       this.loadingReimpresion = false;
+      this.loadingHcTable = false;
     }, (error) => {
       this.rs.reimpresion = new Array<Reimpresion>();
       this.dataSource = new MatTableDataSource(this.rs.reimpresion);
+      this.hcDataOriginal = [];
+      this.setProfesionalFallback();
       //this.changeDetectorRefs.detectChanges();
       this.loadingReimpresion = false;
       if (error.error.error == undefined) {
+        this.errorHcTable = error?.error?.mensaje ?? 'Error al consultar historias clínicas';
         Swal.fire('Advertencia!!', error.error.mensaje, 'warning')
       } else {
+        this.errorHcTable = error?.error?.error ?? 'Error al consultar historias clínicas';
         Swal.fire('Advertencia!!', error.error.error, 'warning')
       }
+      this.loadingHcTable = false;
     })
 
   }
@@ -169,8 +216,10 @@ export class ReimpresionComponent implements OnInit {
       if (!x) {
         this.rs.listadonotas = [];
         this.dataSource2 = new MatTableDataSource([]);
+        this.loadingNotasTable = false;
         this.rs.listadoHcIntegra = [];
         this.dataSource3 = new MatTableDataSource([]);
+        this.loadingOtrosTable = false;
         return;
       }
 
@@ -178,6 +227,8 @@ export class ReimpresionComponent implements OnInit {
     }, error => {
 
       console.log(error)
+      this.loadingNotasTable = false;
+      this.errorNotasTable = 'Error al consultar notas administrativas';
       this.rs.listadonotas = new Array<any>();
       this.dataSource2 = new MatTableDataSource(this.rs.listadonotas);
       //this.changeDetectorRefs.detectChanges();
@@ -185,6 +236,8 @@ export class ReimpresionComponent implements OnInit {
   }
 
   public consultarNotaAdministrativas(idpaciente: string) {
+    this.loadingNotasTable = true;
+    this.errorNotasTable = '';
 
     this.rs.ObtenerConsultaNotasAdministrativas(idpaciente).subscribe((x) => {
       x.forEach(e => {
@@ -192,12 +245,21 @@ export class ReimpresionComponent implements OnInit {
       });
 
       this.rs.listadonotas = x
-      this.dataSource2 = new MatTableDataSource(this.rs.listadonotas);
+      this.notasDataOriginal = [...this.rs.listadonotas];
+      this.construirOpcionesProfesionales();
+      this.aplicarFiltrosLocalesHC();
+      this.notasPage = 1;
+      this.loadingNotasTable = false;
       //this.changeDetectorRefs.detectChanges();
       // this.loadingReimpresion = false;
     }, (error) => {
       this.rs.listadonotas = new Array<any>();
       this.dataSource2 = new MatTableDataSource(this.rs.listadonotas);
+      this.notasDataOriginal = [];
+      this.construirOpcionesProfesionales();
+      this.aplicarFiltrosLocalesHC();
+      this.loadingNotasTable = false;
+      this.errorNotasTable = 'Error al consultar notas administrativas';
       //this.changeDetectorRefs.detectChanges();
       console.log(error)
 
@@ -207,28 +269,43 @@ export class ReimpresionComponent implements OnInit {
 
   public consultarHCIntegra() {
     // this.loadingReimpresion = true;
+    this.loadingOtrosTable = true;
+    this.errorOtrosTable = '';
     this.nota.ObtenerDatosPaciente(this.identificacion, this.tipo).subscribe(x => {
 
       this.rs.datoPaciente = x;
       if (!x) {
         this.rs.listadoHcIntegra = [];
         this.dataSource3 = new MatTableDataSource([]);
+        this.loadingOtrosTable = false;
         return;
       }
 
       this.rs.ObtenerHcIntegra(x.id).subscribe((result) => {
         this.rs.listadoHcIntegra = result
-        this.dataSource3 = new MatTableDataSource(result);
+        this.otrosDataOriginal = [...result];
+        this.construirOpcionesProfesionales();
+        this.aplicarFiltrosLocalesHC();
+        this.otrosPage = 1;
+        this.loadingOtrosTable = false;
         //this.changeDetectorRefs.detectChanges();
         //  this.loadingReimpresion = false;
       }, (error) => {
 
         this.rs.listadoHcIntegra = new Array<any>();
         this.dataSource3 = new MatTableDataSource([]);
+        this.otrosDataOriginal = [];
+        this.construirOpcionesProfesionales();
+        this.aplicarFiltrosLocalesHC();
+        this.loadingOtrosTable = false;
+        this.errorOtrosTable = 'Error al consultar historias de otros sistemas';
         //this.changeDetectorRefs.detectChanges();
         console.log(error)
         //   this.loadingReimpresion = false;
       })
+    }, () => {
+      this.loadingOtrosTable = false;
+      this.errorOtrosTable = 'Error al consultar historias de otros sistemas';
     })
   }
 
@@ -260,15 +337,16 @@ export class ReimpresionComponent implements OnInit {
     if (row.link == "impresion") {
       this.cargarMorbilidad(citaid, row.pacienteId);
     } else if (row.link == "impresionEnfermeria") {
-      // this.ImpresionEnfermeria(citaid);
-     // this.cargarEnfermeria(citaid, row.pacienteId);
+      //this.ImpresionEnfermeria(citaid);
+     this.cargarEnfermeria(citaid, row.pacienteId);
     } /* else if (row.link == "impresionOdontologia") {
       //  this.ImpresionOdontologia(citaid);
       this.diente.isImpresion = true;
       this.cargarOdontologia(citaid, row.pacienteId);
-    }  */else if (row.link == "impresionProcedimiento") {
+    }  */
+   else if (row.link == "impresionProcedimiento") {
       //  this.ImpresionProcedimiento(citaid);
-      //this.cargarProcedimiento(citaid, row.pacienteId);
+      this.cargarProcedimiento(citaid, row.pacienteId);
     } else if (row.link == "impresionPreAnestesiologia") {
       //this.cargarPreAnestesiologia(citaid, row.pacienteId);
     }  else {
@@ -414,6 +492,78 @@ export class ReimpresionComponent implements OnInit {
 
   }
 
+  // enfermeria 
+   
+  cargarEnfermeria(citaid, pacienteId) {
+    this.rs.ObtenerHcEnfermeria(pacienteId, citaid).subscribe(response => {
+
+      var arrayImg = [];
+
+      if (response.enfermeria.esCrecimientoDesarrollo) {
+        this.validarImpresionImagenCD(response.enfermeria.crecimientoDesarrollo, arrayImg);
+      }
+
+      if (response.enfermeria.prenatal) {
+        this.validarImpresionImagenPrenatal(response.enfermeria['prenatalHC'], arrayImg);
+      }
+
+      if (response.enfermeria.profesional.firmaMedico != "") {
+        this.rs.firmaMedico = this.rs._baseUrlLogin + "/FirmaMedico/" + response.enfermeria.profesional.firmaMedico;
+        arrayImg.push({ img: 'imagenFirma', tipo: 'firmaMedico' });
+      }
+
+      response.enfermeria.profesional.firmaMedicoBase = [];
+      response.listadoGraficas = [];
+      if (arrayImg.length > 0) {
+        let requests = arrayImg.reduce((promiseChain, item) => {
+          return promiseChain.then(() => new Promise((resolve) => {
+            this.sleep(1000).then(() => {
+              var img = document.getElementById(item.img);
+              img.style.opacity = "1";
+              this.asyncFunctionGraficas(img, item.tipo, resolve, response.listadoGraficas, response.enfermeria.profesional.firmaMedicoBase);
+            });
+          }));
+        }, Promise.resolve());
+
+        requests.then(() => {
+          this.loadingImpresion = false;
+          this.hcREnfermeria.imprimirHCEnfermeriaPDF(response, this.rs.obtenerImagenLogo());
+          this.rs.cancelar()
+        })
+      } else {
+        this.loadingImpresion = false;
+        this.hcREnfermeria.imprimirHCEnfermeriaPDF(response, this.rs.obtenerImagenLogo());
+        this.rs.cancelar()
+      }
+    }, error => {
+      this.loadingImpresion = false;
+      Swal.fire('', 'Error al consultar la HC:' + error.error.error, 'error')
+    });
+
+  }
+
+
+  // fin de enfermeria
+
+  // procedimiento
+
+   cargarProcedimiento(citaid, pacienteId) {
+    this.rs.ObtenerHcProcedimiento(pacienteId, citaid).subscribe(response => {
+
+      this.loadingImpresion = false;
+      this.hcRProcedimiento.imprimirHCProcedimientoPDF(response, this.rs.obtenerImagenLogo());
+      this.rs.cancelar()
+    }, error => {
+      this.loadingImpresion = false;
+      Swal.fire('', 'Error al consultar la HC:' + error.error, 'error')
+    });
+
+  }
+
+
+  // fin de procedimiento
+
+
   // odontologia
 
   /* cargarOdontologia(citaid, pacienteId) {
@@ -541,10 +691,345 @@ export class ReimpresionComponent implements OnInit {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setMonth(endDate.getMonth() - months);
+    this.filtroFechaRango = [startDate, endDate];
+    this.filtersFormGroup.controls.dateRangeControl.setValue([startDate, endDate]);
+    this.aplicarFiltrosLocalesHC();
+    this.cerrarPopupRangoFecha();
+  }
 
-    this.filtersFormGroup.controls.dateRangeControl.setValue([
-      startDate,
-      endDate,
-    ]);
+  onRangoFechaModelChange(value: Date[] | null): void {
+    this.filtroFechaRango = value;
+    this.aplicarFiltrosLocalesHC();
+    if (this.tieneRangoCompleto(value)) {
+      this.cerrarPopupRangoFecha();
+    }
+  }
+
+  onRangoFechaSelect(): void {
+    if (this.tieneRangoCompleto(this.filtroFechaRango)) {
+      this.cerrarPopupRangoFecha();
+    }
+  }
+
+  onRangoFechaTodayClick(): void {
+    this.aplicarFiltrosLocalesHC();
+    this.cerrarPopupRangoFecha();
+  }
+
+  private tieneRangoCompleto(value: Date[] | null | undefined): boolean {
+    return !!(value && value[0] && value[1]);
+  }
+
+  private cerrarPopupRangoFecha(): void {
+    setTimeout(() => {
+      if (!this.fechaRangoCalendar) {
+        return;
+      }
+      if (typeof this.fechaRangoCalendar.hideOverlay === 'function') {
+        this.fechaRangoCalendar.hideOverlay();
+        return;
+      }
+      if ('overlayVisible' in this.fechaRangoCalendar) {
+        this.fechaRangoCalendar.overlayVisible = false;
+      }
+    }, 0);
+  }
+
+  totalPages(total: number, size: number): number {
+    if (!total || size <= 0) {
+      return 1;
+    }
+    return Math.max(1, Math.ceil(total / size));
+  }
+
+  paginatedRows<T>(rows: T[], page: number, size: number): T[] {
+    const start = (Math.max(page, 1) - 1) * size;
+    return rows.slice(start, start + size);
+  }
+
+  hasNextPage(total: number, page: number, size: number): boolean {
+    return page < this.totalPages(total, size);
+  }
+
+  previousPage(table: 'hc' | 'notas' | 'otros'): void {
+    if (table === 'hc' && this.hcPage > 1) {
+      this.hcPage--;
+    } else if (table === 'notas' && this.notasPage > 1) {
+      this.notasPage--;
+    } else if (table === 'otros' && this.otrosPage > 1) {
+      this.otrosPage--;
+    }
+  }
+
+  nextPage(table: 'hc' | 'notas' | 'otros'): void {
+    if (table === 'hc' && this.hasNextPage(this.dataSource.data.length, this.hcPage, this.hcPageSize)) {
+      this.hcPage++;
+    } else if (table === 'notas' && this.hasNextPage(this.dataSource2.data.length, this.notasPage, this.notasPageSize)) {
+      this.notasPage++;
+    } else if (table === 'otros' && this.hasNextPage(this.dataSource3.data.length, this.otrosPage, this.otrosPageSize)) {
+      this.otrosPage++;
+    }
+  }
+
+  buildCounterText(total: number, page: number, size: number): string {
+    if (!total) {
+      return 'Mostrando 0 de 0';
+    }
+    const start = (page - 1) * size + 1;
+    const end = Math.min(total, page * size);
+    return `Mostrando ${start}-${end} de ${total}`;
+  }
+
+  aplicarFiltrosLocalesHC() {
+    this.dataSource = new MatTableDataSource(this.filtrarRowsLocales(this.hcDataOriginal));
+    this.dataSource2 = new MatTableDataSource(this.filtrarRowsLocales(this.notasDataOriginal));
+    this.dataSource3 = new MatTableDataSource(this.filtrarRowsLocales(this.otrosDataOriginal));
+    this.hcPage = 1;
+    this.notasPage = 1;
+    this.otrosPage = 1;
+  }
+
+  limpiarFiltrosLocalesHC() {
+    this.filtroProfesional = null;
+    this.filtroFechaRango = null;
+    this.aplicarFiltrosLocalesHC();
+  }
+
+  limpiarTodosFiltros() {
+    this.tipo = undefined as any;
+    this.identificacion = undefined as any;
+    this.especialidad = undefined;
+    this.identificacionNoTemporal = '';
+    this.tipoNoTemporal = '';
+    this.especialidadNoTemporal = undefined;
+    this.filtroProfesional = null;
+    this.filtroFechaRango = null;
+    this.filtersFormGroup.controls.dateRangeControl.setValue(null);
+    this.SwBoton = false;
+    this.limpiarDataSources();
+    // Mantiene la opción quemada visible, pero sin selección aplicada.
+    this.filtroProfesional = null;
+  }
+
+  private construirOpcionesProfesionales() {
+    const allRows = [...this.hcDataOriginal];
+    const unicos = Array.from(new Set(
+      allRows
+        .map(item => this.obtenerNombreProfesional(item))
+        .filter(Boolean)
+    ));
+
+    this.profesionalesOptions = unicos
+      .sort((a, b) => a.localeCompare(b))
+      .map(nombre => ({ label: nombre, value: nombre }));
+
+    if (this.profesionalesOptions.length === 0) {
+      this.setProfesionalFallback();
+    }
+
+    const existeSeleccion = this.profesionalesOptions.some(o => o.value === this.filtroProfesional);
+    if (!existeSeleccion) {
+      this.filtroProfesional = this.profesionalesOptions.length > 0 ? this.profesionalesOptions[0].value : null;
+    }
+  }
+
+  private setProfesionalFallback() {
+    this.profesionalesOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
+    this.filtroProfesional = this.profesionalFallbackValue;
+  }
+
+  private inicializarTipoDocumentoPorDefecto(intento: number = 0): void {
+    const yaSeleccionado = this.tipo !== undefined && this.tipo !== null && this.tipo !== '';
+    if (yaSeleccionado) {
+      return;
+    }
+
+    const listado = this.rs.ListadoTipoDocumento ?? [];
+    if (listado.length > 0) {
+      const cedula = listado.find((item: any) =>
+        String(item?.descripcion ?? '').toLowerCase().includes('cedula')
+      );
+      const opcion = cedula ?? listado[0];
+      this.tipo = ((opcion as any)?.valor ?? opcion?.id ?? '') as any;
+      return;
+    }
+
+    if (intento < 20) {
+      setTimeout(() => this.inicializarTipoDocumentoPorDefecto(intento + 1), 150);
+    }
+  }
+
+  private filtrarRowsLocales<T>(rows: T[]): T[] {
+    let filtrado = [...rows];
+
+    if (this.filtroProfesional) {
+      if (this.filtroProfesional !== this.profesionalFallbackValue) {
+        filtrado = filtrado.filter(item => this.obtenerNombreProfesional(item) === this.filtroProfesional);
+      }
+    }
+
+    const fechaInicio = this.filtroFechaRango?.[0] ? this.normalizarFechaSinHora(this.filtroFechaRango[0]) : null;
+    const fechaFinRaw = this.filtroFechaRango?.[1] ?? this.filtroFechaRango?.[0] ?? null;
+    const fechaFin = fechaFinRaw ? this.normalizarFechaSinHora(fechaFinRaw) : null;
+
+    if (fechaInicio && fechaFin) {
+      filtrado = filtrado.filter(item => {
+        const fechaItem = this.obtenerFechaItem(item);
+        return !!fechaItem && fechaItem >= fechaInicio && fechaItem <= fechaFin;
+      });
+    }
+
+    return filtrado;
+  }
+
+  private obtenerNombreProfesional(item: any): string {
+    const nombre = String(
+      item?.medico ??
+      item?.profesional ??
+      item?.usuarioCreacionNombre ??
+      item?.usuarioCreacion ??
+      ''
+    ).trim();
+
+    return nombre
+      .replace(/\s+/g, ' ')
+      .replace(/^medico\b/i, 'Médico');
+  }
+
+  private obtenerFechaItem(item: any): Date | null {
+    const value = item?.fecha ?? item?.fechaCreacion ?? item?.fechaRegistro ?? item?.fechaAtencion ?? null;
+    if (!value) {
+      return null;
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    return this.normalizarFechaSinHora(date);
+  }
+
+  private normalizarFechaSinHora(fecha: Date): Date {
+    return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+  }
+
+  async seleccionarTipoImpresion(row: Reimpresion) {
+    const tipoResult = await Swal.fire({
+      title: 'Tipo de impresión',
+      input: 'radio',
+      inputOptions: {
+        full: 'Historia clínica Full',
+        lite: 'Historia clínica Lite'
+      },
+      inputValue: 'full',
+      showCancelButton: true,
+      confirmButtonText: 'Imprimir',
+      cancelButtonText: 'Cancelar',
+      inputValidator: (value) => !value ? 'Debes seleccionar una opción' : null
+    });
+
+    if (!tipoResult.isConfirmed || !tipoResult.value) {
+      return;
+    }
+
+    // Por ahora Full/Lite comparten la misma impresión actual.
+    this.imprimirHistoriaClinicaPDF(row);
+  }
+
+  async abrirModalEnvio(row: Reimpresion) {
+    const tipoResult = await Swal.fire({
+      title: 'Tipo de historia clínica',
+      input: 'radio',
+      inputOptions: {
+        full: 'Historia clínica Full',
+        lite: 'Historia clínica Lite'
+      },
+      inputValue: 'full',
+      showCancelButton: true,
+      confirmButtonText: 'Siguiente',
+      cancelButtonText: 'Cancelar',
+      inputValidator: (value) => !value ? 'Debes seleccionar una opción' : null
+    });
+
+    if (!tipoResult.isConfirmed || !tipoResult.value) {
+      return;
+    }
+
+    const canalResult = await Swal.fire({
+      title: 'Canal de envío',
+      input: 'radio',
+      inputOptions: {
+        correo: 'Correo electrónico',
+        whatsapp: 'WhatsApp'
+      },
+      inputValue: 'correo',
+      showCancelButton: true,
+      confirmButtonText: 'Siguiente',
+      cancelButtonText: 'Cancelar',
+      inputValidator: (value) => !value ? 'Debes seleccionar una opción' : null
+    });
+
+    if (!canalResult.isConfirmed || !canalResult.value) {
+      return;
+    }
+
+    const isCorreo = canalResult.value === 'correo';
+    const destinoResult = await Swal.fire({
+      title: isCorreo ? 'Correo destino' : 'Número WhatsApp destino',
+      input: 'text',
+      inputPlaceholder: isCorreo ? 'ejemplo@correo.com' : '+573001112233',
+      showCancelButton: true,
+      confirmButtonText: 'Enviar',
+      cancelButtonText: 'Cancelar',
+      inputValidator: (value) => {
+        if (!value || !value.trim()) {
+          return 'Este campo es obligatorio';
+        }
+        if (isCorreo) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(value.trim()) ? null : 'Correo inválido';
+        }
+        const phoneRegex = /^\+?\d{8,15}$/;
+        return phoneRegex.test(value.trim()) ? null : 'Número inválido. Usa formato +573001112233';
+      }
+    });
+
+    if (!destinoResult.isConfirmed || !destinoResult.value) {
+      return;
+    }
+
+    const tipoHistoria = tipoResult.value as 'full' | 'lite';
+    const canal = canalResult.value as 'correo' | 'whatsapp';
+    const destino = (destinoResult.value as string).trim();
+
+    this.enviarHistoriaSeleccionada(row, tipoHistoria, canal, destino);
+  }
+
+  private enviarHistoriaSeleccionada(
+    row: Reimpresion,
+    tipoHistoria: 'full' | 'lite',
+    canal: 'correo' | 'whatsapp',
+    destino: string
+  ) {
+    const tipoTexto = tipoHistoria === 'full' ? 'Full' : 'Lite';
+    const mensaje = this.construirMensajeEnvio(row, tipoTexto);
+
+    if (canal === 'correo') {
+      const asunto = encodeURIComponent(`Historia Clínica ${tipoTexto}`);
+      const cuerpo = encodeURIComponent(mensaje);
+      this.document.defaultView.location.href = `mailto:${destino}?subject=${asunto}&body=${cuerpo}`;
+    } else {
+      const numeroLimpio = destino.replace(/[^\d]/g, '');
+      const url = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
+      this.document.defaultView.open(url, '_blank');
+    }
+
+    Swal.fire('Envío preparado', `Canal: ${canal === 'correo' ? 'Correo' : 'WhatsApp'}\nHistoria: ${tipoTexto}`, 'success');
+  }
+
+  private construirMensajeEnvio(row: Reimpresion, tipoTexto: string): string {
+    const medico = row?.medico ?? 'N/A';
+    const especialidad = row?.especialidad ?? 'N/A';
+    const fecha = row?.fecha ? new Date(row.fecha).toLocaleDateString('es-CO') : 'N/A';
+    return `Adjunto Historia Clínica ${tipoTexto}.\nMédico: ${medico}\nEspecialidad: ${especialidad}\nFecha: ${fecha}`;
   }
 }
