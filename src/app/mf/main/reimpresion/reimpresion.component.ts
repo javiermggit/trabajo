@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, NgModule, OnInit,ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit,ViewChild } from '@angular/core';
 import { ReimpresionService } from './reimpresion.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT } from '@angular/common';
@@ -283,34 +283,122 @@ export class ReimpresionComponent implements OnInit {
   }
 
  imprimirHistoriaClinicaPDF(row: Reimpresion) {
-    this.loadingImpresion = true;
-  
-  this.rs.ObtenerHcDatoAsociado(row.consultaId); 
+
+  this.loadingImpresion = true;
+
+  this.rs.ObtenerHcDatoAsociado(row.consultaId);
+
   const clientId = Number(this.idcliente);
   const pacienteId = row.pacienteId;
-  const citaId = row.consultaId; 
+  const citaId = row.consultaId;
 
-  if (row.link === "impresion") {
-    this.rs.abrirMorbidity('Morbidity',clientId, pacienteId, citaId);
-    this.loadingImpresion = false;
-  }else if (row.link == "impresionEnfermeria") {
-     this.rs.abrirMorbidity('nursing',clientId, pacienteId, citaId);
-    this.loadingImpresion = false;
-    }   else if (row.link == "impresionOdontologia") {
-       this.rs.abrirMorbidity('dentistry',clientId, pacienteId, citaId);
-    this.loadingImpresion = false;
-    }  
-   else if (row.link == "impresionProcedimiento") {
-      this.rs.abrirMorbidity('procedure',clientId, pacienteId, citaId);
-    this.loadingImpresion = false;
-    } /* else if (row.link == "impresionPreAnestesiologia") {
-       this.rs.abrirMorbidity('',clientId, pacienteId, citaId);
-    this.loadingImpresion = false;
-    } */  else {
-      Swal.fire('', 'No se encuentra habilitado en estos momentos', 'info')
+  let tipo = '';
+
+  switch (row.link) {
+
+    case 'impresion':
+      tipo = 'Morbidity';
+      break;
+
+    case 'impresionEnfermeria':
+      tipo = 'nursing';
+      break;
+
+    case 'impresionOdontologia':
+      tipo = 'dentistry';
+      break;
+
+    case 'impresionProcedimiento':
+      tipo = 'procedure';
+      break;
+
+    default:
+      Swal.fire('', 'No se encuentra habilitado en estos momentos', 'info');
       this.loadingImpresion = false;
-    }
-  } 
+      return;
+  }
+
+  this.rs.abrirMorbidity(tipo, clientId, pacienteId, citaId)
+    .subscribe({
+      next: (blob) => {
+
+        const fileURL = URL.createObjectURL(blob);
+        window.open(fileURL, '_blank');
+
+        this.loadingImpresion = false;
+      },
+
+      error: (err) => {
+
+        this.loadingImpresion = false;
+
+        switch (err.message) {
+
+          case 'NO_DATA':
+            Swal.fire('Sin datos', 'No existen registros para esta consulta.', 'info');
+            break;
+
+          case 'NOT_FOUND':
+            Swal.fire('No encontrado', 'La historia clínica no existe.', 'warning');
+            break;
+
+          case 'SERVER_ERROR':
+            Swal.fire('Error servidor', 'Ocurrió un error interno (500).', 'error');
+            break;
+
+          default:
+            Swal.fire('Error', 'No se pudo generar el PDF.', 'error');
+        }
+      }
+    });
+}
+
+
+ imprimirUnificadaGeneral() {
+
+  if (!this.rs?.datoPaciente?.id) {
+    Swal.fire('Advertencia', 'Primero debes consultar un paciente', 'warning');
+    return;
+  }
+
+  const clientId = Number(this.idcliente);
+  const pacienteId = this.rs.datoPaciente.id;
+
+  this.loadingImpresion = true;
+
+  this.rs.abrirunificada('unified-morbidity', clientId, pacienteId)
+    .subscribe({
+      next: (blob) => {
+
+        const fileURL = URL.createObjectURL(blob);
+        window.open(fileURL, '_blank');
+
+        this.loadingImpresion = false;
+      },
+      error: (err) => {
+
+        this.loadingImpresion = false;
+
+        switch (err.message) {
+
+          case 'NO_DATA':
+            Swal.fire('Sin datos', 'No existen registros para este paciente.', 'info');
+            break;
+
+          case 'NOT_FOUND':
+            Swal.fire('No encontrado', 'El recurso no existe.', 'warning');
+            break;
+
+          case 'SERVER_ERROR':
+            Swal.fire('Error servidor', 'Ocurrió un error interno (500).', 'error');
+            break;
+
+          default:
+            Swal.fire('Error', 'No se pudo generar el PDF.', 'error');
+        }
+      }
+    });
+}
 
 
   setDateRange(months: number): void {
@@ -777,6 +865,8 @@ export class ReimpresionComponent implements OnInit {
     this.document.defaultView.open(url, '_blank');
     Swal.fire('Envío preparado', `No fue posible enviar por API. Se abrió WhatsApp (${tipoTexto}).`, 'info');
   }
+
+
 
   private normalizarNumeroWhatsapp(value: string): string {
     const onlyDigits = value.replace(/[^\d]/g, '');

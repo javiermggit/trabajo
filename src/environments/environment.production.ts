@@ -3,8 +3,7 @@ export const environment = {
   title: 'Ordenamientos',
   env: 'Production',
   version: '3.0.0-beta',
-
-URLHc: "/APIHCHealth",
+ URLHc: "/APIHCHealth",
 URLParametrizacion: "/APIParametrizacionGeneralHealth",
 URLPaciente: "/APIPacienteV2",
 URLMedico: "/APIMedicoHealth",
@@ -22,7 +21,7 @@ UrlIntegracionDigiturno: "/ApiIntegarcionEverestDigiturnoPrueba/api",
 UrlParametrizacionRecurso: "/APIParametrizacionRecurso",
 UrlAgendamiento: "",
 IdPais:1,
-UrlPdf:"https://everestintelligent.com:444/apidelta_test/ApiImpresionUnificada/api/Prints",
+UrlPdf: "/apidelta_test/ApiImpresionUnificada/api/Prints",
 tituloCliente:'DELTA',
 numeroCliente:'1',
 plantillaCliente:'c2e0eac5-bfd5-4f3c-96a4-5e3e73d7e7ea'

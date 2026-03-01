@@ -8,6 +8,12 @@
     },
     "logLevel": "debug"
   },
+  "/apidelta_test": {
+    "target": "https://everestintelligent.com:444",
+    "changeOrigin": true,
+    "secure": false,
+    "logLevel": "debug"  
+},
   "/APIParametrizacionGeneralHealth": {
     "target": "http://172.27.83.196:160",
     "changeOrigin": true,

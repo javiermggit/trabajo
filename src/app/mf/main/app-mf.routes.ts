@@ -10,8 +10,8 @@ import { VistahcComponent } from './vistahc/vistahc.component';
     path: '',
     component: AppMfComponent,
     children: [
-      { path: '', redirectTo: 'reimpresion', pathMatch: 'full' },
-      { path: 'reimpresion', component: ReimpresionComponent },
+      //{ path: '', redirectTo: 'reimpresion', pathMatch: 'full' },
+      { path: '', component: ReimpresionComponent },
       { path: 'vistahc', component: VistahcComponent }
     ]
   }

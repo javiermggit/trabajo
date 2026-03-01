@@ -1,7 +1,7 @@
 
 import { environment } from 'src/environments/environment';
-import { catchError, EMPTY } from 'rxjs';
-import { HttpClient, HttpParams, } from '@angular/common/http';
+import { catchError, EMPTY, map, Observable, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpParams, HttpResponse, } from '@angular/common/http';
 import { delayedRetry } from 'src/app/pipes/reintentoApi';
 import { Especialidad, Citas } from 'src/app/Modelos/Medico';
 import { Reimpresion } from 'src/app/Modelos/Reimpresion';
@@ -50,11 +50,86 @@ export class ReimpresionService {
   }
 
     
-abrirMorbidity(tipo :string,clientId: number, pacienteId: number, citaId: string): void {
+/* abrirMorbidity(tipo :string,clientId: number, pacienteId: number, citaId: string): void {
   
   const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}/${citaId}`;
   window.open(url, '_blank');
+} */
+
+ abrirMorbidity(
+  tipo: string,
+  clientId: number,
+  pacienteId: number,
+  citaId: string
+): Observable<Blob> {
+
+  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}/${citaId}`;
+
+  return this.http.get(url, {
+    responseType: 'blob',
+    observe: 'response'
+  }).pipe(
+
+    map((response: HttpResponse<Blob>) => {
+
+      if (!response.body || response.body.size === 0) {
+        throw new Error('NO_DATA');
+      }
+
+      return response.body;
+    }),
+
+    catchError((error: HttpErrorResponse) => {
+
+      if (error.status === 404) {
+        return throwError(() => new Error('NOT_FOUND'));
+      }
+
+      if (error.status === 500) {
+        return throwError(() => new Error('SERVER_ERROR'));
+      }
+
+      return throwError(() => new Error('UNKNOWN_ERROR'));
+    })
+  );
 }
+
+ abrirunificada(
+  tipo: string,
+  clientId: number,
+  pacienteId: number
+): Observable<Blob> {
+
+  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}`;
+
+  return this.http.get(url, {
+    responseType: 'blob',
+    observe: 'response'
+  }).pipe(
+    map(response => {
+
+      // Si viene vacío
+      if (!response.body || response.body.size === 0) {
+        throw new Error('NO_DATA');
+      }
+
+      return response.body;
+    }),
+    catchError((error: HttpErrorResponse) => {
+
+      if (error.status === 404) {
+        return throwError(() => new Error('NOT_FOUND'));
+      }
+
+      if (error.status === 500) {
+        return throwError(() => new Error('SERVER_ERROR'));
+      }
+
+      return throwError(() => new Error('UNKNOWN_ERROR'));
+    })
+  );
+}
+
  descargarPdfDesdeUrl(tipo :string,clientId: number, pacienteId: number, citaId: string) {
    const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}/${citaId}`;
   return this.http.get(url, { responseType: 'blob' });

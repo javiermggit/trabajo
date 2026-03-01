@@ -477,4 +477,30 @@
   .reimp-pager {
     justify-content: space-between;
   }
+  
 }
+
+/* ===== FIX DROPDOWN EN SHELL ===== */
+
+:host {
+  position: relative;
+  z-index: 1;
+  background: #ffffff !important;
+  min-height: 100vh;
+}
+
+/* Fuerza que el panel del dropdown quede por encima del shell */
+:host ::ng-deep .p-dropdown-panel {
+  z-index: 99999 !important;
+}
+
+/* Por si el shell tiene overlays */
+:host ::ng-deep .p-component-overlay {
+  z-index: 99998 !important;
+}
+
+:host ::ng-deep .reimp-dropdown-panel {
+  position: fixed !important;
+  z-index: 999999 !important;
+}
+
