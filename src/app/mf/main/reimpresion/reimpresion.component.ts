@@ -7,7 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Reimpresion } from 'src/app/Modelos/Reimpresion';
 import { NotaAdministrativaService } from 'src/app/nota-administrativa/nota-administrativa.service';
 import { Router } from '@angular/router';
-import { EnviarPlantillaCorreo, EnviarPlantillaGupshup } from 'src/app/Modelos/whatsapp';
+import { EnviarPlantillaCorreo } from 'src/app/Modelos/whatsapp';
 import { environment } from 'src/environments/environment';
 import { firstValueFrom } from 'rxjs';
 
@@ -73,11 +73,12 @@ export class ReimpresionComponent implements OnInit {
    }
 
   ngOnInit(): void {
-     this.setProfesionalFallback();
+    this.setProfesionalFallback();
     this.rs.ObtenerListadoTipoDocumento();
     this.inicializarTipoDocumentoPorDefecto();
     this.consultarEspecialidad(); 
   }
+  
 
   //
    consultarDatoGenerales() {
@@ -131,12 +132,7 @@ export class ReimpresionComponent implements OnInit {
     this.errorHcTable = '';
     this.SwBoton = false;
     this.rs.ObtenerConsulta(this.identificacion, this.tipo, this.especialidad).subscribe((x) => {
-      /**se consultan aqui los datos de referencia solo los que no tiene edad
-       * ya que la edad debe ser la edad con la que e hizo la HC
-       */
-
-    
-
+   
       this.rs.reimpresion = x
 
       if (x.length > 0) {
@@ -169,7 +165,7 @@ export class ReimpresionComponent implements OnInit {
 
   }
 
-  public consultarPaciente() {
+public consultarPaciente() {
     this.nota.ObtenerDatosPaciente(this.identificacion, this.tipo).subscribe(x => {
       this.rs.datoPaciente = x;
       if (!x) {
@@ -185,7 +181,7 @@ export class ReimpresionComponent implements OnInit {
       this.consultarNotaAdministrativas(x.id);
     }, error => {
 
-      console.log(error)
+      //console.log(error)
       this.loadingNotasTable = false;
       this.errorNotasTable = 'Error al consultar notas administrativas';
       this.rs.listadonotas = new Array<any>();
@@ -218,7 +214,7 @@ export class ReimpresionComponent implements OnInit {
       this.aplicarFiltrosLocalesHC();
       this.loadingNotasTable = false;
       this.errorNotasTable = 'Error al consultar notas administrativas';      
-      console.log(error)
+      //console.log(error)
 
     })
 
@@ -278,7 +274,7 @@ export class ReimpresionComponent implements OnInit {
       } else {
         Swal.fire('Advertencia!!', error.error.error, 'error')
       }
-      console.log(error)
+      //console.log(error)
     })
   }
 
@@ -353,8 +349,39 @@ export class ReimpresionComponent implements OnInit {
     });
 }
 
+private construirUrlHistoria(row: Reimpresion): string {
 
- imprimirUnificadaGeneral() {
+  const clientId = Number(this.idcliente);
+  const pacienteId = row.pacienteId;
+  const citaId = row.consultaId;
+  //console.log(citaId);
+
+  let tipo = '';
+
+  switch (row.link) {
+    case 'impresion':
+      tipo = 'Morbidity';
+      break;
+
+    case 'impresionEnfermeria':
+      tipo = 'nursing';
+      break;
+
+    case 'impresionOdontologia':
+      tipo = 'dentistry';
+      break;
+
+    case 'impresionProcedimiento':
+      tipo = 'procedure';
+      break;
+  }
+
+  const base = window.location.origin; //
+
+  return `${environment.apiReal}/ApiImpresionUnificada/api/Prints/${tipo}/${clientId}/${pacienteId}/${citaId}`;
+}
+
+ imprimirUnificadacronica() {
 
   if (!this.rs?.datoPaciente?.id) {
     Swal.fire('Advertencia', 'Primero debes consultar un paciente', 'warning');
@@ -365,8 +392,8 @@ export class ReimpresionComponent implements OnInit {
   const pacienteId = this.rs.datoPaciente.id;
 
   this.loadingImpresion = true;
-
-  this.rs.abrirunificada('unified-morbidity', clientId, pacienteId)
+//pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
+  this.rs.abrircronica('unified-morbidity', clientId, 2)
     .subscribe({
       next: (blob) => {
 
@@ -400,6 +427,51 @@ export class ReimpresionComponent implements OnInit {
     });
 }
 
+ imprimirUnificadageneral() {
+
+  if (!this.rs?.datoPaciente?.id) {
+    Swal.fire('Advertencia', 'Primero debes consultar un paciente', 'warning');
+    return;
+  }
+
+  const clientId = Number(this.idcliente);
+  const pacienteId = this.rs.datoPaciente.id;
+
+  this.loadingImpresion = true;
+//pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
+  this.rs.abrirunificada('unified-morbidity', clientId, 2)
+    .subscribe({
+      next: (blob) => {
+
+        const fileURL = URL.createObjectURL(blob);
+        window.open(fileURL, '_blank');
+
+        this.loadingImpresion = false;
+      },
+      error: (err) => {
+
+        this.loadingImpresion = false;
+
+        switch (err.message) {
+
+          case 'NO_DATA':
+            Swal.fire('Sin datos', 'No existen registros para este paciente.', 'info');
+            break;
+
+          case 'NOT_FOUND':
+            Swal.fire('No encontrado', 'El recurso no existe.', 'warning');
+            break;
+
+          case 'SERVER_ERROR':
+            Swal.fire('Error servidor', 'Ocurrió un error interno (500).', 'error');
+            break;
+
+          default:
+            Swal.fire('Error', 'No se pudo generar el PDF.', 'error');
+        }
+      }
+    });
+}
 
   setDateRange(months: number): void {
     const endDate = new Date();
@@ -626,6 +698,7 @@ export class ReimpresionComponent implements OnInit {
     return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
   }
 
+  
   async seleccionarTipoImpresion(row: Reimpresion) {
     const tipoResult = await Swal.fire({
       title: 'Tipo de impresión',
@@ -725,7 +798,7 @@ export class ReimpresionComponent implements OnInit {
     destino: string
   ): Promise<void> {
     const tipoTexto = tipoHistoria === 'full' ? 'Full' : 'Lite';
-    let linkPdf = '';
+    let linkPdf = '';    
 
     Swal.fire({
       title: 'Preparando envio',
@@ -733,9 +806,16 @@ export class ReimpresionComponent implements OnInit {
       allowOutsideClick: false,
       onOpen: () => Swal.showLoading()
     });
+     //console.log('1. Método enviarHistoriaSeleccionada ejecutado');
 
     try {
-      linkPdf = await this.generarYSubirPdf(row, tipoHistoria);
+
+       //const paciente = await firstValueFrom(this.rs.Obtenercitadet(row.consultaId));
+    //console.log('Datos del paciente:', paciente);
+      //linkPdf = await this.generarYSubirPdf(row, tipoHistoria);
+     linkPdf = this.construirUrlHistoria(row);
+     //console.log('URL generada:', linkPdf);
+      //console.log('2️ PDF generado correctamente:', linkPdf);
     } catch {
       Swal.close();
       const mensajeFallback = this.construirMensajeEnvio(row, tipoTexto);
@@ -765,34 +845,32 @@ export class ReimpresionComponent implements OnInit {
         this.enviarFallbackCorreo(destino, tipoTexto, mensaje);
       }
     } else {
-      const configWsp = this.obtenerConfigWhatsapp();
-      if (!configWsp.from || !configWsp.templateId) {
-        this.enviarFallbackWhatsapp(destino, mensaje, tipoTexto);
-        return;
-      }
+      
 
-      const payload: EnviarPlantillaGupshup = {
-        from: configWsp.from,
-        to: this.normalizarNumeroWhatsapp(destino),
-        templete: {
-          id: configWsp.templateId,
-          params: [
-            configWsp.titulo,
-            this.obtenerNombrePacientePlano(),
-            `Historia Clínica ${tipoTexto}`,
-            this.formatearFechaTexto(row?.fecha),
-            linkPdf
-          ]
-        }
-      };
+  try {
+    // Guardamos celular limpio
+this.rs.celularEnvio = this.normalizarNumeroWhatsapp(destino).replace(/^57/, '');
 
-      try {
-        await firstValueFrom(this.rs.enviarWhatsapp(payload));
-        Swal.fire('Envío realizado', `WhatsApp enviado correctamente (${tipoTexto})`, 'success');
-      } catch {
-        this.enviarFallbackWhatsapp(destino, mensaje, tipoTexto);
-      }
-    }
+
+const responseAsociado = await firstValueFrom(this.rs.ObtenerPaciente(row.consultaId));
+ //console.log('4. datos pacientes:', responseAsociado);
+
+if (!responseAsociado) {
+  throw new Error('No se pudo obtener datos asociados');
+}
+
+
+
+// Enviamos WhatsApp
+await firstValueFrom(
+  this.rs.sendWhatsapp(linkPdf, responseAsociado,row)
+   
+);
+    Swal.fire('Envío realizado', `WhatsApp enviado correctamente (${tipoTexto})`, 'success');
+  } catch {
+    this.enviarFallbackWhatsapp(destino, mensaje, tipoTexto);
+  }
+}
   }
 
   private construirMensajeEnvio(row: Reimpresion, tipoTexto: string, linkPdf?: string): string {
@@ -840,7 +918,7 @@ export class ReimpresionComponent implements OnInit {
 
   const clientId = 1; // o dinámico si lo tienes
   const pacienteId = row?.pacienteId;
-  const citaId = row?.consultaId; // 🔥 NO convertir a number si es string
+  const citaId = row?.consultaId; // NO convertir a number si es string
 
   if (row?.link === 'impresion') {
     return await firstValueFrom(
@@ -865,8 +943,6 @@ export class ReimpresionComponent implements OnInit {
     this.document.defaultView.open(url, '_blank');
     Swal.fire('Envío preparado', `No fue posible enviar por API. Se abrió WhatsApp (${tipoTexto}).`, 'info');
   }
-
-
 
   private normalizarNumeroWhatsapp(value: string): string {
     const onlyDigits = value.replace(/[^\d]/g, '');
@@ -896,12 +972,4 @@ export class ReimpresionComponent implements OnInit {
     return Number.isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('es-CO');
   }
 
-  private obtenerConfigWhatsapp(): { from: string; templateId: string; titulo: string } {
-    const envAny = environment as any;
-    return {
-      from: String(envAny.WhatsappFrom ?? '').trim(),
-      templateId: String(envAny.WhatsappTemplateId ?? '').trim(),
-      titulo: String(envAny.WhatsappTitulo ?? 'Historia Clínica').trim()
-    };
-  }
 }

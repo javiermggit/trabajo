@@ -11,12 +11,14 @@ import { Nota } from 'src/app/Modelos/Nota';
 import { NotaAdministrativaService } from 'src/app/nota-administrativa/nota-administrativa.service';
 import { Injectable } from '@angular/core';
 import { EnviarPlantillaCorreo, EnviarPlantillaGupshup, UploadHCResponse } from 'src/app/Modelos/whatsapp';
+import { CitaDetalles } from 'src/app/Modelos/Impresion';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReimpresionService {
   // Servicio base para habilitar pruebas de navegación
+   celularEnvio: any;
   public firmaMedico: string;
    profesional: Profesional;
    _baseUrl: string;
@@ -94,6 +96,42 @@ export class ReimpresionService {
   );
 }
 
+ abrircronica(
+  tipo: string,
+  clientId: number,
+  pacienteId: number
+): Observable<Blob> {
+
+  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}?programs=pes`;
+
+  return this.http.get(url, {
+    responseType: 'blob',
+    observe: 'response'
+  }).pipe(
+    map(response => {
+
+      // Si viene vacío
+      if (!response.body || response.body.size === 0) {
+        throw new Error('NO_DATA');
+      }
+
+      return response.body;
+    }),
+    catchError((error: HttpErrorResponse) => {
+
+      if (error.status === 404) {
+        return throwError(() => new Error('NOT_FOUND'));
+      }
+
+      if (error.status === 500) {
+        return throwError(() => new Error('SERVER_ERROR'));
+      }
+
+      return throwError(() => new Error('UNKNOWN_ERROR'));
+    })
+  );
+}
+
  abrirunificada(
   tipo: string,
   clientId: number,
@@ -130,6 +168,7 @@ export class ReimpresionService {
   );
 }
 
+
  descargarPdfDesdeUrl(tipo :string,clientId: number, pacienteId: number, citaId: string) {
    const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}/${citaId}`;
   return this.http.get(url, { responseType: 'blob' });
@@ -139,9 +178,30 @@ export class ReimpresionService {
     return this.http.post<UploadHCResponse>(this.getUploadPdfEndpoint(), formData);
   }
 
-  enviarWhatsapp(payload: EnviarPlantillaGupshup) {
-    return this.http.post<any>(this.getEnviarWhatsappEndpoint(), payload);
-  }
+sendWhatsapp(link: string, hc: any,row:any) {
+const fechaFormateada = row.fecha.replace('T', ' ').split('.')[0];
+  const payload: EnviarPlantillaGupshup = {
+    from: environment.telefonocliente,
+    to: "57" + this.celularEnvio,
+    templete: {
+      id: environment.plantillaCliente,
+      params: [
+        environment.tituloCliente,
+        hc?.nombre ?? 'Paciente',
+        row?.especialidad ?? 'Historia Clínica',
+        fechaFormateada ?? '01/11/2025 14:25',
+        link
+      ]
+    }
+  };
+
+  //console.log('Enviando WhatsApp API:', payload);
+
+  return this.http.post<any>(
+    this.getEnviarWhatsappEndpoint(),
+    payload
+  );
+}
 
   enviarCorreo(payload: EnviarPlantillaCorreo) {
     return this.http.post<any>(this.getEnviarCorreoEndpoint(), payload);
@@ -175,6 +235,7 @@ export class ReimpresionService {
   ObtenerEspecialidad() {
     return this.http.get<Array<Especialidad>>(this._baseUrlHC + '/api/Historicos/EspecialidadesImpresion', { responseType: "json" });
   }
+  
 
   private resolveSourceList(response: any): Array<any> {
     if (Array.isArray(response)) {
@@ -193,6 +254,7 @@ export class ReimpresionService {
     const firstArray = candidates.find((c) => Array.isArray(c));
     return Array.isArray(firstArray) ? firstArray : [];
   }
+  
 
   private resolveDescripcion(item: any, id: any): string {
     const raw = item?.Descripcion
@@ -227,13 +289,13 @@ export class ReimpresionService {
   private getEnviarWhatsappEndpoint(): string {
     const envAny = environment as any;
     return envAny.EnviarWhatsappEndpoint
-      ?? `${this._baseUrlwhatspp}/api/EnviarWhatsapp`;
+      ?? `${this._baseUrlwhatspp}/api/v1/whatsapp`;
   }
 
   private getEnviarCorreoEndpoint(): string {
     const envAny = environment as any;
     return envAny.EnviarCorreoEndpoint
-      ?? `${this._baseUrlCorreo}/APIEnvioCorreo/api`;
+      ?? `${this._baseUrlCorreo}/EnvioCorreo/EnviarEmailServicio`;
   }
 
 
@@ -257,6 +319,10 @@ export class ReimpresionService {
 
   ObtenerPaciente(citaid: string) {
     return this.http.get<VMPaciente>(this._baseUrlHC + '/api/Historicos/ObtenerDatosPacienteReimpreision?CitaId=' + citaid, { responseType: "json" });
+  }
+
+   Obtenercitadet(citaid: string) {
+    return this.http.get(this._baseUrlHC + '/api/Historicos/ObtenerDatosCita?CitaId=' + citaid, { responseType: "json" });
   }
 
  ObtenerHCConsultaUnificada(
@@ -299,7 +365,7 @@ export class ReimpresionService {
 
   }
 
-  ObtenerHcDatoAsociado(citaid: string) {
+ /*  ObtenerHcDatoAsociado(citaid: string) {
     return this.http.get<any>(this._baseUrlMedico + '/api/ProfesionalAsociado/ObtenerDatosProfecionalAsociados?CitaId=' + citaid, { responseType: "json" }).subscribe(
       response => {
         if (!response.error && response.data != null) {
@@ -308,6 +374,13 @@ export class ReimpresionService {
       }
       , error => {
       });
-  } 
+  }  */
+
+      ObtenerHcDatoAsociado(citaid: string) {
+  return this.http.get<any>(
+    this._baseUrlMedico + 
+    '/api/ProfesionalAsociado/ObtenerDatosProfecionalAsociados?CitaId=' + citaid
+  );
+}
 
 }
