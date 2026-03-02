@@ -500,7 +500,10 @@
 }
 
 :host ::ng-deep .reimp-dropdown-panel {
-  position: fixed !important;
+  min-width: auto !important; /* permitir que tome el ancho del input */
+  width: auto !important; /* forzar ancho automático */
+  max-width: 100vw; /* nunca sobrepase la pantalla */
+  position: absolute !important; /* relativo al body o contenedor */
   z-index: 999999 !important;
 }
 
