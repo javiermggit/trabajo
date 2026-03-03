@@ -1,9 +1,274 @@
-.page {
-  padding: 16px;
+/* ── VARIABLES Y HOST ── */
+:host {
+  --navy: #001f61;
+  --navy-mid: #0a2d82;
+  --navy-soft: #1a3f99;
+  --accent: #3b82f6;
+  --accent2: #00c9a7;
+  --danger: #ef4444;
+  --warn: #f59e0b;
+  --success: #10b981;
+  --bg: #f0f4fb;
+  --surface: #ffffff;
+  --border: #dde4f0;
+  --text: #1e2a45;
+  --muted: #6b7898;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(0,31,97,.09);
+
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  padding: 1rem; /* reducido */
 }
 
-.actions {
-  margin-top: 16px;
+/* ── RESET ── */
+:host *, :host *::before, :host *::after {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+/* ───────── SUBCARDS ───────── */
+.subcard {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 1.2rem 1.4rem;
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(0, 31, 97, 0.05);
+}
+
+.subcard-filters {
+  margin-bottom: 1.5rem;
+}
+
+.subcard-content {
+  padding: 1.5rem;
+}
+
+/* ───────── FILTROS ───────── */
+.agenda-filters {
+  margin: 0;
+}
+
+.filter-row {
   display: flex;
-  gap: 8px;
+  gap: 1.2rem;
+  align-items: flex-end;
+}
+
+.filter-group {
+  flex: 1;
+}
+
+.full-width {
+  display: block;
+  width: 100%;
+}
+
+/* Float label */
+:host ::ng-deep .p-float-label {
+  margin-top: 4px;
+}
+
+:host ::ng-deep .p-float-label > label {
+  font-size: .70rem;
+  color: var(--muted);
+  left: .8rem;
+}
+
+/* Dropdown moderno */
+:host ::ng-deep .p-dropdown {
+  height: 34px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  font-size: .82rem;
+  display: flex;
+  align-items: center;
+  transition: all .2s ease;
+}
+
+:host ::ng-deep .p-dropdown:not(.p-disabled):hover {
+  border-color: var(--navy-mid);
+}
+
+:host ::ng-deep .p-dropdown.p-focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+:host ::ng-deep .p-dropdown-label {
+  padding: 0 .8rem;
+  font-size: .82rem;
+}
+
+/* ───────── BOTONES ───────── */
+:host .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .82rem;
+  font-weight: 600;
+  padding: .5rem 1rem;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+:host .btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+:host .btn-primary {
+  background: var(--navy);
+  color: #fff;
+}
+
+:host .btn-primary:hover:not(:disabled) {
+  background: var(--navy-soft);
+  transform: translateY(-1px);
+}
+
+:host .btn-secondary {
+  background: #e8edf8;
+  color: var(--navy);
+}
+
+:host .btn-secondary:hover:not(:disabled) {
+  background: #d3dcf2;
+}
+
+/* Botón Consultar */
+.btn-consult {
+  height: 34px;
+  padding: 0 18px;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  color: #fff;
+  border-radius: 12px;
+  font-size: .82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 3px 12px rgba(0,31,97,.18);
+}
+
+.btn-consult:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,31,97,.28);
+}
+
+/* ───────── TABLA ───────── */
+:host .table-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+:host table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+:host thead tr {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+}
+
+:host thead th {
+  color: rgba(255,255,255,.85);
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: .8rem .9rem;
+  text-align: left;
+}
+
+:host tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .15s ease;
+}
+
+:host tbody tr:hover {
+  background: #f5f8ff;
+}
+
+:host tbody td {
+  padding: .8rem .9rem;
+  font-size: .85rem;
+  vertical-align: middle;
+}
+
+/* ───────── PACIENTE / TAGS ───────── */
+:host .patient-name {
+  font-weight: 700;
+  font-size: .88rem;
+  color: var(--navy);
+}
+
+:host .patient-meta {
+  font-size: .72rem;
+  color: var(--muted);
+  margin-top: .15rem;
+}
+
+:host .modality-tag {
+  display: inline-block;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: .2rem .5rem;
+  border-radius: 6px;
+  margin-top: .3rem;
+}
+
+:host .mod-video { background: #eff6ff; color: #1d4ed8; }
+:host .mod-presencial { background: #ecfdf5; color: #065f46; }
+:host .mod-tele { background: #fdf4ff; color: #6b21a8; }
+:host .mod-tele-sede { background: #fff7ed; color: #9a3412; }
+
+/* Estado */
+:host .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: .25rem .7rem;
+  border-radius: 100px;
+}
+
+:host .status-activo { background: #d1fae5; color: #065f46; }
+:host .status-pendiente { background: #fef9c3; color: #854d0e; }
+:host .status-consulta { background: #e0e7ff; color: #3730a3; }
+
+/* ───────── ACORDEÓN ───────── */
+:host ::ng-deep .p-accordion .p-accordion-header-link {
+  border-radius: 12px !important;
+  background: #f5f8ff;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+:host ::ng-deep .p-accordion .p-accordion-content {
+  border-radius: 0 0 12px 12px;
+  border: 1px solid var(--border);
+}
+
+/* ───────── RESPONSIVE ───────── */
+@media (max-width: 768px) {
+  :host {
+    padding: .8rem;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  :host thead th,
+  :host tbody td {
+    padding: .6rem;
+    font-size: .75rem;
+  }
 }

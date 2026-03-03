@@ -1,5 +1,12 @@
 import { Component } from '@angular/core';
 import { VistahcService } from './vistahc.service';
+import Swal from 'sweetalert2';
+//import { AccordionModule } from 'primeng/accordion';
+import { MedicoService } from 'src/app/medico/medico.service';
+import { MatTableDataSource } from '@angular/material/table';
+import { Citas } from 'src/app/Modelos/Medico';
+import { environment } from 'src/environments/environment';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-vistahc',
@@ -7,14 +14,188 @@ import { VistahcService } from './vistahc.service';
   styleUrls: ['./vistahc.component.css']
 })
 export class VistahcComponent {
-  constructor(private vistahcService: VistahcService) {}
+ 
+  public filtro = undefined;
+  public dataSource: MatTableDataSource<Citas>;
+  public dataSourceEti: MatTableDataSource<Citas>;
+  public dataSourceCont: MatTableDataSource<Citas>;
+  public loginId: String;
+  public cookieService: CookieService;
+  row_: any;
+  listado_citas: any;
+  listado_citas_recuperacion: any;
+  listado_contingencia: any;
+  loading = false;
+  especialidad?: string;
+  errorHcTable: string = '';
+  errorNotasTable: string = '';
+  errorOtrosTable: string = '';
+  hcPage: number = 1;
+  notasPage: number = 1;
+  otrosPage: number = 1;
+  hcPageSize: number = 5;
+  notasPageSize: number = 5;
+  otrosPageSize: number = 5;
 
-  // Edita estas funciones con tu lógica real
-  onBuscarPaciente() {
-    this.vistahcService.buscarPaciente();
+
+  /////
+
+  
+    loadingImpresion :boolean =false;
+    identificacion!: string;
+     tipo!: string;
+     identificacionNoTemporal! : string;
+    tipoNoTemporal! : string;
+    especialidadNoTemporal? : string; 
+    SwBoton: boolean = false;
+    PacienteIdInd: number=0;
+    link: string='';
+    fechahoy = new Date().toISOString().substring(0, 10);    
+    displayedColumns: string[] = ['hora'];
+    displayedColumnsHc: string[] = ['paciente', 'identificacion', 'rutaAccesoPdf'];
+   
+    notasDataOriginal: any[] = [];
+    otrosDataOriginal: any[] = [];
+    profesionalesOptions: Array<{ label: string; value: string }> = [];
+    filtroProfesional: string | null = null;
+    filtroFechaRango: Date[] | null = null;
+    loadingHcTable: boolean = false;
+    loadingNotasTable: boolean = false;
+    loadingOtrosTable: boolean = false;
+   
+
+  //////
+
+  constructor(
+    public rs: VistahcService,
+    public medicoServices: MedicoService
+   ){
+
+     this.loginId = environment.production == false ? "mprueba" : this.cookieService.get('UsuarioMedico');
   }
 
-  onAbrirHistoria() {
-    this.vistahcService.abrirHistoria();
+    ngOnInit(): void {    
+      this.consultarEspecialidad(); 
+  }  
+
+    consultarCitasGeneral() {
+      this.consultarCitas();
+     //this.consultarCitasAnteriores();
   }
+
+  public consultarCitas() {
+
+    if (this.filtro != undefined) {
+      this.loading = true;
+
+      this.medicoServices.consultarCitas(this.filtro.id).subscribe(
+        (x) => {
+
+          this.loading = false;
+          if (x.length == 0) {
+            Swal.fire('No hay citas asignadas para el dia de hoy', "", 'info')
+          }
+
+          x.forEach(e => {
+            e.disableButton = true;
+            e.tipoAgendaAcceso = e.tipoAgendaAcceso == null ? '' : (e.tipoAgendaAcceso).toUpperCase()
+            if (e.estado == "FAC") {
+              e.disableButton = false;
+            } else {
+              if (e.estado == "ACT" && (e.tipoAgendaAccesoId == 2 || e.tipoAgendaAccesoId == 4)) {
+                e.disableButton = false;
+              }
+            }
+          });
+
+          this.medicoServices.listadoCitas = x
+          this.dataSource = new MatTableDataSource(x.filter(n => !n.adicional));
+          this.dataSourceEti = new MatTableDataSource(x.filter(n => n.adicional));        
+
+
+          this.listado_citas_recuperacion = x.filter(n => n.adicional)
+          this.listado_citas = x.filter(n => !n.adicional)
+
+          if(this.medicoServices.Especialidad.id == 139){
+            this.listado_citas = x.filter(n => n.estado != 'PRO')
+            this.listado_citas_recuperacion = x.filter(n => n.estado != 'PRO')
+          }
+          // console.log(this.listado_citas_recuperacion)
+          // console.log(this.listado_citas)
+
+
+        }, (error) => {
+          this.loading = false;
+          Swal.fire('Error!!', "Error al consultar la cita", 'error')
+        })
+    } else {
+      Swal.fire('Advertencia!!', 'Debe seleccionar una especialidad', 'warning')
+    }
+
+  }
+
+ public consultarEspecialidad() {
+     //this.loadingReimpresion = true;
+       this.medicoServices.obtenerListadoTipo().subscribe((x) => {    
+ 
+       this.rs.listadoEspecialidad = x
+       //this.loadingReimpresion = false;
+     }, (error) => {
+ 
+       //this.loadingReimpresion = false;
+       if (error.error.error == undefined) {
+         Swal.fire('Advertencia!!', error.error.mensaje, 'error')
+       } else {
+         Swal.fire('Advertencia!!', error.error.error, 'error')
+       }
+       //console.log(error)
+     })
+ }
+
+ totalPages(total: number, size: number): number {
+    if (!total || size <= 0) {
+      return 1;
+    }
+    return Math.max(1, Math.ceil(total / size));
+  }
+
+  paginatedRows<T>(rows: T[], page: number, size: number): T[] {
+    const start = (Math.max(page, 1) - 1) * size;
+    return rows.slice(start, start + size);
+  }
+
+  hasNextPage(total: number, page: number, size: number): boolean {
+    return page < this.totalPages(total, size);
+  }
+
+  previousPage(table: 'hc' | 'notas' | 'otros'): void {
+    if (table === 'hc' && this.hcPage > 1) {
+      this.hcPage--;
+    } else if (table === 'notas' && this.notasPage > 1) {
+      this.notasPage--;
+    } else if (table === 'otros' && this.otrosPage > 1) {
+      this.otrosPage--;
+    }
+  }
+
+  nextPage(table: 'hc' | 'notas' | 'otros'): void {
+    if (table === 'hc' && this.hasNextPage(this.dataSource.data.length, this.hcPage, this.hcPageSize)) {
+      this.hcPage++;
+    } else if (table === 'notas' && this.hasNextPage(this.dataSourceEti.data.length, this.notasPage, this.notasPageSize)) {
+      this.notasPage++;
+    } else if (table === 'otros' && this.hasNextPage(this.dataSourceCont.data.length, this.otrosPage, this.otrosPageSize)) {
+      this.otrosPage++;
+    }
+  }
+
+  buildCounterText(total: number, page: number, size: number): string {
+    if (!total) {
+      return 'Mostrando 0 de 0';
+    }
+    const start = (page - 1) * size + 1;
+    const end = Math.min(total, page * size);
+    return `Mostrando ${start}-${end} de ${total}`;
+  }
+
+   
 }

@@ -1,9 +1,199 @@
-<section class="page">
-  <h1>Vista Historia Clínica</h1>
-  <p>Reemplaza este contenido con tu vista o detalle clínico.</p>
+<div class="card-custom reimp-filter-card">
 
-  <div class="actions">
-    <button type="button" (click)="onBuscarPaciente()">Buscar paciente</button>
-    <button type="button" (click)="onAbrirHistoria()">Abrir historia</button>
+  <!-- ================= SUBCARD FILTROS ================= -->
+  <div class="subcard subcard-filters">
+
+    <div class="agenda-filters">
+      <div class="filter-row">
+
+        <!-- COMBO -->
+        <div class="filter-group">
+          <span class="p-float-label full-width">
+            <p-dropdown
+              inputId="especialidad"
+              [appendTo]="null"
+              [autoZIndex]="true"
+              [baseZIndex]="10000"
+              panelStyleClass="reimp-dropdown-panel"
+              [scrollHeight]="'260px'"
+              [options]="rs.listadoEspecialidad"
+              optionLabel="descripcion"
+              optionValue="id"
+              [(ngModel)]="especialidad"
+              [filter]="true"
+              [showClear]="true"
+              styleClass="w-full modern-dropdown">
+            </p-dropdown>
+            <label for="especialidad">Especialidad</label>
+          </span>
+        </div>
+
+        <!-- BOTÓN CONSULTAR -->
+        <div class="filter-button">
+          <button
+            type="button"
+            class="btn btn-consult">
+            Consultar
+          </button>
+        </div>
+
+      </div>
+    </div>
+
   </div>
-</section>
+
+
+  <!-- ================= SUBCARD CONTENIDO ================= -->
+  <div class="subcard subcard-content">
+
+    <!-- ================= Citas del Día ================= -->
+    <div class="section-block">
+      <div class="section-head">
+        <h5>Citas del Día</h5>
+        <span class="pill">4 citas</span>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Hora</th>
+                <th>Paciente</th>
+                <th>Acceso</th>
+                <th>Turno</th>
+                <th>Estado</th>
+                <th>Historias Clínicas</th>
+                <th>Consentimientos</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <!-- JUAN -->
+              <tr>
+                <td><span class="cell-hora">08:00</span></td>
+                <td>
+                  <div class="patient-name">JUAN PÉREZ</div>
+                  <div class="patient-meta">12345678 · 35 años</div>
+                  <span class="modality-tag mod-video">VIDEOCONSULTA</span>
+                </td>
+                <td>Video</td>
+                <td>Llamar</td>
+                <td><span class="status-badge status-activo">Activo</span></td>
+                <td><button class="btn btn-primary">Historias Clínicas</button></td>
+                <td><button class="btn btn-secondary">Consentimientos</button></td>
+              </tr>
+
+              <!-- MARIA -->
+              <tr>
+                <td><span class="cell-hora">08:30</span></td>
+                <td>
+                  <div class="patient-name">MARÍA GÓMEZ</div>
+                  <div class="patient-meta">87654321 · 12 Meses</div>
+                  <span class="modality-tag mod-presencial">PRESENCIAL</span>
+                </td>
+                <td>Presencial</td>
+                <td>Llamar</td>
+                <td><span class="status-badge status-consulta">En consulta</span></td>
+                <td><button class="btn btn-primary">Historias Clínicas</button></td>
+                <td><button class="btn btn-secondary">Consentimientos</button></td>
+              </tr>
+
+              <!-- CARLOS -->
+              <tr>
+                <td><span class="cell-hora">09:00</span></td>
+                <td>
+                  <div class="patient-name">CARLOS RODRÍGUEZ</div>
+                  <div class="patient-meta">55667788 · 58 años</div>
+                  <span class="modality-tag mod-tele">TELECONSULTA</span>
+                </td>
+                <td>Teléfono</td>
+                <td>-</td>
+                <td><span class="status-badge status-pendiente">Pendiente</span></td>
+                <td><button class="btn btn-primary" disabled>Historias Clínicas</button></td>
+                <td><button class="btn btn-secondary">Consentimientos</button></td>
+              </tr>
+
+              <!-- ANA -->
+              <tr>
+                <td><span class="cell-hora">09:30</span></td>
+                <td>
+                  <div class="patient-name">ANA MARTÍNEZ</div>
+                  <div class="patient-meta">11223344 · 28 años</div>
+                  <span class="modality-tag mod-tele-sede">TELECONSULTA SEDE</span>
+                </td>
+                <td>Video</td>
+                <td>Llamar</td>
+                <td><span class="status-badge status-activo">Activo</span></td>
+                <td><button class="btn btn-primary">Historias Clínicas</button></td>
+                <td><button class="btn btn-secondary">Consentimientos</button></td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= ACORDEÓN ================= -->
+    <p-accordion [multiple]="true">
+
+      <!-- RECUPERACIÓN -->
+      <p-accordionTab header="Recuperación (2 citas)">
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Hora</th>
+                  <th>Paciente</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>07:15</td>
+                  <td>LUIS HERRERA</td>
+                  <td>Pendiente</td>
+                </tr>
+                <tr>
+                  <td>07:45</td>
+                  <td>SOFÍA VARGAS</td>
+                  <td>Activo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </p-accordionTab>
+
+      <!-- CONTINGENCIA -->
+      <p-accordionTab header="Contingencia (1 cita)">
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Paciente</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>3 mar 2026 - 10:00</td>
+                  <td>DIEGO SALCEDO</td>
+                  <td><button class="btn btn-danger">Desactivar</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </p-accordionTab>
+
+    </p-accordion>
+
+  </div>
+
+</div>

@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { EnviarPlantillaCorreo } from 'src/app/Modelos/whatsapp';
 import { environment } from 'src/environments/environment';
 import { firstValueFrom } from 'rxjs';
+import { MedicoService } from 'src/app/medico/medico.service';
 
 @Component({
   selector: 'app-reimpresion',
@@ -66,6 +67,7 @@ export class ReimpresionComponent implements OnInit {
     public router: Router,  
     public changeDetectorRefs: ChangeDetectorRef,
     public nota: NotaAdministrativaService,
+    public medicoServices: MedicoService,
     @Inject(DOCUMENT) private document: any 
    ) {
    
@@ -261,22 +263,22 @@ public consultarPaciente() {
   }
 
   public consultarEspecialidad() {
-    this.loadingReimpresion = true;
-    this.rs.ObtenerEspecialidad().subscribe((x) => {
-
-      this.rs.listadoEspecialidad = x
-      this.loadingReimpresion = false;
-    }, (error) => {
-
-      this.loadingReimpresion = false;
-      if (error.error.error == undefined) {
-        Swal.fire('Advertencia!!', error.error.mensaje, 'error')
-      } else {
-        Swal.fire('Advertencia!!', error.error.error, 'error')
-      }
-      //console.log(error)
-    })
-  }
+      //this.loadingReimpresion = true;
+        this.medicoServices.obtenerListadoTipo().subscribe((x) => {    
+  
+        this.rs.listadoEspecialidad = x
+        //this.loadingReimpresion = false;
+      }, (error) => {
+  
+        //this.loadingReimpresion = false;
+        if (error.error.error == undefined) {
+          Swal.fire('Advertencia!!', error.error.mensaje, 'error')
+        } else {
+          Swal.fire('Advertencia!!', error.error.error, 'error')
+        }
+        //console.log(error)
+      })
+    }
 
  imprimirHistoriaClinicaPDF(row: Reimpresion) {
 
