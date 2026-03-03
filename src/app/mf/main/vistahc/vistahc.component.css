@@ -16,19 +16,37 @@
   --radius: 14px;
   --shadow: 0 4px 24px rgba(0,31,97,.09);
 
+  /* Variables de reimpresion (necesarias para mat-table) */
+  --reimp-text-strong: #0f2746;
+  --reimp-text-muted: #4f647d;
+  --reimp-surface: #ffffff;
+  --reimp-border: #dfe7f1;
+  --reimp-border-soft: #e9eff6;
+  --reimp-header-bg: #f4f8fd;
+
   display: block;
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
-  padding: 1rem; /* reducido */
+  padding: 1rem;
+  position: relative;
+  z-index: 1;
+  background: #ffffff !important;
+  min-height: 100vh;
 }
 
 /* ── RESET ── */
 :host *, :host *::before, :host *::after {
   box-sizing: border-box;
-  padding: 0;
 }
 
-/* ───────── SUBCARDS ───────── */
+/* ───────── CARDS ───────── */
+.card-custom {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(15, 39, 70, 0.06);
+}
+
 .subcard {
   background: var(--surface);
   border-radius: 18px;
@@ -37,18 +55,11 @@
   box-shadow: 0 6px 20px rgba(0, 31, 97, 0.05);
 }
 
-.subcard-filters {
-  margin-bottom: 1.5rem;
-}
-
-.subcard-content {
-  padding: 1.5rem;
-}
+.subcard-filters { margin-bottom: 1.5rem; }
+.subcard-content { padding: 1.5rem; }
 
 /* ───────── FILTROS ───────── */
-.agenda-filters {
-  margin: 0;
-}
+.agenda-filters { margin: 0; }
 
 .filter-row {
   display: flex;
@@ -56,18 +67,31 @@
   align-items: flex-end;
 }
 
-.filter-group {
-  flex: 1;
-}
+.filter-group { flex: 1; }
+.full-width { display: block; width: 100%; }
 
-.full-width {
-  display: block;
-  width: 100%;
+.reimp-filter-card { backdrop-filter: blur(3px); }
+.reimp-filter-card .p-4 {
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
 }
 
 /* Float label */
-:host ::ng-deep .p-float-label {
-  margin-top: 4px;
+:host ::ng-deep .reimp-filtros .p-float-label {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.28rem;
+}
+
+:host ::ng-deep .reimp-filtros .p-float-label > label {
+  position: static !important;
+  transform: none !important;
+  margin: 0; padding: 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.84rem;
+  line-height: 1.2;
 }
 
 :host ::ng-deep .p-float-label > label {
@@ -76,7 +100,23 @@
   left: .8rem;
 }
 
-/* Dropdown moderno */
+/* Dropdown */
+:host ::ng-deep .reimp-filtros .p-dropdown,
+:host ::ng-deep .reimp-filtros .p-inputtext {
+  height: 36px;
+  border-radius: 10px;
+  border-color: var(--border);
+  font-size: 0.86rem;
+}
+
+:host ::ng-deep .reimp-filtros .p-dropdown .p-dropdown-label {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: 0.75rem;
+  font-size: 0.86rem;
+}
+
 :host ::ng-deep .p-dropdown {
   height: 34px;
   border-radius: 12px;
@@ -87,10 +127,7 @@
   transition: all .2s ease;
 }
 
-:host ::ng-deep .p-dropdown:not(.p-disabled):hover {
-  border-color: var(--navy-mid);
-}
-
+:host ::ng-deep .p-dropdown:not(.p-disabled):hover { border-color: var(--navy-mid); }
 :host ::ng-deep .p-dropdown.p-focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(59,130,246,.15);
@@ -101,42 +138,49 @@
   font-size: .82rem;
 }
 
-/* ───────── BOTONES ───────── */
-:host .btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .4rem;
-  font-size: .82rem;
-  font-weight: 600;
-  padding: .5rem 1rem;
+/* ───────── BOTONES (PrimeNG pButton) ───────── */
+:host ::ng-deep .reimp-btn.p-button {
+  min-height: 36px;
+  border: 1px solid transparent;
   border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: all .2s ease;
+  padding: 0.42rem 0.82rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: none;
+  transition: transform 120ms ease, filter 120ms ease;
 }
 
-:host .btn:disabled {
-  opacity: .45;
-  cursor: not-allowed;
+:host ::ng-deep .reimp-btn .p-button-icon { font-size: 0.9rem; }
+
+:host ::ng-deep .reimp-btn.reimp-btn-compact.p-button {
+  min-height: 34px;
+  padding: 0.38rem 0.8rem;
 }
 
-:host .btn-primary {
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button {
   background: var(--navy);
+  border-color: var(--navy);
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button {
+  background: #5d7392;
+  border-color: #5d7392;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-danger.p-button {
+  background: var(--danger);
+  border-color: var(--danger);
   color: #fff;
 }
 
-:host .btn-primary:hover:not(:disabled) {
-  background: var(--navy-soft);
-  transform: translateY(-1px);
+:host ::ng-deep .reimp-btn.p-button:focus { box-shadow: none; }
+:host ::ng-deep .reimp-btn.p-button:hover {
+  filter: brightness(0.95);
+  transform: translateY(-0.5px);
 }
-
-:host .btn-secondary {
-  background: #e8edf8;
-  color: var(--navy);
-}
-
-:host .btn-secondary:hover:not(:disabled) {
-  background: #d3dcf2;
+:host ::ng-deep .reimp-btn.p-button.p-disabled {
+  opacity: 0.62;
+  transform: none;
 }
 
 /* Botón Consultar */
@@ -150,6 +194,8 @@
   font-weight: 600;
   white-space: nowrap;
   box-shadow: 0 3px 12px rgba(0,31,97,.18);
+  border: none;
+  cursor: pointer;
 }
 
 .btn-consult:hover {
@@ -157,90 +203,294 @@
   box-shadow: 0 6px 18px rgba(0,31,97,.28);
 }
 
-/* ───────── TABLA ───────── */
-:host .table-wrap {
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+/* ───────── MAT-TABLE OVERRIDES (clave para producción) ───────── */
+:host ::ng-deep .reimp-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
   border: 1px solid var(--border);
+  border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 1.5rem;
-}
-
-:host table {
   width: 100%;
-  border-collapse: collapse;
 }
 
-:host thead tr {
+/* Header */
+:host ::ng-deep .reimp-table .mat-mdc-header-row,
+:host ::ng-deep .reimp-table .mat-header-row {
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
 }
 
-:host thead th {
-  color: rgba(255,255,255,.85);
-  font-size: .72rem;
-  font-weight: 600;
+:host ::ng-deep .reimp-table .mat-mdc-header-cell,
+:host ::ng-deep .reimp-table .mat-header-cell {
+  color: rgba(255,255,255,.88) !important;
+  font-weight: 700;
+  font-size: 0.75rem;
+  border-bottom: none !important;
+  padding: 0.85rem 1rem;
   text-transform: uppercase;
-  padding: .8rem .9rem;
-  text-align: left;
+  letter-spacing: 0.05em;
 }
 
-:host tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background .15s ease;
-}
-
-:host tbody tr:hover {
-  background: #f5f8ff;
-}
-
-:host tbody td {
-  padding: .8rem .9rem;
-  font-size: .85rem;
+/* Filas */
+:host ::ng-deep .reimp-table .mat-mdc-cell,
+:host ::ng-deep .reimp-table .mat-cell {
+  color: #0f172a;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
   vertical-align: middle;
 }
 
-/* ───────── PACIENTE / TAGS ───────── */
-:host .patient-name {
+:host ::ng-deep .reimp-table .mat-mdc-row:nth-child(even),
+:host ::ng-deep .reimp-table .mat-row:nth-child(even) {
+  background: #fcfdff;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-row:last-child .mat-mdc-cell,
+:host ::ng-deep .reimp-table .mat-row:last-child .mat-cell {
+  border-bottom: none !important;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-row:hover,
+:host ::ng-deep .reimp-table .mat-row:hover {
+  background: #f5f8ff;
+}
+
+/* Fila sin datos */
+.reimp-empty-cell {
+  text-align: center;
+  color: var(--muted);
+  font-style: italic;
+  padding: 2rem 1rem;
+}
+
+/* ───────── SECTION HEAD + PILLS ───────── */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.reimp-section-title {
+  margin: 0;
+  color: var(--reimp-text-strong);
+  font-size: clamp(1rem, 1.35vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.section-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--navy);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.2rem 0.65rem;
+  border-radius: 100px;
+  letter-spacing: 0.04em;
+}
+
+.section-pill-warn    { background: var(--warn);    color: #fff; }
+.section-pill-success { background: var(--success); color: #fff; }
+
+/* ───────── PACIENTE ───────── */
+.patient-name {
   font-weight: 700;
   font-size: .88rem;
   color: var(--navy);
+  line-height: 1.3;
 }
 
-:host .patient-meta {
+.patient-meta {
   font-size: .72rem;
   color: var(--muted);
-  margin-top: .15rem;
+  margin-top: .12rem;
 }
 
-:host .modality-tag {
+.patient-metaacceso {
+  font-size: .72rem;
+  color: var(--navy);
+  margin-top: .12rem;
+}
+
+/* ───────── CELDA HORA ───────── */
+.cell-hora {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+/* ───────── MODALITY TAGS ───────── */
+.modality-tag {
   display: inline-block;
   font-size: .65rem;
   font-weight: 700;
   padding: .2rem .5rem;
   border-radius: 6px;
-  margin-top: .3rem;
+  margin-top: .28rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
 }
 
-:host .mod-video { background: #eff6ff; color: #1d4ed8; }
-:host .mod-presencial { background: #ecfdf5; color: #065f46; }
-:host .mod-tele { background: #fdf4ff; color: #6b21a8; }
-:host .mod-tele-sede { background: #fff7ed; color: #9a3412; }
+.mod-video      { background: #eff6ff; color: #1d4ed8; }
+.mod-presencial { background: #ecfdf5; color: #065f46; }
+.mod-tele       { background: #fdf4ff; color: #6b21a8; }
+.mod-tele-sede  { background: #fff7ed; color: #9a3412; }
+.mod-telexp     { background: #f0fdf4; color: #14532d; }
 
-/* Estado */
-:host .status-badge {
+/* ───────── STATUS BADGES ───────── */
+.status-badge {
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
+  gap: .38rem;
   font-size: .72rem;
   font-weight: 600;
   padding: .25rem .7rem;
   border-radius: 100px;
+  white-space: nowrap;
 }
 
-:host .status-activo { background: #d1fae5; color: #065f46; }
-:host .status-pendiente { background: #fef9c3; color: #854d0e; }
-:host .status-consulta { background: #e0e7ff; color: #3730a3; }
+.status-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.status-activo    { background: #d1fae5; color: #065f46; }
+.status-pendiente { background: #fef9c3; color: #854d0e; }
+.status-cancelado { background: #fee2e2; color: #991b1b; }
+.status-consulta  { background: #e0e7ff; color: #3730a3; }
+
+/* ───────── ICON BUTTONS ───────── */
+.icon-cell { text-align: center; }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: #f0f4fb;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: all .18s;
+  color: var(--navy);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover:not(.disabled):not([disabled]) {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+  transform: scale(1.07);
+}
+
+.icon-btn.disabled,
+.icon-btn[disabled] {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.icon-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ───────── TABLA SHELL ───────── */
+.reimp-table-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.reimp-state {
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.92rem;
+  border: 1px solid var(--border);
+}
+
+.reimp-state-loading { background: #f4f8ff; color: #365a87; }
+.reimp-state-error   { background: #fff5f5; color: #9f1d1d; border-color: #f0cdcd; }
+
+/* ───────── PAGINADOR ───────── */
+.reimp-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  padding-top: 0.25rem;
+}
+
+.reimp-counter {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.reimp-pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f7faff;
+  border: 1px solid #e2eaf5;
+  border-radius: 999px;
+  padding: 0.25rem;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-page.p-button {
+  min-height: 30px;
+  padding: 0.24rem 0.62rem;
+  font-size: 0.82rem;
+}
+
+:host ::ng-deep .reimp-btn.reimp-pager-btn.p-button {
+  background: #ffffff;
+  border: 1px solid #d8e3f2;
+  color: #35527a;
+  border-radius: 999px;
+  min-width: 98px;
+}
+
+:host ::ng-deep .reimp-btn.reimp-pager-btn.p-button:not(.p-disabled):hover {
+  background: #edf4ff;
+  border-color: #c8d9f3;
+}
+
+:host ::ng-deep .reimp-btn.reimp-pager-btn.p-button.p-disabled { opacity: 0.55; }
+
+.reimp-page-indicator {
+  min-width: 3.9rem;
+  text-align: center;
+  color: #2c4365;
+  font-size: 0.84rem;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #d8e3f2;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+}
+
+/* ───────── FECHA CHIP (contingencia) ───────── */
+.fecha-chip {
+  display: inline-block;
+  background: #f0f4fb;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.22rem 0.65rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.73rem;
+  color: var(--navy);
+}
 
 /* ───────── ACORDEÓN ───────── */
 :host ::ng-deep .p-accordion .p-accordion-header-link {
@@ -255,20 +505,387 @@
   border: 1px solid var(--border);
 }
 
+/* ───────── DROPDOWN FIX Z-INDEX ───────── */
+:host ::ng-deep .p-dropdown-panel   { z-index: 99999 !important; }
+:host ::ng-deep .p-component-overlay{ z-index: 99998 !important; }
+:host ::ng-deep .reimp-dropdown-panel {
+  min-width: auto !important;
+  width: auto !important;
+  max-width: 100vw;
+  position: absolute !important;
+  z-index: 999999 !important;
+}
+
 /* ───────── RESPONSIVE ───────── */
+@media (max-width: 992px) {
+  .reimp-filters-wrapper { position: static; }
+}
+
 @media (max-width: 768px) {
-  :host {
-    padding: .8rem;
-  }
+  :host { padding: .8rem; }
 
   .filter-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  :host thead th,
-  :host tbody td {
-    padding: .6rem;
-    font-size: .75rem;
+  :host ::ng-deep .reimp-table .mat-mdc-header-cell,
+  :host ::ng-deep .reimp-table .mat-header-cell,
+  :host ::ng-deep .reimp-table .mat-mdc-cell,
+  :host ::ng-deep .reimp-table .mat-cell {
+    padding: 0.65rem 0.6rem;
+    font-size: 0.78rem;
   }
+
+  .reimp-table-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reimp-pager { justify-content: space-between; }
+
+  .icon-btn { width: 30px; height: 30px; }
+}
+
+/* ───────── ACORDEÓN ───────── */
+:host ::ng-deep .vhc-accordion .p-accordion-header-link {
+  background: #f5f8ff !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  padding: .75rem 1rem !important;
+  transition: background .15s;
+}
+
+:host ::ng-deep .vhc-accordion .p-accordion-header-link:hover {
+  background: #edf3fb !important;
+}
+
+:host ::ng-deep .vhc-accordion .p-accordion-header.p-highlight .p-accordion-header-link {
+  background: #edf3fb !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+:host ::ng-deep .vhc-accordion .p-accordion-content {
+  border: 1px solid var(--border) !important;
+  border-top: none !important;
+  border-radius: 0 0 12px 12px !important;
+  padding: 1rem !important;
+}
+
+:host ::ng-deep .vhc-accordion .p-accordion-tab {
+  margin-bottom: .75rem;
+}
+
+.acc-header-tpl {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+}
+
+.acc-title {
+  font-weight: 700;
+  font-size: .92rem;
+  color: var(--navy);
+  flex: 1;
+}
+
+.acc-empty-hint {
+  font-size: .75rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ───────── LOADER ───────── */
+.vhc-loader {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  background: #f4f8ff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #365a87;
+  font-size: .88rem;
+  margin-bottom: 1rem;
+}
+
+/* ───────── MODAL ───────── */
+.vhc-modal-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .9rem 1.1rem;
+  background: var(--navy);
+  border-radius: 14px 14px 0 0;
+}
+
+.vhc-modal-title {
+  font-weight: 700;
+  color: #fff;
+  font-size: .95rem;
+  flex: 1;
+}
+
+.vhc-modal-calling {
+  font-size: .78rem;
+  font-weight: 700;
+  color: #00c9a7;
+}
+
+.vhc-modal-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.75);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: color .15s;
+}
+
+.vhc-modal-close:hover { color: #fff; }
+
+.vhc-modal-body {
+  padding: 1.1rem 1.25rem;
+}
+
+.vhc-modal-field { margin-bottom: .75rem; }
+
+.vhc-modal-patient {
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+  font-size: .95rem;
+}
+
+.vhc-sip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  margin-bottom: .75rem;
+  flex-wrap: wrap;
+}
+
+.vhc-tel-table {
+  margin-bottom: .75rem;
+}
+
+.vhc-call-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: .9rem 1rem;
+  background: #f8faff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin: .5rem 0;
+}
+
+.vhc-timer {
+  font-size: 1.2rem;
+}
+
+.vhc-btn-hang {
+  background: #fee2e2 !important;
+  border-color: #fecaca !important;
+  color: var(--danger) !important;
+}
+
+.vhc-btn-hang:hover {
+  background: var(--danger) !important;
+  color: #fff !important;
+}
+
+.vhc-muted {
+  background: #fee2e2 !important;
+  border-color: #fecaca !important;
+}
+
+.vhc-videocall-btn {
+  display: flex;
+  justify-content: center;
+  margin-top: .75rem;
+}
+
+/* ───────── SECTION BLOCK spacing ───────── */
+.section-block {
+  margin-bottom: 1.5rem;
+}
+
+/* ───────── BOTONES TABLA MODERNOS ───────── */
+
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button {
+  background: linear-gradient(135deg, #001f61 0%, #0a2d82 100%);
+  border: none;
+  border-radius: 999px;
+  padding: 0.42rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  box-shadow: 0 4px 14px rgba(0,31,97,.18);
+  transition: all .2s ease;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,31,97,.28);
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button {
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+  border: none;
+  border-radius: 999px;
+  padding: 0.42rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  box-shadow: 0 4px 14px rgba(71,85,105,.18);
+  transition: all .2s ease;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(71,85,105,.28);
+}
+
+/* ================================
+   BOTONES TABLA PREMIUM 2026
+================================ */
+
+:host ::ng-deep .reimp-btn.p-button {
+  border-radius: 999px !important;
+  min-height: 34px !important;
+  padding: 0.45rem 1.1rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: .02em;
+  border: none !important;
+  transition: all .25s cubic-bezier(.4,0,.2,1);
+}
+
+/* HISTORIA CLINICA (PRIMARY) */
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button {
+  background: linear-gradient(135deg, #001f61 0%, #0a2d82 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(0,31,97,.25) !important;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(0,31,97,.35) !important;
+}
+
+/* CONSENTIMIENTO (SECONDARY) */
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(37,99,235,.25) !important;
+}
+
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(37,99,235,.35) !important;
+}
+
+/* Estado disabled */
+:host ::ng-deep .reimp-btn.p-button.p-disabled {
+  opacity: .55 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+/* =========================
+   BOTONES MODERNOS REIMP
+========================= */
+
+.reimp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+
+  border: none;
+  border-radius: 999px;
+  padding: .45rem 1.2rem;
+
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .3px;
+
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.reimp-btn-compact {
+  padding: .35rem .9rem;
+  font-size: .72rem;
+}
+
+/* PRIMARY */
+.reimp-btn-primary {
+  background: linear-gradient(135deg, #001f61 0%, #0a2d82 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0,31,97,.25);
+}
+
+.reimp-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(0,31,97,.35);
+}
+
+/* SECONDARY */
+.reimp-btn-secondary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(37,99,235,.25);
+}
+
+.reimp-btn-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(37,99,235,.35);
+}
+
+/* DANGER */
+.reimp-btn-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(220,38,38,.25);
+}
+
+.reimp-btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(220,38,38,.35);
+}
+
+/* DISABLED */
+.reimp-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.btn-consult {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8); /* azul moderno */
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: .5rem 1.4rem;
+  font-weight: 600;
+  font-size: .85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  transition: all .25s ease;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, .25);
+}
+
+.btn-consult:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(37, 99, 235, .35);
+}
+.text-danger {
+  color: #dc3545; /* rojo */
+  font-weight: bold; /* opcional */
 }

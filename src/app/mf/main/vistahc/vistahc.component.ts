@@ -14,11 +14,18 @@ import { CookieService } from 'ngx-cookie-service';
   styleUrls: ['./vistahc.component.css']
 })
 export class VistahcComponent {
- 
+ public llamadaService: any = { loading: false, estado: false };
+
   public filtro = undefined;
-  public dataSource: MatTableDataSource<Citas>;
-  public dataSourceEti: MatTableDataSource<Citas>;
-  public dataSourceCont: MatTableDataSource<Citas>;
+  // ── DataSources ──────────────────────────────────────────────────────────
+  /** Citas del día (no adicionales) */
+  public dataSource: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
+
+  /** Recuperación (adicionales) */
+  public dataSourceEti: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
+
+  /** Contingencia */
+  public dataSourceCont: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
   public loginId: String;
   public cookieService: CookieService;
   row_: any;
@@ -51,8 +58,24 @@ export class VistahcComponent {
     PacienteIdInd: number=0;
     link: string='';
     fechahoy = new Date().toISOString().substring(0, 10);    
-    displayedColumns: string[] = ['hora'];
-    displayedColumnsHc: string[] = ['paciente', 'identificacion', 'rutaAccesoPdf'];
+    displayedColumns: string[] = [
+    'hora',
+    'paciente',
+    //'acceso',
+    'turno',
+    'estado',
+    'historias',
+    'consentimientos'
+  ];
+
+  /** Columnas para Contingencia */
+  displayedColumnsCont: string[] = [
+    'fecha',
+    'paciente',
+    'verificado',
+    'historias',
+    'acciones'
+  ];
    
     notasDataOriginal: any[] = [];
     otrosDataOriginal: any[] = [];
@@ -83,7 +106,7 @@ export class VistahcComponent {
      //this.consultarCitasAnteriores();
   }
 
-  public consultarCitas() {
+  public consultarCitasold() {
 
     if (this.filtro != undefined) {
       this.loading = true;
@@ -132,6 +155,71 @@ export class VistahcComponent {
       Swal.fire('Advertencia!!', 'Debe seleccionar una especialidad', 'warning')
     }
 
+  }
+
+   public consultarCitas(): void {
+    if (this.filtro === undefined || this.filtro === null) {
+      Swal.fire('Advertencia!!', 'Debe seleccionar una especialidad', 'warning');
+      return;
+    }
+
+    this.loading = true;
+
+    this.medicoServices.consultarCitas(this.filtro.id).subscribe(
+      (x: Citas[]) => {
+        this.loading = false;
+
+        if (x.length === 0) {
+          Swal.fire('No hay citas asignadas para el día de hoy', '', 'info');
+        }
+
+        // Marcar botones habilitados/deshabilitados
+        x.forEach(e => {
+          e.disableButton = true;
+          e.tipoAgendaAcceso = e.tipoAgendaAcceso == null
+            ? ''
+            : (e.tipoAgendaAcceso as string).toUpperCase();
+
+          if (e.estado === 'FAC') {
+            e.disableButton = false;
+          } else if (e.estado === 'ACT' && (e.tipoAgendaAccesoId === 2 || e.tipoAgendaAccesoId === 4)) {
+            e.disableButton = false;
+          }
+        });
+
+        // Guardar en el servicio
+        this.medicoServices.listadoCitas = x;
+
+        // Separar citas normales y de recuperación
+        let citas       = x.filter(n => !n.adicional);
+        let recuperacion = x.filter(n => n.adicional);
+
+        // Caso especial especialidad 139: excluir estado PRO
+        if (this.medicoServices.Especialidad.id === 139) {
+          citas        = x.filter(n => n.estado !== 'PRO');
+          recuperacion = x.filter(n => n.estado !== 'PRO');
+        }
+
+        // Arrays raw
+        this.listado_citas              = citas;
+        this.listado_citas_recuperacion = recuperacion;
+        this.listado_contingencia       = x.filter(n => n.adicional); // ajusta el filtro si tienes campo específico
+
+        // DataSources
+        this.dataSource    = new MatTableDataSource<Citas>(citas);
+        this.dataSourceEti = new MatTableDataSource<Citas>(recuperacion);
+        this.dataSourceCont = new MatTableDataSource<Citas>(this.listado_contingencia);
+
+        // Resetear páginas
+        this.hcPage    = 1;
+        this.notasPage = 1;
+        this.otrosPage = 1;
+      },
+      (error) => {
+        this.loading = false;
+        Swal.fire('Error!!', 'Error al consultar la cita', 'error');
+      }
+    );
   }
 
  public consultarEspecialidad() {
@@ -196,6 +284,71 @@ export class VistahcComponent {
     const end = Math.min(total, page * size);
     return `Mostrando ${start}-${end} de ${total}`;
   }
+  
+    // ── Acciones de citas (mantener los métodos que ya tenías) ────────────────
 
+  irA(item: any, tipo: string): void {
+    // tu implementación existente
+  }
+
+  irAci(item: any): void {
+    // tu implementación existente
+  }
+
+  finalizar(item: any): void {
+    // tu implementación existente
+  }
+
+  desactivarCita(item: any): void {
+    // tu implementación existente
+  }
+
+  llamarPaciente(identificacion: string, citaId: any): void {
+    // tu implementación existente
+  }
+
+  abrirModal(item: any, template: any): void {
+    // tu implementación existente
+  }
+
+  openZoom(link: string): void {
+    // tu implementación existente
+  }
+
+  abrirZoom(link: string): void {
+    // tu implementación existente
+  }
+
+  cerraModalLlamada(): void {
+    // tu implementación existente
+  }
+
+  generarLink(): void {
+    // tu implementación existente
+  }
+
+  // ── SIP / Llamadas ────────────────────────────────────────────────────────
+
+  sipRegister(): void {
+    // tu implementación existente
+  }
+
+  sipUnRegister(): void {
+    // tu implementación existente
+  }
+
+  sipCall(type: string, number: string): void {
+    // tu implementación existente
+  }
+
+  sipHangUp(): void {
+    // tu implementación existente
+  }
+
+  sipToggleMute(mute: boolean): void {
+    // tu implementación existente
+  }
+
+  
    
 }
