@@ -16,7 +16,7 @@ UrlLogin: "/EverHealth",
 UrlPrestador: "https://appportal.everestintelligent.com/APIPrestadoresHealth",
 UrlTeleconsulta: "https://appcita.viva1a.com.co:8051/teleconsulta",
 URLExtension: "https://appcita.viva1a.com.co:8051/Directorioclicktocallapi/api",
-UrlCIsign: "/APIConsentimientoInformadoTs/api",
+UrlCIsign: "/apidelta_test/APIConsentimientoInformado/api",
   // Vista externa de Historia Clínica (configurar según despliegue)
   vistaHC: "",
 URLApiCorreo: "/APIEnvioCorreo/api",

@@ -8,6 +8,7 @@ import { Citas } from 'src/app/Modelos/Medico';
 import { environment } from 'src/environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { finalize, switchMap } from 'rxjs';
 //import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.service';
 
 declare const __webpack_require__: { p?: string } | undefined;
@@ -21,6 +22,7 @@ export class VistahcComponent {
  public llamadaService: any = { loading: false, estado: false };  
  public filtro = undefined;
  public loadingCI: boolean = false;
+ private consentimientoLoadingKey: string | null = null;
   // ── DataSources ──────────────────────────────────────────────────────────
   /** Citas del día (no adicionales) */
   public dataSource: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
@@ -399,8 +401,94 @@ export class VistahcComponent {
     });
   } */
 
-  irAci(row :any){
+  private getConsentimientoKey(row: any): string {
+    const citaId = row?.citaId ?? row?.consultaId ?? row?.ConsultaId ?? row?.citaID ?? row?.CitaId;
+    const pacienteId =
+      row?.pacienteId ?? row?.paciente_Id ?? row?.PacienteId ?? row?.pacienteID ?? row?.idPaciente;
 
+    if (citaId !== undefined && citaId !== null && String(citaId).length) return `cita:${String(citaId)}`;
+    if (pacienteId !== undefined && pacienteId !== null && String(pacienteId).length) return `paciente:${String(pacienteId)}`;
+    return `row:${JSON.stringify(row ?? {})}`;
+  }
+
+  isConsentimientoLoading(row: any): boolean {
+    return this.consentimientoLoadingKey === this.getConsentimientoKey(row);
+  }
+
+  irAci(row: any): void {
+    const pacienteId =
+      row?.pacienteId ??
+      row?.paciente_Id ??
+      row?.PacienteId ??
+      row?.pacienteID ??
+      row?.idPaciente;
+
+    if (pacienteId === undefined || pacienteId === null || pacienteId === '') {
+      Swal.fire('Dato faltante', 'No se encontrÃ³ el `pacienteId` para abrir Consentimientos.', 'warning');
+      return;
+    }
+
+    const key = this.getConsentimientoKey(row);
+    if (this.consentimientoLoadingKey === key) return;
+
+    this.loadingCI = true;
+    this.consentimientoLoadingKey = key;
+
+    this.rs
+      .ObtenerPacientePorId(pacienteId)
+      .pipe(
+        switchMap((response: any) => {
+          const apellidos = [response?.primer_Apellido, response?.segundo_Apellido].filter(Boolean).join(' ');
+
+          const data: any = {
+            id: response?.id,
+            tipoIdentificacion: response?.tipo_Identificacion,
+            identificacion: response?.identificacion,
+            nombres: response?.nombre,
+            apellidos,
+            telefono: response?.telefono,
+            correo: response?.correo,
+            swPermiteEnviar: true
+          };
+
+          return this.medicoServices.guardarConsentimientoUsuario(data);
+        }),
+        finalize(() => {
+          this.loadingCI = false;
+          this.consentimientoLoadingKey = null;
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
+          const docId = res?.data?.idDocumento;
+          if (!docId) {
+            Swal.fire('Error', 'No se recibiÃ³ `idDocumento` al generar el consentimiento.', 'error');
+            return;
+          }
+
+          const base = (environment as any).vistaCI ?? '';
+          const baseNormalized = String(base).replace(/\/+$/, '');
+          const docNormalized = String(docId).startsWith('/') ? String(docId) : `/${docId}`;
+
+          //console.log('datos:',baseNormalized);
+
+          const popup = window.open(`${baseNormalized}${docNormalized}`, '_blank');
+          if (!popup) {
+            Swal.fire(
+              'Ventana bloqueada',
+              'Tu navegador bloqueÃ³ la pestaÃ±a. Permite ventanas emergentes para abrir el consentimiento.',
+              'info'
+            );
+          }
+        },
+        error: (err: any) => {
+          const msg =
+            err?.error?.message ??
+            err?.message ??
+            (typeof err === 'string' ? err : 'OcurriÃ³ un error al generar el consentimiento.');
+          Swal.fire('Error', msg, 'error');
+        }
+      });
   }
 
   finalizar(item: any): void {
