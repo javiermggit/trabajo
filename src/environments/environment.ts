@@ -25,6 +25,7 @@ export const environment = {
   
 
   // URLs de APIs
+vistaCI: '/delta_test/cisign', 
 URLHc: "/APIHCHealth",
 URLParametrizacion: "/APIParametrizacionGeneralHealth",
 URLPaciente: "/APIPacienteV2",
@@ -37,6 +38,8 @@ UrlPrestador: "https://appportal.everestintelligent.com/APIPrestadoresHealth",
 UrlTeleconsulta: "https://appcita.viva1a.com.co:8051/teleconsulta",
 URLExtension: "https://appcita.viva1a.com.co:8051/Directorioclicktocallapi/api",
 UrlCIsign: "/APIConsentimientoInformadoTs/api",
+  // Vista externa de Historia Clínica (configurar según despliegue)
+  vistaHC: "",
 URLApiCorreo: "/apidelta_test/APIEnvioCorreo/api",
 URLWhatsapp:"/apidelta_test/ApiWhatsapp",
 UrlIntegracionDigiturno: "/ApiIntegarcionEverestDigiturnoPrueba/api",

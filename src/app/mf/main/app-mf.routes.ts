@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
 import { AppMfComponent } from './app-mf.component';
-import { MainComponent } from 'src/app/main/main.component';
 import { ReimpresionComponent } from './reimpresion/reimpresion.component';
 import { VistahcComponent } from './vistahc/vistahc.component';
+import { HistoriaClinicaComponent } from './historia-clinica/historia-clinica.component';
 
 
  export const routesAppmf: Routes = [
@@ -12,7 +12,8 @@ import { VistahcComponent } from './vistahc/vistahc.component';
     children: [
       //{ path: '', redirectTo: 'reimpresion', pathMatch: 'full' },
       { path: '', component: ReimpresionComponent },
-      { path: 'vistahc', component: VistahcComponent }
+      { path: 'vistahc', component: VistahcComponent },
+      { path: 'historia-clinica', component: HistoriaClinicaComponent }
     ]
   }
 ];

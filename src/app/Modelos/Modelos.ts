@@ -1569,3 +1569,79 @@ export class JSONHc {
 	tipo: string;
 	UsuarioId: number;
 }
+
+export class VMHistoricoResultado {
+  public fechaCreacion: string;
+  public seguimientoResultado: VMSeguimientoResultado;
+  public signosVitales: VMSignosVitales;
+  public graficarDatos: any; // puedes cambiar a un tipo específico si sabes qué estructura tendrá
+
+  constructor() {
+    this.seguimientoResultado = new VMSeguimientoResultado();
+    this.signosVitales = new VMSignosVitales();
+  }
+}
+
+export class VMSeguimientoResultado {
+  public resultadoCreatinina: string;
+  public inicialCreatinina: boolean;
+  public resultadoGlicemia: string;
+  public inicialGlicemia: boolean;
+  public resultadoTrigliceridos: string;
+  public inicialTrigliceridos: boolean;
+  public resultadoHemoglobina: string;
+  public inicialHemoglobina: boolean;
+  public resultadoColesterolTotal: string;
+  public inicialColesterolTotal: boolean;
+  public resultadoPTH: string;
+  public inicialPTH: boolean;
+  public resultadoMicroAlbuminuria: string;
+  public inicialMicroAlbuminuria: boolean;
+  public resultadoColesterolHDL: string;
+  public inicialColesterolHDL: boolean;
+  public resultadoProteina24H: string;
+  public inicialProteina24H: boolean;
+  public resultadoPotasio: string;
+  public inicialPotasio: boolean;
+  public resultadoColesterolLDL: string;
+  public inicialColesterolLDL: boolean;
+  public resultadoCreatinuria: string;
+  public inicialCreatinuria: boolean;
+  public resultadoFosforo: string;
+  public inicialFosforo: boolean;
+  public resultadoAlbumina: string;
+  public inicialAlbumina: boolean;
+  public resultadoUroanalisis: string;
+  public inicialUroanalisis: boolean;
+  public resultadoHemograma: string;
+  public inicialHemograma: boolean;
+  public resultadoCalcio: string;
+  public inicialCalcio: boolean;
+  public resultadoDepuracionCreatininaEnOrina24H: string;
+  public inicialDepuracionCreatininaEnOrina24H: boolean;
+  public resultadoNitrogenoUreicoSangre: string;
+  public inicialNitrogenoUreicoSangre: boolean;
+  public resultadoHemoclasificacion: string;
+  public inicialHemoclasificacion: boolean;
+  public resultadoALT: string;
+  public inicialALT: boolean;
+  public resultadoAST: string;
+  public inicialAST: boolean;
+  public resultadoTFG: number;
+}
+
+export class VMSignosVitales {
+  public presionSistolica: number;
+  public presionDiastolica: number;
+  public frecuenciaCardiaca: number;
+  public frecuenciaRespiratoria: number;
+  public temperatura: number;
+}
+
+export class IdentidadGenero {
+	public id: number;
+	public nombre: string;
+	public descripcion: string;
+	public fechaCreacion: any;
+	public estado: string;
+}

@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Especialidad, Citas } from '../Modelos/Medico';
+import { Especialidad, Citas,Cups } from '../Modelos/Medico';
 import { CookieService } from 'ngx-cookie-service';
 import { Router } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
@@ -38,6 +38,7 @@ export class MedicoService {
   tipoIntegracion: string = "IntegracionDigiturno";
   tipoAcceso:string ='';
   edadAnios: number = 0;
+    cup: Cups;
   //public IdPais:number;
 
 

@@ -1,7 +1,7 @@
-<div class="card-custom reimp-filter-card">
+<div class="card-custom vhc-onecard">
 
   <!-- ── FILTROS ── -->
-  <div class="subcard subcard-filters">
+  <div class="vhc-filters">
     <div class="agenda-filters">
       <div class="filter-row">
 
@@ -36,7 +36,7 @@
   </div>
 
   <!-- ── CONTENIDO ── -->
-  <div class="subcard subcard-content">
+  <div class="vhc-content">
 
     <!-- Loader -->
     <div *ngIf="loading" class="vhc-loader">
@@ -188,12 +188,16 @@
             <ng-container matColumnDef="turno">
               <th mat-header-cell *matHeaderCellDef>Turno</th>
               <td mat-cell *matCellDef="let item" class="icon-cell">
-                <button class="icon-btn"
+                <button class="icon-btn icon-btn-turno"
                   [class.disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
                   [disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
                   title="Llamar turno"
                   (click)="llamarPaciente(item.identificacion, item.citaId)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                  <img
+                    [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
+                      ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
+                      : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
+                    alt="Llamar turno">
                 </button>
               </td>
             </ng-container>
@@ -222,7 +226,7 @@
                       'reimp-btn-secondary': item.tipoAgendaAccesoId === 7 || item.tipoAgendaAccesoId === 8,
                       'reimp-btn-primary':   item.tipoAgendaAccesoId !== 7 && item.tipoAgendaAccesoId !== 8
                     }"
-                    (click)="irA(item, 'CIT')">Historias Clínicas</button>
+                    (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
                 </ng-container>
                 <ng-container *ngIf="medicoServices.Especialidad.id === 139">
                   <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
@@ -344,8 +348,16 @@
               <ng-container matColumnDef="turno">
                 <th mat-header-cell *matHeaderCellDef>Turno</th>
                 <td mat-cell *matCellDef="let item" class="icon-cell">
-                  <button class="icon-btn" title="Llamar turno">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                  <button class="icon-btn icon-btn-turno"
+                    [class.disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
+                    [disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
+                    title="Llamar turno"
+                    (click)="llamarPaciente(item.identificacion, item.citaId)">
+                    <img
+                      [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
+                        ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
+                        : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
+                      alt="Llamar turno">
                   </button>
                 </td>
               </ng-container>
@@ -365,7 +377,9 @@
               <ng-container matColumnDef="historias">
                 <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
                 <td mat-cell *matCellDef="let item">
-                  <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact">Historias Clínicas</button>
+                  <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                    [disabled]="item.disableButton"
+                    (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
                 </td>
               </ng-container>
 
@@ -453,7 +467,9 @@
               <ng-container matColumnDef="historias">
                 <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
                 <td mat-cell *matCellDef="let item">
-                  <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact">Historias Clínicas</button>
+                  <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                    [disabled]="item.disableButton"
+                    (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
                 </td>
               </ng-container>
 
@@ -493,7 +509,7 @@
     </p-accordion>
 
   </div><!-- /subcard-content -->
-</div><!-- /card-custom -->
+</div><!-- /vhc-onecard -->
 
 
 <!-- ── LOADER LLAMADA ── -->

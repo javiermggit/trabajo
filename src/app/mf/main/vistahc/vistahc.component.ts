@@ -7,6 +7,10 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Citas } from 'src/app/Modelos/Medico';
 import { environment } from 'src/environments/environment';
 import { CookieService } from 'ngx-cookie-service';
+import { ActivatedRoute, Router } from '@angular/router';
+//import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.service';
+
+declare const __webpack_require__: { p?: string } | undefined;
 
 @Component({
   selector: 'app-vistahc',
@@ -14,9 +18,9 @@ import { CookieService } from 'ngx-cookie-service';
   styleUrls: ['./vistahc.component.css']
 })
 export class VistahcComponent {
- public llamadaService: any = { loading: false, estado: false };
-
-  public filtro = undefined;
+ public llamadaService: any = { loading: false, estado: false };  
+ public filtro = undefined;
+ public loadingCI: boolean = false;
   // ── DataSources ──────────────────────────────────────────────────────────
   /** Citas del día (no adicionales) */
   public dataSource: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
@@ -46,7 +50,6 @@ export class VistahcComponent {
 
 
   /////
-
   
     loadingImpresion :boolean =false;
     identificacion!: string;
@@ -88,17 +91,65 @@ export class VistahcComponent {
    
 
   //////
-
   constructor(
     public rs: VistahcService,
-    public medicoServices: MedicoService
+    public medicoServices: MedicoService,
+    private router: Router,
+    private route: ActivatedRoute,
+    //public du: DatosPacienteService
    ){
 
      this.loginId = environment.production == false ? "mprueba" : this.cookieService.get('UsuarioMedico');
+       
+  }
+
+  mfAssetUrl(path: string): string {
+    const cleanPath = path.replace(/^\/+/, '');
+
+    const publicPath = __webpack_require__?.p && __webpack_require__?.p.length ? __webpack_require__.p : '';
+    const windowHref = typeof window !== 'undefined' ? window.location.href : '';
+    const windowOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+
+    let origin = windowOrigin;
+    if (publicPath) {
+      try {
+        origin = new URL(publicPath, windowHref || 'http://localhost/').origin;
+      } catch {
+        origin = windowOrigin;
+      }
+    }
+
+    if (!origin) {
+      return `/${cleanPath}`;
+    }
+
+    // En Angular CLI, los assets normalmente viven en `/<assets...>` (root del host).
+    return new URL(`/${cleanPath}`, origin).toString();
   }
 
     ngOnInit(): void {    
       this.consultarEspecialidad(); 
+
+      const state = this.rs.viewState;
+      if (state) {
+        this.filtro = state.filtro;
+
+        this.listado_citas = state.citas ?? this.listado_citas;
+        this.listado_citas_recuperacion = state.citasEti ?? this.listado_citas_recuperacion;
+        this.listado_contingencia = state.citasCont ?? this.listado_contingencia;
+
+        this.dataSource = new MatTableDataSource<Citas>(state.citas ?? []);
+        this.dataSourceEti = new MatTableDataSource<Citas>(state.citasEti ?? []);
+        this.dataSourceCont = new MatTableDataSource<Citas>(state.citasCont ?? []);
+
+        this.hcPage = state.hcPage ?? this.hcPage;
+        this.notasPage = state.notasPage ?? this.notasPage;
+        this.otrosPage = state.otrosPage ?? this.otrosPage;
+
+        this.hcPageSize = state.hcPageSize ?? this.hcPageSize;
+        this.notasPageSize = state.notasPageSize ?? this.notasPageSize;
+        this.otrosPageSize = state.otrosPageSize ?? this.otrosPageSize;
+      }
   }  
 
     consultarCitasGeneral() {
@@ -284,6 +335,26 @@ export class VistahcComponent {
     const end = Math.min(total, page * size);
     return `Mostrando ${start}-${end} de ${total}`;
   }
+
+  abrirHistoriaClinica(item: any): void {
+    const base = (environment as any).vistaHC as string;
+    if (!base) {
+      Swal.fire('Configuración pendiente', 'Falta configurar `environment.vistaHC` para abrir la Historia Clínica.', 'info');
+      return;
+    }
+
+    const url = new URL(base, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+    const citaId = item?.citaId ?? item?.consultaId ?? item?.ConsultaId;
+    const pacienteId = item?.pacienteId ?? item?.paciente_Id ?? item?.PacienteId ?? item?.pacienteID;
+
+    if (citaId !== undefined && citaId !== null) url.searchParams.set('citaId', String(citaId));
+    if (pacienteId !== undefined && pacienteId !== null) url.searchParams.set('pacienteId', String(pacienteId));
+    if (item?.identificacion) url.searchParams.set('identificacion', String(item.identificacion));
+    if (this.filtro?.id) url.searchParams.set('especialidadId', String(this.filtro.id));
+
+    window.open(url.toString(), '_blank');
+  }
+
   
     // ── Acciones de citas (mantener los métodos que ya tenías) ────────────────
 
@@ -291,8 +362,45 @@ export class VistahcComponent {
     // tu implementación existente
   }
 
-  irAci(item: any): void {
-    // tu implementación existente
+   /*  irAci(row: any) {
+    this.loading = true;
+    this.du.ObtenerPacientePorId(row.pacienteId).subscribe((response) => {
+      console.log(response)
+      let data: any = {
+        "id": response.id,
+        "tipoIdentificacion": response.tipo_Identificacion,
+        "identificacion": response.identificacion,
+        "nombres": response.nombre,
+        "apellidos": response.primer_Apellido + " " + response.segundo_Apellido,
+        "telefono": response.telefono,
+        "correo": response.correo,
+        "swPermiteEnviar": true
+      }
+
+      this.medicoServices.guardarConsentimientoUsuario(data).subscribe({
+        next: (res: any) => {
+          console.log(res)
+          window.open(environment.vistaCI + res.data.idDocumento, "_target");
+        },
+        error: (err: any) => {
+          console.log(err)
+          Swal.fire({
+            icon: 'error',
+            title: 'Error...',
+            text: err,
+          })
+          this.loading = false
+        },
+        complete: () => {
+          this.loading = false
+        }
+      })
+    }, (error) => {
+    });
+  } */
+
+  irAci(row :any){
+
   }
 
   finalizar(item: any): void {

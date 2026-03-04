@@ -22,15 +22,31 @@
   --reimp-surface: #ffffff;
   --reimp-border: #dfe7f1;
   --reimp-border-soft: #e9eff6;
-  --reimp-header-bg: #f4f8fd;
+  /* Header un poco más marcado para no confundirse con zebra */
+  --reimp-header-bg: #eef4ff;
+
+  /* ───────── Sistema tipográfico (consistencia) ───────── */
+  --vhc-fw-title: 700;
+  --vhc-fw-strong: 700;
+  --vhc-fw-semibold: 600;
+  --vhc-fw-regular: 500;
+
+  --vhc-fs-title: 1.2rem;  /* títulos secciones */
+  --vhc-fs-label: 0.78rem; /* labels filtros/form */
+  --vhc-fs-th: 0.74rem;    /* encabezados tabla */
+  --vhc-fs-body: 0.875rem; /* texto general */
+  --vhc-fs-meta: 0.75rem;  /* metadatos */
+
+  --vhc-lh-tight: 1.15;
+  --vhc-lh-body: 1.35;
+  --vhc-lh-meta: 1.25;
 
   display: block;
   font-family: 'DM Sans', sans-serif;
   background: var(--bg);
-  padding: 1rem;
+  padding: 0.2rem;
   position: relative;
   z-index: 1;
-  background: #ffffff !important;
   min-height: 100vh;
 }
 
@@ -40,6 +56,34 @@
 }
 
 /* ───────── CARDS ───────── */
+.vhc-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.vhc-onecard {
+  padding: 1.2rem 1.4rem;
+  overflow: hidden;
+}
+
+.vhc-filters {
+  margin-bottom: 1rem;
+}
+
+.vhc-content {
+  padding: 0;
+}
+
+/* Una sola card: mantener estilo de tabla, pero sin sombras extra */
+:host ::ng-deep .vhc-onecard .reimp-table {
+  box-shadow: none;
+}
+
+:host ::ng-deep .vhc-onecard .reimp-table .mat-mdc-header-row,
+:host ::ng-deep .vhc-onecard .reimp-table .mat-header-row {
+  border-top: 1px solid var(--reimp-border-soft);
+}
+
 .card-custom {
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -55,7 +99,10 @@
   box-shadow: 0 6px 20px rgba(0, 31, 97, 0.05);
 }
 
-.subcard-filters { margin-bottom: 1.5rem; }
+.subcard-filters {
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1.1rem;
+}
 .subcard-content { padding: 1.5rem; }
 
 /* ───────── FILTROS ───────── */
@@ -74,6 +121,39 @@
 .reimp-filter-card .p-4 {
   padding-top: 1rem !important;
   padding-bottom: 1rem !important;
+}
+
+/* Float label (Especialidad): evita que el label quede pegado arriba */
+:host ::ng-deep .agenda-filters .p-float-label {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.3rem;
+}
+
+:host ::ng-deep .agenda-filters .p-float-label > label {
+  position: static !important;
+  transform: none !important;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: var(--vhc-fw-regular);
+  font-size: var(--vhc-fs-label);
+  line-height: 1.2;
+}
+
+/* Filtro: altura consistente entre dropdown y botón */
+:host ::ng-deep .agenda-filters .p-dropdown {
+  height: 36px;
+  border-radius: 12px;
+}
+
+:host ::ng-deep .agenda-filters .p-dropdown .p-dropdown-label {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding-left: 0.85rem;
+  font-size: 0.86rem;
 }
 
 /* Float label */
@@ -185,7 +265,7 @@
 
 /* Botón Consultar */
 .btn-consult {
-  height: 34px;
+  height: 36px;
   padding: 0 18px;
   background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
   color: #fff;
@@ -196,6 +276,10 @@
   box-shadow: 0 3px 12px rgba(0,31,97,.18);
   border: none;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
 }
 
 .btn-consult:hover {
@@ -217,43 +301,164 @@
 /* Header */
 :host ::ng-deep .reimp-table .mat-mdc-header-row,
 :host ::ng-deep .reimp-table .mat-header-row {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  background: var(--reimp-header-bg);
+  border-bottom: 1px solid var(--border);
+  /* Reduce la "banda" del header */
+  min-height: 40px;
+  height: 40px;
 }
 
 :host ::ng-deep .reimp-table .mat-mdc-header-cell,
 :host ::ng-deep .reimp-table .mat-header-cell {
-  color: rgba(255,255,255,.88) !important;
-  font-weight: 700;
-  font-size: 0.75rem;
+  color: var(--reimp-text-strong) !important;
+  font-weight: var(--vhc-fw-semibold);
+  font-size: var(--vhc-fs-th);
   border-bottom: none !important;
-  padding: 0.85rem 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  padding: 0.46rem 0.9rem;
+  line-height: var(--vhc-lh-tight);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  /* Importante en Material (MDC): el fondo suele vivir en la celda.
+     Esto permite que se vea el gradiente del header-row sin "parches". */
+  background: transparent !important;
+  /* Separadores sutiles (look más enterprise) */
+  border-right: 1px solid rgba(15, 39, 70, 0.05);
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-header-cell:last-child,
+:host ::ng-deep .reimp-table .mat-header-cell:last-child {
+  border-right: none;
+}
+
+/* Sort header (flecha / label) sobre header oscuro */
+:host ::ng-deep .reimp-table .mat-sort-header-container {
+  color: inherit;
+}
+
+:host ::ng-deep .reimp-table .mat-sort-header-arrow {
+  color: var(--navy-mid);
+}
+
+:host ::ng-deep .reimp-table .mat-sort-header-content {
+  color: inherit;
 }
 
 /* Filas */
 :host ::ng-deep .reimp-table .mat-mdc-cell,
 :host ::ng-deep .reimp-table .mat-cell {
   color: #0f172a;
-  border-bottom: 1px solid var(--border) !important;
-  padding: 0.85rem 1rem;
-  font-size: 0.875rem;
+  /* El separador lo maneja el row para evitar líneas "cortadas"
+     cuando una celda no estira al alto de la fila. */
+  border-bottom: none !important;
+  padding: 0.78rem 0.9rem;
+  font-size: var(--vhc-fs-body);
+  line-height: var(--vhc-lh-body);
   vertical-align: middle;
+  /* Deja ver el zebra/hover aplicado al row (evita fondos por celda). */
+  background: transparent !important;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-row,
+:host ::ng-deep .reimp-table .mat-row {
+  border-bottom: 1px solid var(--border);
+  /* Alineación vertical consistente para celdas con poco contenido (Turno/Estado/Acciones) */
+  align-items: center;
 }
 
 :host ::ng-deep .reimp-table .mat-mdc-row:nth-child(even),
 :host ::ng-deep .reimp-table .mat-row:nth-child(even) {
-  background: #fcfdff;
+  /* Zebra MUY leve para guiar la vista sin verse "rejilla" */
+  background: #fbfbfd;
 }
 
-:host ::ng-deep .reimp-table .mat-mdc-row:last-child .mat-mdc-cell,
-:host ::ng-deep .reimp-table .mat-row:last-child .mat-cell {
-  border-bottom: none !important;
+:host ::ng-deep .reimp-table .mat-mdc-row:last-child,
+:host ::ng-deep .reimp-table .mat-row:last-child {
+  border-bottom: none;
 }
 
 :host ::ng-deep .reimp-table .mat-mdc-row:hover,
 :host ::ng-deep .reimp-table .mat-row:hover {
   background: #f5f8ff;
+}
+
+/* Anchos sugeridos para estabilizar el layout */
+:host ::ng-deep .reimp-table .mat-column-hora {
+  width: 110px;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .reimp-table .mat-column-turno {
+  width: 90px;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .reimp-table .mat-column-estado {
+  width: 140px;
+}
+
+:host ::ng-deep .reimp-table .mat-column-historias,
+:host ::ng-deep .reimp-table .mat-column-consentimientos {
+  width: 1%;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .reimp-table .mat-column-paciente {
+  min-width: 360px;
+}
+
+/* Alineación consistente por columna (evita sensación de "corrido") */
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-hora,
+:host ::ng-deep .reimp-table .mat-mdc-cell.mat-column-hora {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-paciente,
+:host ::ng-deep .reimp-table .mat-mdc-cell.mat-column-paciente {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-turno,
+:host ::ng-deep .reimp-table .mat-mdc-cell.mat-column-turno,
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-estado,
+:host ::ng-deep .reimp-table .mat-mdc-cell.mat-column-estado,
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-historias,
+:host ::ng-deep .reimp-table .mat-mdc-cell.mat-column-historias,
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-consentimientos,
+:host ::ng-deep .reimp-table .mat-mdc-cell.mat-column-consentimientos {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Celdas con íconos/botones: centra de forma robusta (MDC usa flex) */
+:host ::ng-deep .reimp-table .mat-mdc-cell.icon-cell,
+:host ::ng-deep .reimp-table .mat-cell.icon-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Evita que el separador (border-bottom) quede a media fila cuando la celda
+     no estira al alto de la fila (row más alto por columnas con texto). */
+  align-self: stretch;
+}
+
+/* Sort header centrado en columnas centradas */
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-estado .mat-sort-header-container,
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-turno .mat-sort-header-container,
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-historias .mat-sort-header-container,
+:host ::ng-deep .reimp-table .mat-mdc-header-cell.mat-column-consentimientos .mat-sort-header-container {
+  justify-content: center;
+}
+
+/* Botones dentro de tabla: look más "corporativo" (menos sombra) */
+:host ::ng-deep .reimp-table .reimp-btn-primary,
+:host ::ng-deep .reimp-table .reimp-btn-secondary {
+  box-shadow: 0 6px 16px rgba(0, 31, 97, 0.14);
+}
+
+:host ::ng-deep .reimp-table .reimp-btn-primary:hover:not(:disabled),
+:host ::ng-deep .reimp-table .reimp-btn-secondary:hover:not(:disabled) {
+  box-shadow: 0 10px 22px rgba(0, 31, 97, 0.18);
 }
 
 /* Fila sin datos */
@@ -275,44 +480,72 @@
 .reimp-section-title {
   margin: 0;
   color: var(--reimp-text-strong);
-  font-size: clamp(1rem, 1.35vw, 1.2rem);
-  font-weight: 700;
+  font-size: var(--vhc-fs-title);
+  font-weight: var(--vhc-fw-title);
   letter-spacing: -0.01em;
 }
 
 .section-pill {
   display: inline-flex;
   align-items: center;
-  background: var(--navy);
-  color: #fff;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 0.2rem 0.65rem;
-  border-radius: 100px;
-  letter-spacing: 0.04em;
+  /* Contador importante (no-botón): tipo "badge" enterprise */
+  background: var(--reimp-header-bg);
+  border: 1px solid rgba(15, 39, 70, 0.12);
+  padding: 0.18rem 0.55rem;
+  color: var(--reimp-text-strong);
+  font-size: 0.74rem;
+  font-weight: var(--vhc-fw-semibold);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  border-radius: 10px;
+  cursor: default;
+  user-select: none;
+  pointer-events: none;
 }
 
-.section-pill-warn    { background: var(--warn);    color: #fff; }
-.section-pill-success { background: var(--success); color: #fff; }
+/* Pills de estado (sí tipo badge) */
+.section-pill-warn,
+.section-pill-success {
+  background: var(--warn);
+  color: #fff;
+  border-color: transparent;
+  padding: 0.22rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.section-pill-success { background: var(--success); }
 
 /* ───────── PACIENTE ───────── */
 .patient-name {
-  font-weight: 700;
-  font-size: .88rem;
+  font-weight: var(--vhc-fw-strong);
+  font-size: 0.9rem;
   color: var(--navy);
-  line-height: 1.3;
+  line-height: var(--vhc-lh-meta);
+  letter-spacing: 0.01em;
 }
 
 .patient-meta {
-  font-size: .72rem;
-  color: var(--muted);
+  font-size: var(--vhc-fs-meta);
+  color: var(--reimp-text-muted);
   margin-top: .12rem;
+  line-height: var(--vhc-lh-meta);
 }
 
 .patient-metaacceso {
-  font-size: .72rem;
-  color: var(--navy);
+  display: inline-block;
+  width: fit-content;
+  font-size: var(--vhc-fs-meta);
+  font-weight: var(--vhc-fw-semibold);
   margin-top: .12rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  /* Evita "manchas" de color si se aplican clases mod-* (que tienen background) */
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
 }
 
 /* ───────── CELDA HORA ───────── */
@@ -322,6 +555,7 @@
   font-weight: 600;
   color: var(--navy);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ───────── MODALITY TAGS ───────── */
@@ -392,6 +626,7 @@
   transform: scale(1.07);
 }
 
+
 .icon-btn.disabled,
 .icon-btn[disabled] {
   opacity: 0.38;
@@ -400,6 +635,25 @@
 }
 
 .icon-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.icon-btn img { width: 16px; height: 16px; flex-shrink: 0; display: block; object-fit: contain; }
+
+/* Turno (hablando-fuerte): hover mÃ¡s suave y ajuste visual de alineaciÃ³n */
+.icon-btn.icon-btn-turno {
+  margin-top: 12px;
+}
+
+.icon-btn.icon-btn-turno:hover:not(.disabled):not([disabled]) {
+  background: #eaf2ff;
+  color: var(--navy);
+  border-color: rgba(0, 31, 97, 0.22);
+  transform: scale(1.04);
+}
+
+.icon-btn.icon-btn-turno img {
+  width: 18px;
+  height: 18px;
+  transform: translateY(1px);
+}
 
 /* ───────── TABLA SHELL ───────── */
 .reimp-table-shell {
@@ -494,15 +748,19 @@
 
 /* ───────── ACORDEÓN ───────── */
 :host ::ng-deep .p-accordion .p-accordion-header-link {
-  border-radius: 12px !important;
-  background: #f5f8ff;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   font-weight: 600;
   color: var(--navy);
 }
 
 :host ::ng-deep .p-accordion .p-accordion-content {
-  border-radius: 0 0 12px 12px;
-  border: 1px solid var(--border);
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 /* ───────── DROPDOWN FIX Z-INDEX ───────── */
@@ -537,6 +795,10 @@
     font-size: 0.78rem;
   }
 
+  :host ::ng-deep .reimp-table .mat-column-paciente {
+    min-width: 260px;
+  }
+
   .reimp-table-footer {
     flex-direction: column;
     align-items: stretch;
@@ -549,32 +811,35 @@
 
 /* ───────── ACORDEÓN ───────── */
 :host ::ng-deep .vhc-accordion .p-accordion-header-link {
-  background: #f5f8ff !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  padding: .75rem 1rem !important;
-  transition: background .15s;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: .85rem 0 !important;
+  transition: none;
 }
 
 :host ::ng-deep .vhc-accordion .p-accordion-header-link:hover {
-  background: #edf3fb !important;
+  background: transparent !important;
 }
 
 :host ::ng-deep .vhc-accordion .p-accordion-header.p-highlight .p-accordion-header-link {
-  background: #edf3fb !important;
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
+  background: transparent !important;
 }
 
 :host ::ng-deep .vhc-accordion .p-accordion-content {
-  border: 1px solid var(--border) !important;
-  border-top: none !important;
-  border-radius: 0 0 12px 12px !important;
-  padding: 1rem !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 0 1rem 0 !important;
+  background: transparent !important;
 }
 
 :host ::ng-deep .vhc-accordion .p-accordion-tab {
-  margin-bottom: .75rem;
+  margin-bottom: 0 !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+:host ::ng-deep .vhc-accordion .p-accordion-tab:first-child {
+  border-top: none !important;
 }
 
 .acc-header-tpl {
@@ -780,14 +1045,15 @@
 
 /* CONSENTIMIENTO (SECONDARY) */
 :host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  /* Azul secundario más sobrio (enterprise) */
+  background: linear-gradient(135deg, #2f6bd8 0%, #244fbf 100%) !important;
   color: #ffffff !important;
-  box-shadow: 0 6px 18px rgba(37,99,235,.25) !important;
+  box-shadow: 0 6px 16px rgba(36, 79, 191, 0.20) !important;
 }
 
 :host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(37,99,235,.35) !important;
+  box-shadow: 0 12px 26px rgba(36, 79, 191, 0.28) !important;
 }
 
 /* Estado disabled */
@@ -837,14 +1103,14 @@
 
 /* SECONDARY */
 .reimp-btn-secondary {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #2f6bd8 0%, #244fbf 100%);
   color: #fff;
-  box-shadow: 0 6px 18px rgba(37,99,235,.25);
+  box-shadow: 0 6px 16px rgba(36, 79, 191, 0.20);
 }
 
 .reimp-btn-secondary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(37,99,235,.35);
+  box-shadow: 0 12px 26px rgba(36, 79, 191, 0.28);
 }
 
 /* DANGER */
@@ -867,23 +1133,26 @@
   transform: none;
 }
 .btn-consult {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8); /* azul moderno */
+  /* Consultar = acción primaria global */
+  height: 36px;
+  padding: 0 18px;
+  background: linear-gradient(135deg, #001f61 0%, #0a2d82 100%);
   color: #fff;
   border: none;
   border-radius: 999px;
-  padding: .5rem 1.4rem;
   font-weight: 600;
-  font-size: .85rem;
+  font-size: .82rem;
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
+  justify-content: center;
+  gap: .45rem;
   transition: all .25s ease;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, .25);
+  box-shadow: 0 6px 18px rgba(0, 31, 97, 0.22);
 }
 
 .btn-consult:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(37, 99, 235, .35);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0, 31, 97, 0.28);
 }
 .text-danger {
   color: #dc3545; /* rojo */

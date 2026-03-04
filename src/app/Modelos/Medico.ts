@@ -48,3 +48,11 @@ export class CitasImpresion {
     horaCierre: String='17:00';
 
 }
+
+export class Cups {
+  codigo: string;
+  descripcion: string;
+  notaTecnica: string;
+  estado: string | null;
+  swIsHistoriaProcedimiento: boolean | null;
+}

@@ -6,6 +6,14 @@
   --reimp-border: #dfe7f1;
   --reimp-border-soft: #e9eff6;
   --reimp-header-bg: #f4f8fd;
+  --reimp-bg: #f0f4fb;
+
+  /* Layout base del MF dentro del shell */
+  position: relative;
+  z-index: 1;
+  background: var(--reimp-bg);
+  min-height: 100vh;
+  padding: 0.2rem;
 }
 
 .required-asterisk {
@@ -66,6 +74,43 @@
   border-radius: 14px;
   background: var(--reimp-surface);
   box-shadow: 0 8px 24px rgba(15, 39, 70, 0.06);
+}
+
+.reimp-onecard {
+  overflow: hidden;
+}
+
+/* ReimpresiÃ³n: una sola card (las internas se vuelven secciones) */
+.reimp-onecard {
+  padding: 1.2rem 1.4rem;
+  overflow: hidden;
+}
+
+.reimp-onecard .card-custom {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* PrimeFlex grid usa mÃ¡rgenes negativos; dentro de 1 sola card genera "puntas" raras */
+.reimp-onecard .grid {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.reimp-onecard .reimp-filter-card {
+  backdrop-filter: none;
+}
+
+/* Una sola card: mantener estilo de tabla, pero sin sombras extra */
+:host ::ng-deep .reimp-onecard .reimp-table {
+  box-shadow: none;
+}
+
+:host ::ng-deep .reimp-onecard .reimp-table .mat-mdc-header-row,
+:host ::ng-deep .reimp-onecard .reimp-table .mat-header-row {
+  border-top: 1px solid var(--reimp-border-soft);
 }
 
 .table-responsive {
@@ -482,12 +527,7 @@
 
 /* ===== FIX DROPDOWN EN SHELL ===== */
 
-:host {
-  position: relative;
-  z-index: 1;
-  background: #ffffff !important;
-  min-height: 100vh;
-}
+/* (El fondo del host se maneja arriba con --reimp-bg) */
 
 /* Fuerza que el panel del dropdown quede por encima del shell */
 :host ::ng-deep .p-dropdown-panel {
@@ -506,4 +546,3 @@
   position: absolute !important; /* relativo al body o contenedor */
   z-index: 999999 !important;
 }
-

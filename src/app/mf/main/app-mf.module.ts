@@ -6,6 +6,7 @@ import { routesAppmf } from './app-mf.routes';
 import { AppMfComponent } from './app-mf.component';
 import { ReimpresionComponent } from './reimpresion/reimpresion.component';
 import { VistahcComponent } from './vistahc/vistahc.component';
+import { HistoriaClinicaComponent } from './historia-clinica/historia-clinica.component';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
@@ -44,7 +45,8 @@ import { AccordionModule } from 'primeng/accordion';
   declarations: [
     AppMfComponent,
     ReimpresionComponent,
-    VistahcComponent
+    VistahcComponent,
+    HistoriaClinicaComponent
   ],
   providers: [DatePipe]
 })

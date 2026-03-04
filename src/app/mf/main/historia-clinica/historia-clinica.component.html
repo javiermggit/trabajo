@@ -1,0 +1,84 @@
+<div class="hc-shell">
+  <div class="hc-wrap">
+
+    <div class="hc-topbar">
+      <button type="button" class="hc-back" (click)="volver()">Atrás</button>
+      <div class="hc-topbar-title">Historia Clínica</div>
+    </div>
+
+    <!-- Resumen Paciente -->
+    <section class="pt-card">
+      <div class="pt-left">
+        <div class="pt-avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21a8 8 0 0 0-16 0" />
+            <circle cx="12" cy="8" r="4" />
+          </svg>
+        </div>
+      </div>
+
+      <div class="pt-main">
+        <div class="pt-name">{{ (nombrePaciente || 'Paciente') | uppercase }}</div>
+
+        <div class="pt-grid">
+          <div class="pt-item">
+            <div class="pt-label">Identificación</div>
+            <div class="pt-value">{{ identificacion || '-' }}</div>
+          </div>
+          <div class="pt-item">
+            <div class="pt-label">Edad</div>
+            <div class="pt-value">{{ edadTexto }}</div>
+          </div>
+          <div class="pt-item">
+            <div class="pt-label">Sexo</div>
+            <div class="pt-value">{{ sexo || '-' }}</div>
+          </div>
+          <div class="pt-item">
+            <div class="pt-label">EPS</div>
+            <div class="pt-value">{{ eps || '-' }}</div>
+          </div>
+          <div class="pt-item pt-span-2">
+            <div class="pt-label">Correo</div>
+            <div class="pt-value">{{ correo || '-' }}</div>
+          </div>
+        </div>
+
+        <div class="pt-marks" *ngIf="marcaciones?.length; else marksEmpty">
+          <span class="pt-mark-title">Marcaciones:</span>
+          <span class="pt-chip" *ngFor="let m of marcaciones">{{ m }}</span>
+        </div>
+        <ng-template #marksEmpty>
+          <div class="pt-marks pt-marks-empty">
+            <span class="pt-mark-title">Marcaciones:</span>
+            <span class="pt-mark-muted">Sin marcaciones</span>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="pt-actions">
+        <button type="button" class="pt-action-btn" disabled>
+          <span class="pt-action-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4" />
+              <path d="M12 8h.01" />
+            </svg>
+          </span>
+          Información del Paciente
+        </button>
+        <div class="pt-hint">Vista previa (en construcción)</div>
+      </div>
+    </section>
+
+    <!-- Placeholder contenido HC -->
+    <section class="hc-content">
+      <div class="hc-section-title">Contenido</div>
+      <div class="hc-section-subtitle">Aquí irá la historia clínica (anamnesis, antecedentes, etc.).</div>
+      <div class="hc-kv">
+        <div><span class="hc-k">CitaId:</span> {{ citaId || '-' }}</div>
+      </div>
+    </section>
+
+  </div>
+</div>
+

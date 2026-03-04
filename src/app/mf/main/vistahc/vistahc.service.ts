@@ -4,6 +4,24 @@ import { Especialidad, Citas } from 'src/app/Modelos/Medico';
 import { catchError, EMPTY, map, Observable, throwError } from 'rxjs';
 import { HttpClient, HttpErrorResponse, HttpParams, HttpResponse, } from '@angular/common/http';
 import { delayedRetry } from 'src/app/pipes/reintentoApi';
+import { VMPaciente } from 'src/app/Modelos/Modelos';
+
+export type VistahcFiltro = any;
+
+export type VistahcViewState = {
+  filtro?: VistahcFiltro;
+  citas?: Citas[];
+  citasEti?: Citas[];
+  citasCont?: Citas[];
+  hcPage?: number;
+  notasPage?: number;
+  otrosPage?: number;
+  hcPageSize?: number;
+  notasPageSize?: number;
+  otrosPageSize?: number;
+  savedAt: number;
+ 
+};
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +29,14 @@ import { delayedRetry } from 'src/app/pipes/reintentoApi';
 export class VistahcService {
  
    public listadoEspecialidad: Array<Especialidad> = [];
+   public viewState: VistahcViewState | null = null;
    private _baseUrlHC: string;
+   private _baseUrlPaciente: string;
   constructor(
      private http: HttpClient,
        
    ) {
-   
+     this._baseUrlPaciente = environment.URLPaciente;
      this._baseUrlHC = environment.URLHc;     
     
    }
@@ -25,4 +45,9 @@ export class VistahcService {
   ObtenerEspecialidad() {
     return this.http.get<Array<Especialidad>>(this._baseUrlHC + '/api/Historicos/EspecialidadesImpresion', { responseType: "json" });
   }
+
+   ObtenerPacientePorId(idPaciente) {
+    return this.http.get<VMPaciente>(this._baseUrlPaciente + '/api/Paciente/CargarDatosPaciente/' + idPaciente, { responseType: "json" })
+  }
+
 }

@@ -1,0 +1,256 @@
+:host {
+  --navy: #001f61;
+  --navy-mid: #0a2d82;
+  --accent: #3b82f6;
+  --bg: #f0f4fb;
+  --surface: #ffffff;
+  --border: #dde4f0;
+  --text: #1e2a45;
+  --muted: #6b7898;
+  --shadow: 0 8px 24px rgba(15, 39, 70, 0.06);
+
+  display: block;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.hc-shell {
+  min-height: 100vh;
+  padding: 1rem;
+  background: var(--bg);
+}
+
+.hc-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.hc-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.hc-topbar-title {
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.hc-back {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f7faff;
+  color: #0f2746;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hc-back:hover {
+  background: #eef4ff;
+  border-color: rgba(0, 31, 97, 0.22);
+}
+
+/* =====================
+   PACIENTE RESUMEN
+===================== */
+.pt-card {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.15rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.pt-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #eef4ff;
+  border: 1px solid rgba(0, 31, 97, 0.14);
+  color: var(--navy);
+}
+
+.pt-avatar svg {
+  width: 30px;
+  height: 30px;
+}
+
+.pt-name {
+  color: var(--navy);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  font-size: 1.05rem;
+  line-height: 1.1;
+  margin-bottom: 0.55rem;
+}
+
+.pt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+}
+
+.pt-span-2 {
+  grid-column: span 2;
+}
+
+.pt-label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pt-value {
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 0.15rem;
+}
+
+.pt-marks {
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+}
+
+.pt-mark-title {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-right: 0.2rem;
+}
+
+.pt-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  background: #eef4ff;
+  border: 1px solid rgba(0, 31, 97, 0.14);
+  color: var(--navy);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pt-marks-empty .pt-mark-muted {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.pt-actions {
+  display: grid;
+  justify-items: end;
+  gap: 0.4rem;
+}
+
+.pt-action-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  box-shadow: 0 10px 24px rgba(0, 31, 97, 0.18);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.pt-action-ico {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+}
+
+.pt-action-ico svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pt-hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* =====================
+   CONTENIDO PLACEHOLDER
+===================== */
+.hc-content {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.hc-section-title {
+  color: #0f2746;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.hc-section-subtitle {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hc-kv {
+  margin-top: 0.85rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.hc-k {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .pt-card {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .pt-actions {
+    justify-items: start;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .pt-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pt-span-2 {
+    grid-column: auto;
+  }
+}
+

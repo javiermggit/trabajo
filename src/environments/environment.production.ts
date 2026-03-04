@@ -3,6 +3,8 @@ export const environment = {
   title: 'Ordenamientos',
   env: 'Production',
   version: '3.0.0-beta',
+
+  vistaCI: '/delta_test/cisign',  
  URLHc: "/APIHCHealth",
 URLParametrizacion: "/APIParametrizacionGeneralHealth",
 URLPaciente: "/APIPacienteV2",
@@ -15,6 +17,8 @@ UrlPrestador: "https://appportal.everestintelligent.com/APIPrestadoresHealth",
 UrlTeleconsulta: "https://appcita.viva1a.com.co:8051/teleconsulta",
 URLExtension: "https://appcita.viva1a.com.co:8051/Directorioclicktocallapi/api",
 UrlCIsign: "/APIConsentimientoInformadoTs/api",
+  // Vista externa de Historia Clínica (configurar según despliegue)
+  vistaHC: "",
 URLApiCorreo: "/APIEnvioCorreo/api",
 URLWhatsapp:"/apiperez_test/ApiWhatsapp",
 UrlIntegracionDigiturno: "/ApiIntegarcionEverestDigiturnoPrueba/api",
