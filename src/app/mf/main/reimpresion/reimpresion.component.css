@@ -7,6 +7,10 @@
   --reimp-border-soft: #e9eff6;
   --reimp-header-bg: #f4f8fd;
   --reimp-bg: #f0f4fb;
+  --reimp-navy: #001f61;
+  --reimp-navy-mid: #0a2d82;
+  --reimp-blue: #2f6bd8;
+  --reimp-blue-mid: #244fbf;
 
   /* Layout base del MF dentro del shell */
   position: relative;
@@ -116,6 +120,8 @@
 .table-responsive {
   margin-top: 0.65rem;
   overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 :host ::ng-deep .reimp-filtros .p-float-label {
@@ -153,7 +159,7 @@
 :host ::ng-deep .reimp-btn.p-button {
   min-height: 36px;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 999px;
   padding: 0.42rem 0.82rem;
   font-size: 0.88rem;
   font-weight: 600;
@@ -187,18 +193,21 @@
 }
 
 :host ::ng-deep .reimp-btn.reimp-btn-primary.p-button {
-  background: #3b7ce5;
-  border-color: #3b7ce5;
+  background: linear-gradient(135deg, var(--reimp-navy) 0%, var(--reimp-navy-mid) 100%);
+  border-color: transparent;
+  color: #ffffff;
 }
 
 :host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button {
-  background: #5d7392;
-  border-color: #5d7392;
+  background: linear-gradient(135deg, var(--reimp-blue) 0%, var(--reimp-blue-mid) 100%);
+  border-color: transparent;
+  color: #ffffff;
 }
 
 :host ::ng-deep .reimp-btn.reimp-btn-success.p-button {
   background: #22c55e;
   border-color: #22c55e;
+  color: #ffffff;
 }
 
 :host ::ng-deep .reimp-btn.p-button:focus {
@@ -311,7 +320,8 @@
   border: 1px solid var(--reimp-border);
   border-radius: 12px;
   overflow: hidden;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
 }
 
 :host ::ng-deep .reimp-table .mat-mdc-header-row,
@@ -487,9 +497,14 @@
 @media (max-width: 768px) {
   .reimp-search-row {
     width: 100%;
+    flex-direction: column;
   }
 
   :host ::ng-deep .reimp-btn.reimp-btn-search.p-button {
+    width: 100%;
+  }
+
+  :host ::ng-deep .reimp-search-row .reimp-btn.p-button {
     width: 100%;
   }
 
@@ -512,6 +527,11 @@
   :host ::ng-deep .reimp-table .mat-mdc-cell,
   :host ::ng-deep .reimp-table .mat-cell {
     padding: 0.72rem 0.75rem;
+  }
+
+  :host ::ng-deep .reimp-table .mat-column-link,
+  :host ::ng-deep .reimp-table .mat-column-rutaAccesoPdf {
+    min-width: 120px;
   }
 
   .reimp-table-footer {
@@ -540,9 +560,64 @@
 }
 
 :host ::ng-deep .reimp-dropdown-panel {
-  min-width: auto !important; /* permitir que tome el ancho del input */
-  width: auto !important; /* forzar ancho automático */
-  max-width: 100vw; /* nunca sobrepase la pantalla */
-  position: absolute !important; /* relativo al body o contenedor */
+  /* Mantener comportamiento default de PrimeNG (ancho del trigger) */
+  max-width: calc(100vw - 24px); /* evita que se salga del viewport */
+  overflow-x: hidden;
   z-index: 999999 !important;
+}
+
+
+/* Dropdown: input de filtro (panel) */
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-header {
+  padding: 0.5rem 0.6rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--reimp-border-soft);
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter-container {
+  width: 100%;
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter {
+  height: 34px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--reimp-border);
+  box-shadow: none !important;
+  outline: none !important;
+  padding-right: 2.2rem;
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter:focus {
+  border-color: var(--reimp-navy-mid);
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter-icon {
+  right: 0.75rem;
+  color: #64748b;
+}
+
+/* Evita que textos largos "estiren" el panel */
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-item {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* En viewport bajo (inspector / móviles), limita altura para que el panel pueda abrir hacia abajo. */
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-items-wrapper {
+  max-height: min(260px, 30vh) !important;
+}
+
+@media (max-height: 700px) {
+  :host ::ng-deep .reimp-dropdown-panel .p-dropdown-items-wrapper {
+    max-height: min(220px, 24vh) !important;
+  }
+}
+
+@media (max-height: 560px) {
+  :host ::ng-deep .reimp-dropdown-panel .p-dropdown-items-wrapper {
+    max-height: min(200px, 18vh) !important;
+  }
 }

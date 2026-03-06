@@ -1,78 +1,83 @@
 {
   "/APIHCHealth": {
-    "target": "http://localhost:5088",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false,
-    "pathRewrite": {
-      "^/APIHCHealth": ""
-    },
     "logLevel": "debug"
   },
-  "/apidelta_test": {
-    "target": "https://everestintelligent.com:444",
+  "/ApiImpresionUnificada": {
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false,
     "logLevel": "debug"  
 },
- "/delta_test": {
-    "target": "https://everestintelligent.com:444",
+"/everest_test": {
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false,
     "logLevel": "debug"  
 },
   "/APIParametrizacionGeneralHealth": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/APIPacienteV2": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/APIMedicoHealth": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/APIImpresion": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/APIOrdenamientoHealth": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/ApiOrdenamientoV2": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/APIConsentimientoInformadoTs": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/APIEnvioCorreo": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
-  "/apiperez_test": {
-    "target": "http://172.27.83.196:160",
+  "/ApiWhatsapp": {
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/ApiIntegarcionEverestDigiturnoPrueba": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   },
   "/APIParametrizacionRecurso": {
-    "target": "http://172.27.83.196:160",
+    "target": "http://172.27.83.196:84",
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/APIConsentimientoInformado": {
+    "target": "http://172.27.83.196:84",
     "changeOrigin": true,
     "secure": false
   }
+
+
+  
 }

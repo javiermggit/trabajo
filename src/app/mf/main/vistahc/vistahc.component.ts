@@ -102,7 +102,7 @@ export class VistahcComponent {
    ){
 
      this.loginId = environment.production == false ? "mprueba" : this.cookieService.get('UsuarioMedico');
-       
+      //this.loginId = environment.production == false ? "JARAMIREZ" : this.cookieService.get('UsuarioMedico');
   }
 
   mfAssetUrl(path: string): string {
@@ -155,8 +155,35 @@ export class VistahcComponent {
   }  
 
     consultarCitasGeneral() {
+      if (this.filtro !== undefined && this.filtro !== null) {
+        this.medicoServices.Especialidad = this.filtro;
+      }
+
       this.consultarCitas();
-     //this.consultarCitasAnteriores();
+      this.consultarCitasAnteriores();
+  }
+
+  public consultarCitasAnteriores(): void {
+    if (this.filtro === undefined || this.filtro === null) {
+      return;
+    }
+
+    this.medicoServices.consultarCitasContigencia(this.filtro.id).subscribe(
+      (x: Citas[]) => {
+        let contingencia = x;
+
+        if (this.medicoServices?.Especialidad?.id === 139) {
+          contingencia = x.filter(n => n.estado !== 'PRO');
+        }
+
+        this.listado_contingencia = contingencia;
+        this.dataSourceCont = new MatTableDataSource<Citas>(contingencia);
+        this.otrosPage = 1;
+      },
+      () => {
+        // Contingencia es opcional; no bloquea la vista si falla.
+      }
+    );
   }
 
   public consultarCitasold() {
@@ -277,7 +304,7 @@ export class VistahcComponent {
 
  public consultarEspecialidad() {
      //this.loadingReimpresion = true;
-       this.medicoServices.obtenerListadoTipo().subscribe((x) => {    
+       this.rs.ObtenerEspecialidad().subscribe((x) => {    
  
        this.rs.listadoEspecialidad = x
        //this.loadingReimpresion = false;
@@ -492,15 +519,144 @@ export class VistahcComponent {
   }
 
   finalizar(item: any): void {
-    // tu implementación existente
+    const citaId = item?.citaId ?? item?.consultaId ?? item?.ConsultaId;
+    if (citaId === undefined || citaId === null || citaId === '') {
+      Swal.fire('Dato faltante', 'No se encontro citaId para finalizar la cita.', 'warning');
+      return;
+    }
+
+    this.loading = true;
+    const citaIdEncoded = encodeURIComponent(btoa(String(citaId)));
+
+    this.medicoServices.validHC(citaIdEncoded).subscribe({
+      next: (res: any) => {
+        if (res?.swEstadoPro === true) {
+          Swal.fire('Error', res?.mensaje ?? 'La cita ya esta finalizada.', 'error');
+          this.loading = false;
+          return;
+        }
+
+        Swal.fire({
+          title: 'Desea finalizar la cita?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Finalizar',
+          cancelButtonText: 'Cancelar',
+        }).then((result: any) => {
+          const confirmed = result?.isConfirmed ?? result?.value;
+          if (!confirmed) {
+            this.loading = false;
+            return;
+          }
+
+          // Facturacion (no bloqueante)
+          this.medicoServices.facturarCitas(String(citaId)).subscribe({ next: () => {}, error: () => {} });
+
+          this.medicoServices.FinalizarTicket(String(citaId)).subscribe({
+            next: (resp: any) => {
+              Swal.fire('Listo', resp?.mensaje ?? 'Cita finalizada.', 'success');
+              this.consultarCitasGeneral();
+            },
+            error: (err: any) => {
+              const msg =
+                err?.error?.mensaje ??
+                err?.message ??
+                (typeof err === 'string' ? err : 'Error finalizando la cita.');
+              Swal.fire('Error', msg, 'error');
+              this.loading = false;
+            },
+            complete: () => {
+              this.loading = false;
+            }
+          });
+        });
+      },
+      error: (err: any) => {
+        const msg =
+          err?.error?.mensaje ??
+          err?.message ??
+          (typeof err === 'string' ? err : 'Error validando el estado de la cita.');
+        Swal.fire('Error', msg, 'error');
+        this.loading = false;
+      }
+    });
   }
 
   desactivarCita(item: any): void {
-    // tu implementación existente
+    const citaId = item?.citaId ?? item?.consultaId ?? item?.ConsultaId;
+    if (citaId === undefined || citaId === null || citaId === '') {
+      Swal.fire('Dato faltante', 'No se encontró el id de la cita para desactivar.', 'warning');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Esta seguro que desea desactivar la cita?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Desactivar',
+      cancelButtonText: 'Cancelar',
+    }).then((result: any) => {
+      const confirmed = result?.isConfirmed ?? result?.value;
+      if (!confirmed) return;
+
+      this.loading = true;
+      this.medicoServices.desactivarCitasAnteriores(String(citaId)).subscribe({
+        next: (resp: any) => {
+          if (String(resp).toLowerCase() === 'true') {
+            Swal.fire('Listo', 'Cita desactivada.', 'success');
+            this.consultarCitasAnteriores();
+          } else {
+            Swal.fire('Error', 'Error al desactivar la cita.', 'error');
+          }
+        },
+        error: (err: any) => {
+          const msg =
+            err?.error?.mensaje ??
+            err?.message ??
+            (typeof err === 'string' ? err : 'Error al desactivar la cita.');
+          Swal.fire('Error', msg, 'error');
+        },
+        complete: () => {
+          this.loading = false;
+        }
+      });
+    });
   }
 
   llamarPaciente(identificacion: string, citaId: any): void {
-    // tu implementación existente
+    if (!identificacion) {
+      Swal.fire('Dato faltante', 'No se encontro la identificacion del paciente.', 'warning');
+      return;
+    }
+
+    if (citaId === undefined || citaId === null || citaId === '') {
+      Swal.fire('Dato faltante', 'No se encontro el id del turno/cita.', 'warning');
+      return;
+    }
+
+    this.medicoServices.llamadoPaciente(String(identificacion), Number(citaId), this.medicoServices.ticketId).subscribe({
+      next: (res: any) => {
+        if (res?.ticketId === 0) {
+          Swal.fire('Informacion', res?.mensaje ?? 'No fue posible llamar al paciente.', 'info');
+          return;
+        }
+
+        if (res?.swSegirLlamando) {
+          Swal.fire('Llamado exitoso', 'Llamando al paciente...', 'success');
+          this.medicoServices.ticketId = res.ticketId;
+          this.medicoServices.ticketMensaje = res?.mensaje ?? '';
+        } else {
+          Swal.fire('Informacion', res?.mensaje ?? 'No se puede realizar el llamado.', 'info');
+        }
+      },
+      error: (err: any) => {
+        const msg =
+          err?.error?.mensaje ??
+          err?.message ??
+          (typeof err === 'string' ? err : 'Error realizando el llamado.');
+        Swal.fire('Error', msg, 'error');
+      }
+    });
   }
 
   abrirModal(item: any, template: any): void {
@@ -508,11 +664,19 @@ export class VistahcComponent {
   }
 
   openZoom(link: string): void {
-    // tu implementación existente
+    if (!link) {
+      Swal.fire('Dato faltante', 'No hay link para abrir.', 'info');
+      return;
+    }
+    window.open(link, '_blank');
   }
 
   abrirZoom(link: string): void {
-    // tu implementación existente
+    if (!link) {
+      Swal.fire('Dato faltante', 'No hay link para abrir.', 'info');
+      return;
+    }
+    window.open(link, '_blank');
   }
 
   cerraModalLlamada(): void {

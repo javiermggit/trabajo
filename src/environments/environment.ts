@@ -25,7 +25,7 @@ export const environment = {
   
 
   // URLs de APIs
-vistaCI: '/delta_test/cisign', 
+  vistaCI: '/everest_test/cisign', 
 URLHc: "/APIHCHealth",
 URLParametrizacion: "/APIParametrizacionGeneralHealth",
 URLPaciente: "/APIPacienteV2",
@@ -37,22 +37,23 @@ UrlLogin: "/EverHealth",
 UrlPrestador: "https://appportal.everestintelligent.com/APIPrestadoresHealth",
 UrlTeleconsulta: "https://appcita.viva1a.com.co:8051/teleconsulta",
 URLExtension: "https://appcita.viva1a.com.co:8051/Directorioclicktocallapi/api",
-UrlCIsign: "/apidelta_test/APIConsentimientoInformado/api",
+UrlCIsign: "/APIConsentimientoInformado/api",
   // Vista externa de Historia Clínica (configurar según despliegue)
   vistaHC: "",
-URLApiCorreo: "/apidelta_test/APIEnvioCorreo/api",
-URLWhatsapp:"/apidelta_test/ApiWhatsapp",
+URLApiCorreo: "/APIEnvioCorreo/api",
+URLWhatsapp:"/ApiWhatsapp",
 UrlIntegracionDigiturno: "/ApiIntegarcionEverestDigiturnoPrueba/api",
 UrlParametrizacionRecurso: "/APIParametrizacionRecurso",
 UrlAgendamiento: "",
 IdPais:1,
-UrlPdf: "/apidelta_test/ApiImpresionUnificada/api/Prints",
-tituloCliente:'DELTA',
+UrlPdf: "/ApiImpresionUnificada/api/Prints",
+
 numeroCliente:'1',
-telefonocliente:'5756475610',
- //numeroCliente:'1',
-plantillaCliente:'c2e0eac5-bfd5-4f3c-96a4-5e3e73d7e7ea',
-apiReal: 'https://everestintelligent.com:444/apidelta_test' // o tu servidor real
+tituloCliente:'Viva1A Ips',
+telefonocliente:'573011347279',
+plantillaCliente:'a88bc7e7-24eb-474b-9f0c-0d56b793b407',
+apiReal: 'http://172.27.83.196:84' // o tu servidor real
+
 
 
 };

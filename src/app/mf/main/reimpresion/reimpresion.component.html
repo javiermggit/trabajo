@@ -1,4 +1,5 @@
 <div class="card-custom reimp-onecard">
+  <div class="reimp-onecard-inner">
 <!--   <header class="reimp-page-header">
     <h1 class="reimp-page-title">Reimpresiones</h1>
   </header> -->
@@ -8,7 +9,7 @@
 
 <div class="grid reimp-filters-wrapper">
   <div class="col-12">
-    <div class="reimp-filter-card">
+    <div class="card-custom reimp-filter-card">
       <div class="p-4">
        
 
@@ -19,7 +20,7 @@
    <span class="p-float-label">
       <p-dropdown
         inputId="tipoDoc"
-        [appendTo]="null"
+        appendTo="body"
         [autoZIndex]="true"
         [baseZIndex]="10000"
         panelStyleClass="reimp-dropdown-panel"
@@ -29,8 +30,19 @@
         optionValue="valor"
         placeholder="Ninguna opción seleccionada"
         [filter]="true"
+        [resetFilterOnHide]="true"
+        (onFilter)="onProfesionalFilter($event)"
+        (onHide)="onProfesionalHide()"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="38"
+        (onFilter)="onProfesionalFilter($event)"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="38"
+        [virtualScroll]="true"
+        [virtualScrollItemSize]="38"
         [(ngModel)]="tipo"
         [showClear]="true"
+        (onShow)="ajustarPanelDropdown('tipoDoc')"
         styleClass="w-full">
       </p-dropdown>
       <label for="tipoDoc">Tipo de documento <span class="required-asterisk">*</span></label>
@@ -55,7 +67,7 @@
     <span class="p-float-label">
       <p-dropdown
         inputId="especialidad"
-        [appendTo]="null"
+        appendTo="body"
         [autoZIndex]="true"
         [baseZIndex]="10000"
         panelStyleClass="reimp-dropdown-panel"
@@ -67,6 +79,7 @@
         [(ngModel)]="especialidad"
         [filter]="true"
         [showClear]="true"
+        (onShow)="ajustarPanelDropdown('especialidad')"
         styleClass="w-full">
       </p-dropdown>
       <label for="especialidad">Especialidad</label>
@@ -75,10 +88,13 @@
 
   <!-- Médico (opcional) -->
   <div class="field col-12 md:col-6 lg:col-4">
-    <label class="reimp-field-label" for="filtroMedico">Profesional</label>
+    <label class="reimp-field-label" for="filtroMedico">
+      Profesional <i *ngIf="loadingProfesionales" class="pi pi-spin pi-spinner" style="font-size:0.9rem"></i>
+    </label>
       <p-dropdown
         inputId="filtroMedico"
         [options]="profesionalesOptions"
+        [disabled]="loadingProfesionales"
         optionLabel="label"
         optionValue="value"
         [(ngModel)]="filtroProfesional"
@@ -86,7 +102,21 @@
         [filter]="true"
       placeholder="Ninguna opción seleccionada"
         (onChange)="aplicarFiltrosLocalesHC()"
+        (onShow)="ajustarPanelDropdown('filtroMedico')"
         styleClass="w-full">
+        <ng-template pTemplate="footer">
+          <div class="p-2 flex align-items-center justify-content-between" *ngIf="!profesionalFilterValue">
+            <small>Mostrando {{ profesionalesOptions.length }} de {{ totalProfesionales }}</small>
+            <button
+              pButton
+              type="button"
+              class="p-button-text p-button-sm"
+              label="Ver más"
+              (click)="verMasProfesionales()"
+              [disabled]="profesionalesOptions.length >= totalProfesionales">
+            </button>
+          </div>
+        </ng-template>
     </p-dropdown>
   </div>
 
@@ -181,7 +211,7 @@
 
   <!-- HISTORIAS CLÍNICAS -->
   <div class="col-12">
-    <div class="reimp-section">
+    <div class="card-custom">
       <div class="p-4">
 
         <div class="mb-3">
@@ -300,7 +330,7 @@
 
   <!-- NOTAS ADMINISTRATIVAS -->
   <div class="col-12 mt-4">
-    <div class="reimp-section">
+    <div class="card-custom">
       <div class="p-4">
 
         <h2 class="reimp-section-title mb-3">Notas Administrativas</h2>
@@ -371,7 +401,7 @@
 
   <!-- HC OTROS SISTEMAS -->
   <div class="col-12 mt-4">
-    <div class="reimp-section">
+    <div class="card-custom">
       <div class="p-4">
 
         <h2 class="reimp-section-title mb-3">Historia Clínica Otros Sistemas</h2>
@@ -437,4 +467,5 @@
 
  
  
+  </div>
 </div>

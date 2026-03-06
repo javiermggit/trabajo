@@ -295,7 +295,8 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   overflow: hidden;
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
 }
 
 /* Header */
@@ -664,6 +665,8 @@
 
 .table-responsive {
   overflow-x: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .reimp-state {
@@ -767,16 +770,50 @@
 :host ::ng-deep .p-dropdown-panel   { z-index: 99999 !important; }
 :host ::ng-deep .p-component-overlay{ z-index: 99998 !important; }
 :host ::ng-deep .reimp-dropdown-panel {
-  min-width: auto !important;
-  width: auto !important;
+  /* Mantener comportamiento default de PrimeNG (ancho del trigger) */
   max-width: 100vw;
-  position: absolute !important;
   z-index: 999999 !important;
+}
+
+/* Dropdown: input de filtro (panel) */
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-header {
+  padding: 0.5rem 0.6rem;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter-container {
+  width: 100%;
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter {
+  height: 34px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: none !important;
+  outline: none !important;
+  padding-right: 2.2rem;
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter:focus {
+  border-color: var(--navy-mid);
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+:host ::ng-deep .reimp-dropdown-panel .p-dropdown-filter-icon {
+  right: 0.75rem;
+  color: #64748b;
 }
 
 /* ───────── RESPONSIVE ───────── */
 @media (max-width: 992px) {
   .reimp-filters-wrapper { position: static; }
+
+  :host ::ng-deep .reimp-table .mat-column-paciente {
+    min-width: 300px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -785,6 +822,14 @@
   .filter-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .filter-button {
+    width: 100%;
+  }
+
+  .btn-consult {
+    width: 100%;
   }
 
   :host ::ng-deep .reimp-table .mat-mdc-header-cell,
@@ -807,6 +852,12 @@
   .reimp-pager { justify-content: space-between; }
 
   .icon-btn { width: 30px; height: 30px; }
+}
+
+@media (max-width: 480px) {
+  :host ::ng-deep .reimp-table .mat-column-paciente {
+    min-width: 220px;
+  }
 }
 
 /* ───────── ACORDEÓN ───────── */
@@ -1157,4 +1208,13 @@
 .text-danger {
   color: #dc3545; /* rojo */
   font-weight: bold; /* opcional */
+}
+
+/* VistaHC: botones sin sombra */
+:host ::ng-deep .btn-consult,
+:host ::ng-deep .reimp-btn,
+:host ::ng-deep .reimp-btn.p-button,
+:host ::ng-deep .p-button,
+:host ::ng-deep .icon-btn {
+  box-shadow: none !important;
 }

@@ -32,18 +32,22 @@ export class VistahcService {
    public viewState: VistahcViewState | null = null;
    private _baseUrlHC: string;
    private _baseUrlPaciente: string;
+   private _baseUrlparametrizacion:string;
   constructor(
      private http: HttpClient,
        
    ) {
      this._baseUrlPaciente = environment.URLPaciente;
-     this._baseUrlHC = environment.URLHc;     
+     this._baseUrlHC = environment.URLHc;   
+    this._baseUrlparametrizacion = environment.URLParametrizacion;   
+     
+
     
    }
  
 
   ObtenerEspecialidad() {
-    return this.http.get<Array<Especialidad>>(this._baseUrlHC + '/api/Historicos/EspecialidadesImpresion', { responseType: "json" });
+    return this.http.get<Array<Especialidad>>(this._baseUrlparametrizacion + '/api/ParEspecialidades', { responseType: "json" });
   }
 
    ObtenerPacientePorId(idPaciente) {

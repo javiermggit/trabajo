@@ -21,6 +21,9 @@ export class ReimpresionComponent implements OnInit {
   @ViewChild('fechaRangoCalendar') fechaRangoCalendar: any;
   private readonly profesionalFallbackValue = '__medico_prueba__';
   private readonly profesionalFallbackLabel = 'Medico Prueba';
+  private readonly profesionalesInicial = 40;
+  private readonly profesionalesPaso = 200;
+  private profesionalLogueadoOption: { label: string; value: string } | null = null;
   filtersFormGroup = new FormGroup({
     dateRangeControl: new FormControl<Date[] | null>(null),
   });
@@ -45,6 +48,11 @@ export class ReimpresionComponent implements OnInit {
   hcDataOriginal: Reimpresion[] = [];
   notasDataOriginal: any[] = [];
   otrosDataOriginal: any[] = [];
+  loadingProfesionales: boolean = false;
+  private catalogoProfesionalesOptions: Array<{ label: string; value: string }> = [];
+  private profesionalesAllOptions: Array<{ label: string; value: string }> = [];
+  profesionalesVisibleLimit: number = this.profesionalesInicial;
+  profesionalFilterValue: string = '';
   profesionalesOptions: Array<{ label: string; value: string }> = [];
   filtroProfesional: string | null = null;
   filtroFechaRango: Date[] | null = null;
@@ -76,9 +84,56 @@ export class ReimpresionComponent implements OnInit {
 
   ngOnInit(): void {
     this.setProfesionalFallback();
+    this.consultarprofesionales();
     this.rs.ObtenerListadoTipoDocumento();
     this.inicializarTipoDocumentoPorDefecto();
-    this.consultarEspecialidad(); 
+    this.consultarEspecialidad();
+  }
+
+  ajustarPanelDropdown(inputId: string): void {
+    try {
+      const doc = this.document as Document;
+      const triggerNode = doc?.getElementById(inputId) as HTMLElement | null;
+      const triggerEl = (triggerNode?.closest?.('.p-dropdown') as HTMLElement | null) ?? triggerNode;
+      if (!triggerEl) {
+        return;
+      }
+
+      const panels = Array.from(
+        doc.querySelectorAll('.p-dropdown-panel.reimp-dropdown-panel')
+      ) as HTMLElement[];
+      const panel = panels[panels.length - 1];
+      if (!panel) {
+        return;
+      }
+
+      const rect = triggerEl.getBoundingClientRect();
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const gutter = 12;
+
+      const width = Math.min(Math.max(rect.width, 260), viewportW - gutter * 2);
+      const left = Math.min(Math.max(rect.left, gutter), viewportW - width - gutter);
+      const top = rect.bottom + 4;
+
+      panel.style.width = `${width}px`;
+      panel.style.maxWidth = `${viewportW - gutter * 2}px`;
+      panel.style.left = `${left + window.scrollX}px`;
+      panel.style.right = 'auto';
+      panel.style.top = `${top + window.scrollY}px`;
+      panel.style.bottom = 'auto';
+
+      const headerReserve = panel.querySelector('.p-dropdown-header') ? 62 : 18;
+      const availableBelow = viewportH - rect.bottom - gutter;
+      const wrapperMax = Math.max(80, Math.min(260, availableBelow - headerReserve));
+
+      const wrapper = panel.querySelector('.p-dropdown-items-wrapper') as HTMLElement | null;
+      if (wrapper) {
+        wrapper.style.maxHeight = `${wrapperMax}px`;
+      }
+    } catch {
+      // no-op
+    }
   }
   
 
@@ -152,7 +207,8 @@ export class ReimpresionComponent implements OnInit {
       this.rs.reimpresion = new Array<Reimpresion>();
       this.dataSource = new MatTableDataSource(this.rs.reimpresion);
       this.hcDataOriginal = [];
-      this.setProfesionalFallback();
+      this.filtroProfesional = null;
+      this.construirOpcionesProfesionales();
       
       this.loadingReimpresion = false;
       if (error.error.error == undefined) {
@@ -264,7 +320,7 @@ public consultarPaciente() {
 
   public consultarEspecialidad() {
       //this.loadingReimpresion = true;
-        this.medicoServices.obtenerListadoTipo().subscribe((x) => {    
+        this.rs.ObtenerEspecialidad().subscribe((x) => {    
   
         this.rs.listadoEspecialidad = x
         //this.loadingReimpresion = false;
@@ -278,6 +334,42 @@ public consultarPaciente() {
         }
         //console.log(error)
       })
+    }
+
+     public async consultarprofesionales() {
+      // NO cargar el combo desde /api/ParProfesionales.
+      // Se toma el profesional del usuario logueado (cookie UsuarioMedico).
+      this.loadingProfesionales = true;
+
+      try {
+        const resp = await firstValueFrom(this.medicoServices.obtenerDatosLoginByLogin$());
+        const nombres = String(resp?.nombres ?? resp?.Nombres ?? '').trim();
+        const apellidos = String(resp?.apellidos ?? resp?.Apellidos ?? '').trim();
+        const label = `${nombres} ${apellidos}`.replace(/\s+/g, ' ').trim();
+
+        if (label) {
+          this.profesionalLogueadoOption = { label, value: label };
+          this.catalogoProfesionalesOptions = [this.profesionalLogueadoOption];
+        } else {
+          this.profesionalLogueadoOption = null;
+          this.catalogoProfesionalesOptions = [];
+        }
+
+        // Ya no usamos el listado completo de profesionales.
+        this.rs.listadoprofesinal = [];
+
+        this.loadingProfesionales = false;
+        this.construirOpcionesProfesionales();
+      } catch (error: any) {
+        this.loadingProfesionales = false;
+        this.profesionalLogueadoOption = null;
+        this.catalogoProfesionalesOptions = [];
+        this.rs.listadoprofesinal = [];
+        this.construirOpcionesProfesionales();
+
+        const msg = error?.error?.mensaje ?? error?.error?.error ?? 'No fue posible cargar el profesional logueado';
+        Swal.fire('Advertencia!!', msg, 'error');
+      }
     }
 
  imprimirHistoriaClinicaPDF(row: Reimpresion) {
@@ -395,7 +487,7 @@ private construirUrlHistoria(row: Reimpresion): string {
 
   this.loadingImpresion = true;
 //pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
-  this.rs.abrircronica('unified-morbidity', clientId, 2)
+  this.rs.abrircronica('unified-morbidity', clientId, pacienteId)
     .subscribe({
       next: (blob) => {
 
@@ -441,7 +533,7 @@ private construirUrlHistoria(row: Reimpresion): string {
 
   this.loadingImpresion = true;
 //pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
-  this.rs.abrirunificada('unified-morbidity', clientId, 2)
+  this.rs.abrirunificada('unified-morbidity', clientId, pacienteId)
     .subscribe({
       next: (blob) => {
 
@@ -597,33 +689,84 @@ private construirUrlHistoria(row: Reimpresion): string {
     this.limpiarDataSources();
     // Mantiene la opción quemada visible, pero sin selección aplicada.
     this.filtroProfesional = null;
+    this.construirOpcionesProfesionales();
   }
 
   private construirOpcionesProfesionales() {
-    const allRows = [...this.hcDataOriginal];
-    const unicos = Array.from(new Set(
-      allRows
-        .map(item => this.obtenerNombreProfesional(item))
-        .filter(Boolean)
-    ));
-
-    this.profesionalesOptions = unicos
-      .sort((a, b) => a.localeCompare(b))
-      .map(nombre => ({ label: nombre, value: nombre }));
-
-    if (this.profesionalesOptions.length === 0) {
-      this.setProfesionalFallback();
+    if (this.profesionalLogueadoOption) {
+      this.profesionalesAllOptions = [this.profesionalLogueadoOption];
+      this.profesionalesVisibleLimit = 1;
+      this.profesionalFilterValue = '';
+      this.actualizarOpcionesProfesionalesVisibles();
+      return;
     }
 
-    const existeSeleccion = this.profesionalesOptions.some(o => o.value === this.filtroProfesional);
+    const allRows: any[] = [
+      ...(this.hcDataOriginal ?? []),
+      ...(this.notasDataOriginal ?? []),
+      ...(this.otrosDataOriginal ?? []),
+    ];
+
+    const nombresEnTablas = allRows
+      .map(item => this.obtenerNombreProfesional(item))
+      .filter(Boolean);
+
+    const optionsByKey = new Map<string, { label: string; value: string }>();
+
+    for (const opt of (this.catalogoProfesionalesOptions ?? [])) {
+      const key = this.normalizarTexto(opt.value);
+      if (key && !optionsByKey.has(key)) {
+        optionsByKey.set(key, opt);
+      }
+    }
+
+    for (const nombre of nombresEnTablas) {
+      const value = String(nombre).trim();
+      const key = this.normalizarTexto(value);
+      if (key && !optionsByKey.has(key)) {
+        optionsByKey.set(key, { label: value, value });
+      }
+    }
+
+    const options = Array.from(optionsByKey.values());
+
+    if (options.length === 0) {
+      this.profesionalesAllOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
+    } else if (nombresEnTablas.length === 0) {
+      this.profesionalesAllOptions = (this.catalogoProfesionalesOptions.length > 0
+        ? this.catalogoProfesionalesOptions
+        : options).sort((a, b) => a.label.localeCompare(b.label));
+    } else {
+      this.profesionalesAllOptions = options.sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    if (this.profesionalesVisibleLimit <= 0) {
+      this.profesionalesVisibleLimit = this.profesionalesInicial;
+    }
+
+    if (this.profesionalesVisibleLimit > this.profesionalesAllOptions.length) {
+      this.profesionalesVisibleLimit = this.profesionalesAllOptions.length;
+    }
+
+    this.actualizarOpcionesProfesionalesVisibles();
+
+    const existeSeleccion = !!this.filtroProfesional
+      && this.filtroProfesional !== this.profesionalFallbackValue
+      && this.profesionalesAllOptions.some(o =>
+        this.normalizarTexto(o.value) === this.normalizarTexto(this.filtroProfesional!)
+      );
+
     if (!existeSeleccion) {
-      this.filtroProfesional = this.profesionalesOptions.length > 0 ? this.profesionalesOptions[0].value : null;
+      this.filtroProfesional = null;
     }
   }
 
   private setProfesionalFallback() {
-    this.profesionalesOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
-    this.filtroProfesional = this.profesionalFallbackValue;
+    this.profesionalesAllOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
+    this.profesionalesVisibleLimit = this.profesionalesInicial;
+    this.profesionalFilterValue = '';
+    this.actualizarOpcionesProfesionalesVisibles();
+    this.filtroProfesional = null;
   }
 
   private inicializarTipoDocumentoPorDefecto(intento: number = 0): void {
@@ -652,7 +795,8 @@ private construirUrlHistoria(row: Reimpresion): string {
 
     if (this.filtroProfesional) {
       if (this.filtroProfesional !== this.profesionalFallbackValue) {
-        filtrado = filtrado.filter(item => this.obtenerNombreProfesional(item) === this.filtroProfesional);
+        const filtroKey = this.normalizarTexto(this.filtroProfesional);
+        filtrado = filtrado.filter(item => this.normalizarTexto(this.obtenerNombreProfesional(item)) === filtroKey);
       }
     }
 
@@ -682,6 +826,74 @@ private construirUrlHistoria(row: Reimpresion): string {
     return nombre
       .replace(/\s+/g, ' ')
       .replace(/^medico\b/i, 'Médico');
+  }
+
+  private normalizarTexto(value: string): string {
+    return String(value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  get totalProfesionales(): number {
+    return this.profesionalesAllOptions?.length ?? 0;
+  }
+
+  verMasProfesionales(): void {
+    const total = this.totalProfesionales;
+    if (!total) {
+      return;
+    }
+    this.profesionalesVisibleLimit = Math.min(total, this.profesionalesVisibleLimit + this.profesionalesPaso);
+    this.actualizarOpcionesProfesionalesVisibles();
+  }
+
+  onProfesionalFilter(event: any): void {
+    this.profesionalFilterValue = String(event?.filter ?? '');
+    this.actualizarOpcionesProfesionalesVisibles();
+  }
+
+  onProfesionalHide(): void {
+    if (this.profesionalFilterValue) {
+      this.profesionalFilterValue = '';
+      this.actualizarOpcionesProfesionalesVisibles();
+    }
+  }
+
+  private actualizarOpcionesProfesionalesVisibles(): void {
+    const all = this.profesionalesAllOptions ?? [];
+    const filtro = String(this.profesionalFilterValue ?? '').trim();
+
+    let visibles: Array<{ label: string; value: string }>;
+
+    if (filtro) {
+      const filtroKey = this.normalizarTexto(filtro);
+      visibles = all.filter(o => this.normalizarTexto(o.label).includes(filtroKey));
+
+      // Evita renderizar miles de items si el filtro es muy amplio.
+      if (visibles.length > 300) {
+        visibles = visibles.slice(0, 300);
+      }
+    } else {
+      const limit = Math.max(0, this.profesionalesVisibleLimit ?? this.profesionalesInicial);
+      visibles = all.slice(0, limit);
+    }
+
+    // Garantiza que la selección actual siempre exista en el listado visible.
+    if (this.filtroProfesional) {
+      const keySel = this.normalizarTexto(this.filtroProfesional);
+      const existsVisible = visibles.some(o => this.normalizarTexto(o.value) === keySel);
+      if (!existsVisible) {
+        const selected = all.find(o => this.normalizarTexto(o.value) === keySel);
+        if (selected) {
+          visibles = [selected, ...visibles];
+        }
+      }
+    }
+
+    this.profesionalesOptions = visibles;
   }
 
   private obtenerFechaItem(item: any): Date | null {
@@ -865,11 +1077,13 @@ if (!responseAsociado) {
 
 // Enviamos WhatsApp
 await firstValueFrom(
+  //this.rs.sendWhatsapp(linkPdf, responseAsociado,row);
   this.rs.sendWhatsapp(linkPdf, responseAsociado,row)
    
 );
     Swal.fire('Envío realizado', `WhatsApp enviado correctamente (${tipoTexto})`, 'success');
   } catch {
+    
     this.enviarFallbackWhatsapp(destino, mensaje, tipoTexto);
   }
 }

@@ -31,6 +31,7 @@ export class ReimpresionService {
   public ListadoTipoDocumento: Array<{ descripcion: string; id: any; valor: any }> = [];
   private _baseUrlHC: string;
   public listadoEspecialidad: Array<Especialidad> = [];
+   public listadoprofesinal: Array<Profesional>;
   reimpresion: Array<Reimpresion> = [];
   listadonotas: Array<any> = [];
   listadoHcIntegra: Array<any> = [];
@@ -102,7 +103,7 @@ export class ReimpresionService {
   pacienteId: number
 ): Observable<Blob> {
 
-  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}?programs=pes`;
+  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}?program=pes`;
 
   return this.http.get(url, {
     responseType: 'blob',
@@ -190,7 +191,7 @@ const fechaFormateada = row.fecha.replace('T', ' ').split('.')[0];
         hc?.nombre ?? 'Paciente',
         row?.especialidad ?? 'Historia Clínica',
         fechaFormateada ?? '01/11/2025 14:25',
-        link
+        link ?? 'https://www.google.com'
       ]
     }
   };
@@ -233,9 +234,12 @@ const fechaFormateada = row.fecha.replace('T', ' ').split('.')[0];
   }
 
   ObtenerEspecialidad() {
-    return this.http.get<Array<Especialidad>>(this._baseUrlHC + '/api/Historicos/EspecialidadesImpresion', { responseType: "json" });
+    return this.http.get<Array<Especialidad>>(this._baseUrl + '/api/ParEspecialidades', { responseType: "json" });
   }
-  
+
+  Obtenerprofesionales() {
+    return this.http.get<Array<Profesional>>(this._baseUrl + '/api/ParProfesionales', { responseType: "json" });
+  }
 
   private resolveSourceList(response: any): Array<any> {
     if (Array.isArray(response)) {
@@ -315,11 +319,18 @@ const fechaFormateada = row.fecha.replace('T', ' ').split('.')[0];
     `${this._baseUrlHC}/api/Historicos/ConsultasPorDocumentoPaciente`,
     { params }
   );
-}
+} 
 
-  ObtenerPaciente(citaid: string) {
+
+  /* ObtenerPaciente(citaid: string) {
+   return this.http.get<VMPaciente>(this._baseUrlHC + '/api/Paciente/CargarDatosPacienteByCitaId/' + citaid, { responseType: "json" });
+  } */
+
+  //sirve
+  ObtenerPaciente(citaid) {
     return this.http.get<VMPaciente>(this._baseUrlHC + '/api/Historicos/ObtenerDatosPacienteReimpreision?CitaId=' + citaid, { responseType: "json" });
   }
+
 
    Obtenercitadet(citaid: string) {
     return this.http.get(this._baseUrlHC + '/api/Historicos/ObtenerDatosCita?CitaId=' + citaid, { responseType: "json" });
