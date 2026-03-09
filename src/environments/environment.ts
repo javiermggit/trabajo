@@ -19,7 +19,7 @@
 
 export const environment = {
   production: false,
-  title: 'Ordenamientos',
+  title: 'Reimpresion',
   env: 'Local',
   version: '3.0.0-beta',
   
