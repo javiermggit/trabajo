@@ -237,9 +237,18 @@ const fechaFormateada = row.fecha.replace('T', ' ').split('.')[0];
     return this.http.get<Array<Especialidad>>(this._baseUrl + '/api/ParEspecialidades', { responseType: "json" });
   }
 
-  Obtenerprofesionales() {
-    return this.http.get<Array<Profesional>>(this._baseUrl + '/api/ParProfesionales', { responseType: "json" });
-  }
+	  Obtenerprofesionales() {
+	    return this.http.get<Array<Profesional>>(this._baseUrl + '/api/ParProfesionales', { responseType: "json" });
+	  }
+
+	  ObtenerProfesionalesPorTermino(termino: string): Observable<Array<Profesional>> {
+	    const params = new HttpParams().set('termino', String(termino ?? '').trim());
+	    return this.http
+	      .get<any>(`${this._baseUrl}/api/ParProfesionales/GetParProfesionalPorTermino`, { params })
+	      .pipe(
+	        map((response: any) => this.resolveSourceList(response) as Array<Profesional>)
+	      );
+	  }
 
   private resolveSourceList(response: any): Array<any> {
     if (Array.isArray(response)) {

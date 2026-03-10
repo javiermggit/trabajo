@@ -80,38 +80,32 @@
   </div>
 
   <!-- Médico (opcional) -->
-  <div class="field col-12 md:col-6 lg:col-4">
-    <label class="reimp-field-label" for="filtroMedico">
-      Profesional <i *ngIf="loadingProfesionales" class="pi pi-spin pi-spinner" style="font-size:0.9rem"></i>
-    </label>
-      <p-dropdown
-        inputId="filtroMedico"
-        [options]="profesionalesOptions"
-        [disabled]="loadingProfesionales"
-        optionLabel="label"
-        optionValue="value"
-        [(ngModel)]="filtroProfesional"
-        [showClear]="true"
-        [filter]="true"
-      placeholder="Ninguna opción seleccionada"
-        (onChange)="aplicarFiltrosLocalesHC()"
-        (onShow)="ajustarPanelDropdown('filtroMedico')"
-        styleClass="w-full">
-        <ng-template pTemplate="footer">
-          <div class="p-2 flex align-items-center justify-content-between" *ngIf="!profesionalFilterValue">
-            <small>Mostrando {{ profesionalesOptions.length }} de {{ totalProfesionales }}</small>
-            <button
-              pButton
-              type="button"
-              class="p-button-text p-button-sm"
-              label="Ver más"
-              (click)="verMasProfesionales()"
-              [disabled]="profesionalesOptions.length >= totalProfesionales">
-            </button>
-          </div>
-        </ng-template>
-    </p-dropdown>
-  </div>
+	  <div class="field col-12 md:col-6 lg:col-4">
+	    <label class="reimp-field-label" for="filtroMedico">
+	      Profesional <i *ngIf="loadingProfesionales" class="pi pi-spin pi-spinner" style="font-size:0.9rem"></i>
+	    </label>
+	    <p-dropdown
+	      #profesionalDropdown
+	      inputId="filtroMedico"
+	      appendTo="body"
+	      [autoZIndex]="true"
+	      [baseZIndex]="10000"
+	      panelStyleClass="reimp-dropdown-panel"
+	      [scrollHeight]="'260px'"
+	      [options]="profesionalesOptions"
+	      optionLabel="label"
+	      optionValue="value"
+	      [(ngModel)]="filtroProfesional"
+	      [showClear]="true"
+	      [filter]="true"
+	      filterPlaceholder="Buscar (mín. 3 letras)"
+	      (onFilter)="onProfesionalFilter($event)"
+	      (onChange)="aplicarFiltrosLocalesHC()"
+	      (onShow)="onProfesionalShow(); ajustarPanelDropdown('filtroMedico')"
+	      (onHide)="onProfesionalHide()"
+	      styleClass="w-full">
+	    </p-dropdown>
+	  </div>
 
   <!-- Rango de fechas (opcional) -->
   <div class="field col-12 md:col-6 lg:col-4">

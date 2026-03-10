@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, OnInit,ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ReimpresionService } from './reimpresion.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT } from '@angular/common';
@@ -9,7 +9,7 @@ import { NotaAdministrativaService } from 'src/app/nota-administrativa/nota-admi
 import { Router } from '@angular/router';
 import { EnviarPlantillaCorreo } from 'src/app/Modelos/whatsapp';
 import { environment } from 'src/environments/environment';
-import { firstValueFrom } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, finalize, firstValueFrom, map, of, Subject, switchMap, takeUntil, timeout } from 'rxjs';
 import { MedicoService } from 'src/app/medico/medico.service';
 
 @Component({
@@ -17,13 +17,19 @@ import { MedicoService } from 'src/app/medico/medico.service';
   templateUrl: './reimpresion.component.html',
   styleUrls: ['./reimpresion.component.css']
 })
-export class ReimpresionComponent implements OnInit {
+export class ReimpresionComponent implements OnInit, OnDestroy {
   @ViewChild('fechaRangoCalendar') fechaRangoCalendar: any;
+  @ViewChild('profesionalDropdown') profesionalDropdown: any;
   private readonly profesionalFallbackValue = '__medico_prueba__';
   private readonly profesionalFallbackLabel = 'Medico Prueba';
   private readonly profesionalesInicial = 40;
   private readonly profesionalesPaso = 200;
+  private readonly profesionalesMaxApi = 50;
   private profesionalLogueadoOption: { label: string; value: string } | null = null;
+  private readonly profesionalTermino$ = new Subject<string>();
+  private readonly destroy$ = new Subject<void>();
+  private profesionalSearchActivo: boolean = false;
+  private profesionalDropdownAbierto: boolean = false;
   filtersFormGroup = new FormGroup({
     dateRangeControl: new FormControl<Date[] | null>(null),
   });
@@ -84,23 +90,30 @@ export class ReimpresionComponent implements OnInit {
 
   ngOnInit(): void {
     this.setProfesionalFallback();
+    this.configurarAutocompleteProfesionales();
     this.consultarprofesionales();
     this.rs.ObtenerListadoTipoDocumento();
     this.inicializarTipoDocumentoPorDefecto();
     this.consultarEspecialidad();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.profesionalTermino$.complete();
+  }
+
   ajustarPanelDropdown(inputId: string): void {
     try {
       const doc = this.document as Document;
       const triggerNode = doc?.getElementById(inputId) as HTMLElement | null;
-      const triggerEl = (triggerNode?.closest?.('.p-dropdown') as HTMLElement | null) ?? triggerNode;
+      const triggerEl = (triggerNode?.closest?.('.p-dropdown, .p-autocomplete') as HTMLElement | null) ?? triggerNode;
       if (!triggerEl) {
         return;
       }
 
       const panels = Array.from(
-        doc.querySelectorAll('.p-dropdown-panel.reimp-dropdown-panel')
+        doc.querySelectorAll('.reimp-dropdown-panel')
       ) as HTMLElement[];
       const panel = panels[panels.length - 1];
       if (!panel) {
@@ -127,18 +140,105 @@ export class ReimpresionComponent implements OnInit {
       const availableBelow = viewportH - rect.bottom - gutter;
       const wrapperMax = Math.max(80, Math.min(260, availableBelow - headerReserve));
 
-      const wrapper = panel.querySelector('.p-dropdown-items-wrapper') as HTMLElement | null;
+      const wrapper =
+        (panel.querySelector('.p-dropdown-items-wrapper') as HTMLElement | null)
+        ?? (panel.querySelector('.p-autocomplete-items-wrapper') as HTMLElement | null);
       if (wrapper) {
         wrapper.style.maxHeight = `${wrapperMax}px`;
       }
-    } catch {
-      // no-op
-    }
-  }
-  
+	  } catch {
+	      // no-op
+	    }
+	  }
 
-  //
-   consultarDatoGenerales() {
+	  private configurarAutocompleteProfesionales(): void {
+	    this.profesionalTermino$
+	      .pipe(
+	        debounceTime(350),
+	        distinctUntilChanged(),
+	        switchMap((termino) => {
+	          const clean = String(termino ?? '').trim();
+	          if (clean.length < 3) {
+	            return of([]);
+	          }
+
+	          this.loadingProfesionales = true;
+	          return this.rs.ObtenerProfesionalesPorTermino(clean).pipe(
+	            timeout({ first: 8000 }),
+	            catchError(() => of([])),
+	            finalize(() => {
+	              this.loadingProfesionales = false;
+	            })
+	          );
+	        }),
+	        map((listado: any[]) => this.mapProfesionalesToOptions(listado)),
+	        takeUntil(this.destroy$)
+	      )
+		      .subscribe((options) => {
+		        this.catalogoProfesionalesOptions = options;
+		        this.construirOpcionesProfesionales();
+
+		        if (this.profesionalDropdownAbierto && (this.profesionalFilterValue?.length ?? 0) >= 3) {
+		          setTimeout(() => {
+		            try {
+		              this.profesionalDropdown?.show?.();
+		              this.profesionalDropdown?.focusFilter?.();
+		              this.ajustarPanelDropdown('filtroMedico');
+		            } catch {
+		              // no-op
+		            }
+		          }, 0);
+		        }
+		      });
+		  }
+
+
+	  private sanitizarTerminoProfesional(value: string): string {
+	    return String(value ?? '')
+	      .replace(/[^A-Za-zÀ-ÿÑñ\s]/g, ' ')
+	      .replace(/\s+/g, ' ')
+	      .trim();
+	  }
+
+	  private mapProfesionalesToOptions(listado: any[]): Array<{ label: string; value: string }> {
+	    const out: Array<{ label: string; value: string }> = [];
+	    const seen = new Set<string>();
+
+	    for (const item of (listado ?? [])) {
+	      const nombres = String(item?.nombres ?? item?.Nombres ?? item?.nombre ?? item?.Nombre ?? '').trim();
+	      const apellidos = String(item?.apellidos ?? item?.Apellidos ?? '').trim();
+	      const rawLabel = String(
+	        `${nombres} ${apellidos}`.replace(/\s+/g, ' ').trim()
+	          || item?.nombreCompleto
+	          || item?.NombreCompleto
+	          || item?.descripcion
+	          || item?.Descripcion
+	          || ''
+	      ).trim();
+
+	      if (!rawLabel) {
+	        continue;
+	      }
+
+	      const key = this.normalizarTexto(rawLabel);
+	      if (!key || seen.has(key)) {
+	        continue;
+	      }
+
+	      seen.add(key);
+	      out.push({ label: rawLabel, value: rawLabel });
+
+	      if (out.length >= this.profesionalesMaxApi) {
+	        break;
+	      }
+	    }
+
+	    return out;
+	  }
+	  
+	
+	  //
+	   consultarDatoGenerales() {
     if (this.tipo != undefined && this.identificacion != '' && this.identificacion != undefined) {
       this.limpiarDataSources();
       this.identificacionNoTemporal = this.identificacion;
@@ -205,12 +305,12 @@ export class ReimpresionComponent implements OnInit {
       this.loadingHcTable = false;
     }, (error) => {
       this.rs.reimpresion = new Array<Reimpresion>();
-      this.dataSource = new MatTableDataSource(this.rs.reimpresion);
-      this.hcDataOriginal = [];
-      this.filtroProfesional = null;
-      this.construirOpcionesProfesionales();
-      
-      this.loadingReimpresion = false;
+	      this.dataSource = new MatTableDataSource(this.rs.reimpresion);
+	      this.hcDataOriginal = [];
+	      this.filtroProfesional = null;
+	      this.construirOpcionesProfesionales();
+	      
+	      this.loadingReimpresion = false;
       if (error.error.error == undefined) {
         this.errorHcTable = error?.error?.mensaje ?? 'Error al consultar historias clínicas';
         Swal.fire('Advertencia!!', error.error.mensaje, 'warning')
@@ -347,25 +447,29 @@ public consultarPaciente() {
         const apellidos = String(resp?.apellidos ?? resp?.Apellidos ?? '').trim();
         const label = `${nombres} ${apellidos}`.replace(/\s+/g, ' ').trim();
 
-        if (label) {
-          this.profesionalLogueadoOption = { label, value: label };
-          this.catalogoProfesionalesOptions = [this.profesionalLogueadoOption];
-        } else {
-          this.profesionalLogueadoOption = null;
-          this.catalogoProfesionalesOptions = [];
-        }
+	        if (label) {
+	          this.profesionalLogueadoOption = { label, value: label };
+	          this.catalogoProfesionalesOptions = [this.profesionalLogueadoOption];
+	          // Solo se carga como opción por defecto; NO se selecciona para no afectar el consultar/filtro local.
+	          this.filtroProfesional = null;
+	        } else {
+	          this.profesionalLogueadoOption = null;
+	          this.catalogoProfesionalesOptions = [];
+	          this.filtroProfesional = null;
+	        }
 
         // Ya no usamos el listado completo de profesionales.
         this.rs.listadoprofesinal = [];
 
         this.loadingProfesionales = false;
         this.construirOpcionesProfesionales();
-      } catch (error: any) {
-        this.loadingProfesionales = false;
-        this.profesionalLogueadoOption = null;
-        this.catalogoProfesionalesOptions = [];
-        this.rs.listadoprofesinal = [];
-        this.construirOpcionesProfesionales();
+	      } catch (error: any) {
+	        this.loadingProfesionales = false;
+	        this.profesionalLogueadoOption = null;
+	        this.catalogoProfesionalesOptions = [];
+	        this.rs.listadoprofesinal = [];
+	        this.filtroProfesional = null;
+	        this.construirOpcionesProfesionales();
 
         const msg = error?.error?.mensaje ?? error?.error?.error ?? 'No fue posible cargar el profesional logueado';
         Swal.fire('Advertencia!!', msg, 'error');
@@ -646,11 +750,11 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     this.otrosPage = 1;
   }
 
-  limpiarFiltrosLocalesHC() {
-    this.filtroProfesional = null;
-    this.filtroFechaRango = null;
-    this.aplicarFiltrosLocalesHC();
-  }
+		  limpiarFiltrosLocalesHC() {
+		    this.filtroProfesional = null;
+		    this.filtroFechaRango = null;
+		    this.aplicarFiltrosLocalesHC();
+		  }
 
   limpiarTodosFiltros() {
     this.tipo = undefined as any;
@@ -658,42 +762,43 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     this.especialidad = undefined;
     this.identificacionNoTemporal = '';
     this.tipoNoTemporal = '';
-    this.especialidadNoTemporal = undefined;
-    this.filtroProfesional = null;
-    this.filtroFechaRango = null;
+	    this.especialidadNoTemporal = undefined;
+		    this.filtroProfesional = null;
+		    this.filtroFechaRango = null;
     this.filtersFormGroup.controls.dateRangeControl.setValue(null);
     this.SwBoton = false;
     this.limpiarDataSources();
     // Mantiene la opción quemada visible, pero sin selección aplicada.
-    this.filtroProfesional = null;
-    this.construirOpcionesProfesionales();
-  }
+		    this.filtroProfesional = null;
+		    this.construirOpcionesProfesionales();
+		  }
 
-  private construirOpcionesProfesionales() {
-    if (this.profesionalLogueadoOption) {
-      this.profesionalesAllOptions = [this.profesionalLogueadoOption];
-      this.profesionalesVisibleLimit = 1;
-      this.profesionalFilterValue = '';
-      this.actualizarOpcionesProfesionalesVisibles();
-      return;
-    }
+	  private construirOpcionesProfesionales() {
+	    const allRows: any[] = [
+	      ...(this.hcDataOriginal ?? []),
+	      ...(this.notasDataOriginal ?? []),
+	      ...(this.otrosDataOriginal ?? []),
+	    ];
 
-    const allRows: any[] = [
-      ...(this.hcDataOriginal ?? []),
-      ...(this.notasDataOriginal ?? []),
-      ...(this.otrosDataOriginal ?? []),
-    ];
+	    const nombresEnTablas = this.profesionalSearchActivo
+	      ? []
+	      : allRows
+	        .map(item => this.obtenerNombreProfesional(item))
+	        .filter(Boolean);
 
-    const nombresEnTablas = allRows
-      .map(item => this.obtenerNombreProfesional(item))
-      .filter(Boolean);
+	    const optionsByKey = new Map<string, { label: string; value: string }>();
 
-    const optionsByKey = new Map<string, { label: string; value: string }>();
-
-    for (const opt of (this.catalogoProfesionalesOptions ?? [])) {
-      const key = this.normalizarTexto(opt.value);
-      if (key && !optionsByKey.has(key)) {
-        optionsByKey.set(key, opt);
+	    if (this.profesionalLogueadoOption) {
+	      const key = this.normalizarTexto(this.profesionalLogueadoOption.value);
+	      if (key && !optionsByKey.has(key)) {
+	        optionsByKey.set(key, this.profesionalLogueadoOption);
+	      }
+	    }
+	
+	    for (const opt of (this.catalogoProfesionalesOptions ?? [])) {
+	      const key = this.normalizarTexto(opt.value);
+	      if (key && !optionsByKey.has(key)) {
+	        optionsByKey.set(key, opt);
       }
     }
 
@@ -733,18 +838,18 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
         this.normalizarTexto(o.value) === this.normalizarTexto(this.filtroProfesional!)
       );
 
-    if (!existeSeleccion) {
-      this.filtroProfesional = null;
-    }
-  }
+		    if (!existeSeleccion) {
+		      this.filtroProfesional = null;
+		    }
+		  }
 
-  private setProfesionalFallback() {
-    this.profesionalesAllOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
-    this.profesionalesVisibleLimit = this.profesionalesInicial;
-    this.profesionalFilterValue = '';
-    this.actualizarOpcionesProfesionalesVisibles();
-    this.filtroProfesional = null;
-  }
+		  private setProfesionalFallback() {
+		    this.profesionalesAllOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
+		    this.profesionalesVisibleLimit = this.profesionalesInicial;
+		    this.profesionalFilterValue = '';
+		    this.actualizarOpcionesProfesionalesVisibles();
+		    this.filtroProfesional = null;
+		  }
 
   private inicializarTipoDocumentoPorDefecto(intento: number = 0): void {
     const yaSeleccionado = this.tipo !== undefined && this.tipo !== null && this.tipo !== '';
@@ -827,17 +932,38 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     this.actualizarOpcionesProfesionalesVisibles();
   }
 
-  onProfesionalFilter(event: any): void {
-    this.profesionalFilterValue = String(event?.filter ?? '');
-    this.actualizarOpcionesProfesionalesVisibles();
-  }
+		  onProfesionalFilter(event: any): void {
+		    const raw = String(event?.filter ?? '');
+		    const termino = this.sanitizarTerminoProfesional(raw);
+		    this.profesionalFilterValue = termino;
 
-  onProfesionalHide(): void {
-    if (this.profesionalFilterValue) {
-      this.profesionalFilterValue = '';
-      this.actualizarOpcionesProfesionalesVisibles();
-    }
-  }
+		    if (termino.length < 3) {
+		      this.profesionalSearchActivo = false;
+		      this.loadingProfesionales = false;
+		      this.catalogoProfesionalesOptions = [];
+		      this.profesionalTermino$.next('');
+		      this.construirOpcionesProfesionales();
+		      return;
+		    }
+
+		    this.profesionalSearchActivo = true;
+		    this.loadingProfesionales = true;
+		    this.profesionalTermino$.next(termino);
+		  }
+
+		  onProfesionalShow(): void {
+		    this.profesionalDropdownAbierto = true;
+		  }
+
+		  onProfesionalHide(): void {
+		    this.profesionalFilterValue = '';
+		    this.profesionalSearchActivo = false;
+		    this.profesionalDropdownAbierto = false;
+		    this.loadingProfesionales = false;
+		    this.catalogoProfesionalesOptions = [];
+		    this.profesionalTermino$.next('');
+		    this.construirOpcionesProfesionales();
+		  }
 
   private actualizarOpcionesProfesionalesVisibles(): void {
     const all = this.profesionalesAllOptions ?? [];
@@ -870,8 +996,12 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
       }
     }
 
-    this.profesionalesOptions = visibles;
-  }
+	    // Evita que el overlay de PrimeNG se cierre al cambiar la referencia del arreglo.
+	    if (!this.profesionalesOptions) {
+	      this.profesionalesOptions = [];
+	    }
+	    this.profesionalesOptions.splice(0, this.profesionalesOptions.length, ...visibles);
+	  }
 
   private obtenerFechaItem(item: any): Date | null {
     const value = item?.fecha ?? item?.fechaCreacion ?? item?.fechaRegistro ?? item?.fechaAtencion ?? null;
