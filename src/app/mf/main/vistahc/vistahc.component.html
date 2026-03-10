@@ -189,17 +189,28 @@
             <ng-container matColumnDef="turno">
               <th mat-header-cell *matHeaderCellDef>Turno</th>
               <td mat-cell *matCellDef="let item" class="icon-cell">
-                <button class="icon-btn icon-btn-turno"
-                  [class.disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
-                  [disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
-                  title="Llamar turno"
-                  (click)="llamarPaciente(item.identificacion, item.citaId)">
-                  <img
-                    [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
-                      ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
-                      : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
-                    alt="Llamar turno">
-                </button>
+                <ng-container *ngIf="item.swExcedioLimiteLlamada === 1; else turnoBtnTpl">
+                  <span class="status-badge status-consulta">Paciente llamado</span>
+                </ng-container>
+                <ng-template #turnoBtnTpl>
+                  <div class="flex align-items-center gap-2">
+                    <button class="icon-btn icon-btn-turno"
+                      [class.disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
+                      [disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
+                      title="Llamar turno"
+                      (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
+                      <img
+                        [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
+                          ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
+                          : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
+                        alt="Llamar turno">
+                    </button>
+                    <span class="patient-meta" *ngIf="item.disableButton && item.ticket_Id != null">
+                      Reintento en {{ item.contador }}s
+                    </span>
+                    <span class="patient-meta" *ngIf="isTurnoLoading(item)">Cargando...</span>
+                  </div>
+                </ng-template>
               </td>
             </ng-container>
 
@@ -254,6 +265,19 @@
               </td>
             </ng-container>
 
+            <!-- HISTORICO CITAS -->
+            <ng-container matColumnDef="historico" *ngIf="mostrarHistoricoCitas()">
+              <th mat-header-cell *matHeaderCellDef>Histórico citas</th>
+              <td mat-cell *matCellDef="let item">
+                <button
+                  type="button"
+                  class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                  (click)="obtenerHistoricoAsistioCita(item)">
+                  Histórico citas
+                </button>
+              </td>
+            </ng-container>
+
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
             <tr class="mat-row" *matNoDataRow>
@@ -299,6 +323,7 @@
         </ng-template>
 
         <div class="reimp-table-shell">
+          <div *ngIf="loadingNotasTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...</div>
           <div class="table-responsive">
             <table mat-table
               [dataSource]="paginatedRows(dataSourceEti?.data ?? [], notasPage, notasPageSize)"
@@ -358,17 +383,28 @@
               <ng-container matColumnDef="turno">
                 <th mat-header-cell *matHeaderCellDef>Turno</th>
                 <td mat-cell *matCellDef="let item" class="icon-cell">
-                  <button class="icon-btn icon-btn-turno"
-                    [class.disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
-                    [disabled]="item.disableButton && medicoServices.Especialidad.id !== 139"
-                    title="Llamar turno"
-                    (click)="llamarPaciente(item.identificacion, item.citaId)">
-                    <img
-                      [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
-                        ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
-                        : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
-                      alt="Llamar turno">
-                  </button>
+                  <ng-container *ngIf="item.swExcedioLimiteLlamada === 1; else turnoBtnRecTpl">
+                    <span class="status-badge status-consulta">Paciente llamado</span>
+                  </ng-container>
+                  <ng-template #turnoBtnRecTpl>
+                    <div class="flex align-items-center gap-2">
+                      <button class="icon-btn icon-btn-turno"
+                        [class.disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
+                        [disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
+                        title="Llamar turno"
+                        (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
+                        <img
+                          [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
+                            ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
+                            : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
+                          alt="Llamar turno">
+                      </button>
+                      <span class="patient-meta" *ngIf="item.disableButton && item.ticket_Id != null">
+                        Reintento en {{ item.contador }}s
+                      </span>
+                      <span class="patient-meta" *ngIf="isTurnoLoading(item)">Cargando...</span>
+                    </div>
+                  </ng-template>
                 </td>
               </ng-container>
 
@@ -420,6 +456,18 @@
                 </td>
               </ng-container>
 
+              <ng-container matColumnDef="historico" *ngIf="mostrarHistoricoCitas()">
+                <th mat-header-cell *matHeaderCellDef>Histórico citas</th>
+                <td mat-cell *matCellDef="let item">
+                  <button
+                    type="button"
+                    class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                    (click)="obtenerHistoricoAsistioCita(item)">
+                    Histórico citas
+                  </button>
+                </td>
+              </ng-container>
+
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
               <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
               <tr class="mat-row" *matNoDataRow>
@@ -459,6 +507,7 @@
         </ng-template>
 
         <div class="reimp-table-shell">
+          <div *ngIf="loadingOtrosTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...</div>
           <div class="table-responsive">
             <table mat-table
               [dataSource]="paginatedRows(dataSourceCont?.data ?? [], otrosPage, otrosPageSize)"
@@ -517,7 +566,8 @@
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let item">
                   <button type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact"
-                    (click)="desactivarCita(item)">Desactivar</button>
+                    [disabled]="isDesactivarLoading(item)"
+                    (click)="desactivarCita(item)">{{ isDesactivarLoading(item) ? 'Desactivando...' : 'Desactivar' }}</button>
                 </td>
               </ng-container>
 

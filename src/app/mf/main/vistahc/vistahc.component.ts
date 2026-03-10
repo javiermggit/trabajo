@@ -8,7 +8,7 @@ import { Citas } from 'src/app/Modelos/Medico';
 import { environment } from 'src/environments/environment';
 import { CookieService } from 'ngx-cookie-service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, switchMap } from 'rxjs';
+import { finalize, switchMap, timeout } from 'rxjs';
 //import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.service';
 
 declare const __webpack_require__: { p?: string } | undefined;
@@ -21,8 +21,12 @@ declare const __webpack_require__: { p?: string } | undefined;
 export class VistahcComponent {
  public llamadaService: any = { loading: false, estado: false };  
  public filtro = undefined;
- public loadingCI: boolean = false;
- private consentimientoLoadingKey: string | null = null;
+  public loadingCI: boolean = false;
+  private consentimientoLoadingKey: string | null = null;
+  private turnoLoadingKeys = new Set<string>();
+  private desactivarLoadingKeys = new Set<string>();
+  citasAMostrar: any[] = [];
+  private estadoLlamadoTimer: ReturnType<typeof setInterval> | null = null;
   // ── DataSources ──────────────────────────────────────────────────────────
   /** Citas del día (no adicionales) */
   public dataSource: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
@@ -63,7 +67,7 @@ export class VistahcComponent {
     PacienteIdInd: number=0;
     link: string='';
     fechahoy = new Date().toISOString().substring(0, 10);    
-    displayedColumns: string[] = [
+    private readonly baseDisplayedColumns: string[] = [
     'hora',
     'paciente',
     //'acceso',
@@ -81,6 +85,12 @@ export class VistahcComponent {
     'historias',
     'acciones'
   ];
+
+  get displayedColumns(): string[] {
+    return this.mostrarHistoricoCitas()
+      ? [...this.baseDisplayedColumns, 'historico']
+      : this.baseDisplayedColumns;
+  }
    
     notasDataOriginal: any[] = [];
     otrosDataOriginal: any[] = [];
@@ -154,6 +164,10 @@ export class VistahcComponent {
       }
   }  
 
+  ngOnDestroy(): void {
+    this.detenerEstadoLlamadoTimer();
+  }
+
     consultarCitasGeneral() {
       if (this.filtro !== undefined && this.filtro !== null) {
         this.medicoServices.Especialidad = this.filtro;
@@ -168,8 +182,11 @@ export class VistahcComponent {
       return;
     }
 
+    this.loadingOtrosTable = true;
     this.medicoServices.consultarCitasContigencia(this.filtro.id).subscribe(
       (x: Citas[]) => {
+        this.loadingOtrosTable = false;
+        this.normalizarTextoCitas(x as any);
         let contingencia = x;
 
         if (this.medicoServices?.Especialidad?.id === 139) {
@@ -181,6 +198,7 @@ export class VistahcComponent {
         this.otrosPage = 1;
       },
       () => {
+        this.loadingOtrosTable = false;
         // Contingencia es opcional; no bloquea la vista si falla.
       }
     );
@@ -244,10 +262,15 @@ export class VistahcComponent {
     }
 
     this.loading = true;
+    this.loadingHcTable = true;
+    this.loadingNotasTable = true;
 
     this.medicoServices.consultarCitas(this.filtro.id).subscribe(
       (x: Citas[]) => {
         this.loading = false;
+        this.loadingHcTable = false;
+        this.loadingNotasTable = false;
+        this.normalizarTextoCitas(x as any);
 
         if (x.length === 0) {
           Swal.fire('No hay citas asignadas para el día de hoy', '', 'info');
@@ -256,6 +279,7 @@ export class VistahcComponent {
         // Marcar botones habilitados/deshabilitados
         x.forEach(e => {
           e.disableButton = true;
+          (e as any).contador = 0;
           e.tipoAgendaAcceso = e.tipoAgendaAcceso == null
             ? ''
             : (e.tipoAgendaAcceso as string).toUpperCase();
@@ -294,9 +318,19 @@ export class VistahcComponent {
         this.hcPage    = 1;
         this.notasPage = 1;
         this.otrosPage = 1;
+
+        if ((this.filtro as any)?.swControlaLlamadosSimultaneos) {
+          this.consultarEstadoLlamado();
+          this.iniciarEstadoLlamadoTimer();
+        } else {
+          this.detenerEstadoLlamadoTimer();
+        }
       },
       (error) => {
         this.loading = false;
+        this.loadingHcTable = false;
+        this.loadingNotasTable = false;
+        this.detenerEstadoLlamadoTimer();
         Swal.fire('Error!!', 'Error al consultar la cita', 'error');
       }
     );
@@ -365,6 +399,78 @@ export class VistahcComponent {
     return `Mostrando ${start}-${end} de ${total}`;
   }
 
+  mostrarHistoricoCitas(): boolean {
+    return Number(this.filtro?.id) === 14;
+  }
+
+  private iniciarEstadoLlamadoTimer(): void {
+    this.detenerEstadoLlamadoTimer();
+    this.estadoLlamadoTimer = setInterval(() => this.consultarEstadoLlamado(), 1000);
+  }
+
+  private detenerEstadoLlamadoTimer(): void {
+    if (this.estadoLlamadoTimer) {
+      clearInterval(this.estadoLlamadoTimer);
+      this.estadoLlamadoTimer = null;
+    }
+  }
+
+  private consultarEstadoLlamado(): void {
+    const citasIds = (this.listado_citas || [])
+      .map((c: any) => this.resolveCitaId(c))
+      .filter((id: any) => id !== null) as Array<string | number>;
+    if (!citasIds.length) {
+      return;
+    }
+
+    this.medicoServices.obtenerEstadoLlamado(citasIds).subscribe({
+      next: (response: any) => {
+        const data = response?.data || response || [];
+        if (!Array.isArray(data)) {
+          return;
+        }
+
+        this.aplicarEstadoLlamado(this.listado_citas, data);
+        this.aplicarEstadoLlamado(this.listado_citas_recuperacion, data);
+        this.dataSource = new MatTableDataSource<Citas>(this.listado_citas || []);
+        this.dataSourceEti = new MatTableDataSource<Citas>(this.listado_citas_recuperacion || []);
+      },
+      error: () => {
+        // Digiturno no debe bloquear la vista si falla temporalmente.
+      }
+    });
+  }
+
+  private aplicarEstadoLlamado(listado: any[], data: any[]): void {
+    if (!Array.isArray(listado)) {
+      return;
+    }
+
+    listado.forEach((cita: any) => {
+      const citaId = this.resolveCitaId(cita);
+      if (citaId === null) return;
+
+      const estado = data.find((d: any) => {
+        const everestId = d?.everest_Id ?? d?.EverestId ?? d?.everestId ?? d?.Everest_Id;
+        if (everestId === undefined || everestId === null || everestId === '') return false;
+        return String(everestId) === String(citaId);
+      });
+      if (!estado) {
+        return;
+      }
+
+      cita.swSeguirLlamando = estado.swSeguirLlamando;
+
+      if ((this.filtro as any)?.swControlaLlamadosSimultaneos) {
+        cita.swExcedioLimiteLlamada = estado.swExcedioLimiteLlamada;
+        cita.disableButton = !estado.swTiempoRestanteLlamado;
+        cita.contador = estado.tiempoRestanteLlamado;
+        cita.ticket_Id = estado.ticket_Id;
+        cita.swTiempoRestanteLlamado = estado.swTiempoRestanteLlamado;
+      }
+    });
+  }
+
   abrirHistoriaClinica(item: any): void {
     const base = (environment as any).vistaHC as string;
     if (!base) {
@@ -373,7 +479,7 @@ export class VistahcComponent {
     }
 
     const url = new URL(base, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
-    const citaId = item?.citaId ?? item?.consultaId ?? item?.ConsultaId;
+    const citaId = this.resolveCitaId(item);
     const pacienteId = item?.pacienteId ?? item?.paciente_Id ?? item?.PacienteId ?? item?.pacienteID;
 
     if (citaId !== undefined && citaId !== null) url.searchParams.set('citaId', String(citaId));
@@ -382,6 +488,244 @@ export class VistahcComponent {
     if (this.filtro?.id) url.searchParams.set('especialidadId', String(this.filtro.id));
 
     window.open(url.toString(), '_blank');
+  }
+
+  obtenerHistoricoAsistioCita(item: any): void {
+    const pacienteId =
+      item?.pacienteId ??
+      item?.paciente_Id ??
+      item?.PacienteId ??
+      item?.pacienteID ??
+      item?.idPaciente;
+
+    if (pacienteId === undefined || pacienteId === null || pacienteId === '') {
+      Swal.fire('Dato faltante', 'No se encontró el paciente para consultar el histórico de citas.', 'warning');
+      return;
+    }
+
+    const especialidadId = Number(this.filtro?.id ?? 0);
+    if (!especialidadId) {
+      Swal.fire('Dato faltante', 'No se encontró la especialidad para consultar el histórico de citas.', 'warning');
+      return;
+    }
+
+    this.loading = true;
+    this.medicoServices.obtenerHistoricoAsistioCita(especialidadId, Number(pacienteId), true).subscribe({
+      next: (res: any[]) => {
+        this.citasAMostrar = Array.isArray(res) ? res : [];
+
+        if (this.citasAMostrar.length < 1) {
+          Swal.fire('Información', 'El paciente no tiene citas anteriores', 'info');
+          return;
+        }
+
+        Swal.fire({
+          title: 'Histórico de citas',
+          width: 900,
+          html: this.buildHistoricoHtml(this.citasAMostrar),
+          confirmButtonText: 'Cerrar'
+        });
+      },
+      error: (err: any) => {
+        const msg =
+          err?.error?.mensaje ??
+          err?.error?.message ??
+          err?.message ??
+          (typeof err === 'string' ? err : 'Error consultando el histórico de citas.');
+        Swal.fire('Error', msg, 'error');
+      },
+      complete: () => {
+        this.loading = false;
+      }
+    });
+  }
+
+  private buildHistoricoHtml(citas: any[]): string {
+    const rows = citas.map((cita: any) => {
+      const fecha = this.formatHistoricoDate(cita?.fechaCita);
+      const profesional = this.escapeHtml(cita?.nombreProfesional ?? '');
+      const asistio = cita?.asistioCita ? 'Sí' : 'No';
+      const asistioClass = cita?.asistioCita ? '' : ' style="color:#dc2626;font-weight:600;"';
+      const especialidad = this.escapeHtml(cita?.especialidad ?? '');
+      const programa = this.escapeHtml(cita?.programa ?? '');
+
+      return `
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${fecha}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${profesional}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;"${asistioClass}>${asistio}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${especialidad}</td>
+          <td style="padding:8px;border-bottom:1px solid #e5e7eb;">${programa}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <div style="max-height:420px;overflow:auto;text-align:left;">
+        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #d1d5db;">Fecha</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #d1d5db;">Profesional</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #d1d5db;">Asistió</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #d1d5db;">Especialidad</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #d1d5db;">Programa</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  private formatHistoricoDate(value: any): string {
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return this.escapeHtml(String(value));
+    return d.toLocaleDateString('es-CO');
+  }
+
+  private escapeHtml(value: string): string {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Los endpoints retornan ids con nombres distintos según la consulta (citaId, ConsultaId, CitaId, etc).
+  // Esta función centraliza la resolución para que los botones (turno/desactivar/historia) funcionen parejo.
+  resolveCitaId(rowOrId: any): string | number | null {
+    if (rowOrId === undefined || rowOrId === null) return null;
+    if (typeof rowOrId === 'string' || typeof rowOrId === 'number') return rowOrId;
+
+    const candidate =
+      rowOrId?.citaId ??
+      rowOrId?.citaID ??
+      rowOrId?.CitaId ??
+      rowOrId?.CitaID ??
+      rowOrId?.citaIdCode ??
+      rowOrId?.consultaId ??
+      rowOrId?.ConsultaId ??
+      rowOrId?.consultaID ??
+      rowOrId?.ConsultaID ??
+      rowOrId?.turnoId ??
+      rowOrId?.TurnoId ??
+      rowOrId?.everestId ??
+      rowOrId?.EverestId ??
+      rowOrId?.everestID ??
+      rowOrId?.EverestID ??
+      rowOrId?.everest_Id ??
+      rowOrId?.Everest_Id ??
+      rowOrId?.id ??
+      rowOrId?.Id;
+
+    if (candidate === undefined || candidate === null || candidate === '') return null;
+    return candidate;
+  }
+
+  private getRowKey(row: any, prefix: 'turno' | 'desactivar'): string | null {
+    const citaId = this.resolveCitaId(row);
+    if (citaId !== null) return `${prefix}:cita:${String(citaId)}`;
+    if (row?.identificacion) return `${prefix}:ident:${String(row.identificacion)}`;
+    return null;
+  }
+
+  isTurnoLoading(row: any): boolean {
+    const key = this.getRowKey(row, 'turno');
+    return key ? this.turnoLoadingKeys.has(key) : false;
+  }
+
+  isDesactivarLoading(row: any): boolean {
+    const key = this.getRowKey(row, 'desactivar');
+    return key ? this.desactivarLoadingKeys.has(key) : false;
+  }
+
+  private quitarFilaContingencia(item: any): void {
+    const citaId = this.resolveCitaId(item);
+    if (citaId === null) return;
+
+    const actual = Array.isArray(this.listado_contingencia) ? this.listado_contingencia : [];
+    const filtered = actual.filter((row: any) => String(this.resolveCitaId(row)) !== String(citaId));
+
+    this.listado_contingencia = filtered;
+    this.dataSourceCont = new MatTableDataSource<Citas>(filtered as any);
+
+    // Ajustar paginación si la página queda fuera de rango.
+    const maxPage = this.totalPages(filtered.length, this.otrosPageSize);
+    if (this.otrosPage > maxPage) this.otrosPage = maxPage;
+  }
+
+  private maybeFixMojibake(value: any): string {
+    const text = String(value ?? '');
+    if (!text) return text;
+
+    // Heurística: patrones típicos de UTF-8 mal interpretado como Latin1/Win-1252.
+    const looksBroken = /Ã.|Â.|â[€™“”–—]/.test(text);
+    if (!looksBroken) return text;
+
+    const win1252Map: Record<number, number> = {
+      0x20ac: 0x80, // €
+      0x201a: 0x82, // ‚
+      0x0192: 0x83, // ƒ
+      0x201e: 0x84, // „
+      0x2026: 0x85, // …
+      0x2020: 0x86, // †
+      0x2021: 0x87, // ‡
+      0x02c6: 0x88, // ˆ
+      0x2030: 0x89, // ‰
+      0x0160: 0x8a, // Š
+      0x2039: 0x8b, // ‹
+      0x0152: 0x8c, // Œ
+      0x017d: 0x8e, // Ž
+      0x2018: 0x91, // ‘
+      0x2019: 0x92, // ’
+      0x201c: 0x93, // “
+      0x201d: 0x94, // ”
+      0x2022: 0x95, // •
+      0x2013: 0x96, // –
+      0x2014: 0x97, // —
+      0x02dc: 0x98, // ˜
+      0x2122: 0x99, // ™
+      0x0161: 0x9a, // š
+      0x203a: 0x9b, // ›
+      0x0153: 0x9c, // œ
+      0x017e: 0x9e, // ž
+      0x0178: 0x9f, // Ÿ
+    };
+
+    // Re-encodar la string a bytes 0-255 (win1252/latin1) y decodificar como UTF-8.
+    const bytes = new Uint8Array(text.length);
+    for (let i = 0; i < text.length; i++) {
+      const codePoint = text.charCodeAt(i);
+      if (codePoint <= 0xff) {
+        bytes[i] = codePoint;
+        continue;
+      }
+      const mapped = win1252Map[codePoint];
+      if (mapped === undefined) {
+        return text; // no representable; no arriesgar.
+      }
+      bytes[i] = mapped;
+    }
+
+    try {
+      const fixed = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+      // Solo aplicar si realmente mejora (reduce patrones rotos).
+      if (/Ã.|Â.|â[€™“”–—]/.test(fixed)) return text;
+      return fixed;
+    } catch {
+      return text;
+    }
+  }
+
+  private normalizarTextoCitas(list: any[]): void {
+    if (!Array.isArray(list)) return;
+    list.forEach((e: any) => {
+      if (e?.nombrePaciente) e.nombrePaciente = this.maybeFixMojibake(e.nombrePaciente);
+      if (e?.tipoAgendaAcceso) e.tipoAgendaAcceso = this.maybeFixMojibake(e.tipoAgendaAcceso);
+    });
   }
 
   
@@ -429,7 +773,7 @@ export class VistahcComponent {
   } */
 
   private getConsentimientoKey(row: any): string {
-    const citaId = row?.citaId ?? row?.consultaId ?? row?.ConsultaId ?? row?.citaID ?? row?.CitaId;
+    const citaId = this.resolveCitaId(row);
     const pacienteId =
       row?.pacienteId ?? row?.paciente_Id ?? row?.PacienteId ?? row?.pacienteID ?? row?.idPaciente;
 
@@ -519,7 +863,7 @@ export class VistahcComponent {
   }
 
   finalizar(item: any): void {
-    const citaId = item?.citaId ?? item?.consultaId ?? item?.ConsultaId;
+    const citaId = this.resolveCitaId(item);
     if (citaId === undefined || citaId === null || citaId === '') {
       Swal.fire('Dato faltante', 'No se encontro citaId para finalizar la cita.', 'warning');
       return;
@@ -552,7 +896,7 @@ export class VistahcComponent {
           // Facturacion (no bloqueante)
           this.medicoServices.facturarCitas(String(citaId)).subscribe({ next: () => {}, error: () => {} });
 
-          this.medicoServices.FinalizarTicket(String(citaId)).subscribe({
+          this.medicoServices.finalizar(String(citaId)).subscribe({
             next: (resp: any) => {
               Swal.fire('Listo', resp?.mensaje ?? 'Cita finalizada.', 'success');
               this.consultarCitasGeneral();
@@ -583,11 +927,14 @@ export class VistahcComponent {
   }
 
   desactivarCita(item: any): void {
-    const citaId = item?.citaId ?? item?.consultaId ?? item?.ConsultaId;
+    const citaId = this.resolveCitaId(item);
     if (citaId === undefined || citaId === null || citaId === '') {
       Swal.fire('Dato faltante', 'No se encontró el id de la cita para desactivar.', 'warning');
       return;
     }
+
+    const loadingKey = this.getRowKey(item, 'desactivar');
+    if (loadingKey && this.desactivarLoadingKeys.has(loadingKey)) return;
 
     Swal.fire({
       title: 'Esta seguro que desea desactivar la cita?',
@@ -600,24 +947,52 @@ export class VistahcComponent {
       if (!confirmed) return;
 
       this.loading = true;
-      this.medicoServices.desactivarCitasAnteriores(String(citaId)).subscribe({
+      if (loadingKey) this.desactivarLoadingKeys.add(loadingKey);
+      this.medicoServices
+        .desactivarCitasAnteriores(String(citaId))
+        .pipe(
+          timeout(15000),
+          finalize(() => {
+            this.loading = false;
+            if (loadingKey) this.desactivarLoadingKeys.delete(loadingKey);
+          })
+        )
+        .subscribe({
         next: (resp: any) => {
-          if (String(resp).toLowerCase() === 'true') {
-            Swal.fire('Listo', 'Cita desactivada.', 'success');
-            this.consultarCitasAnteriores();
-          } else {
-            Swal.fire('Error', 'Error al desactivar la cita.', 'error');
+          const normalized = String(resp ?? '')
+            .trim()
+            .replace(/^\"|\"$/g, '')
+            .toLowerCase();
+
+          const ok =
+            normalized === '1' ||
+            normalized.length === 0 ||
+            normalized.includes('true') ||
+            normalized.includes('ok') ||
+            normalized.includes('success') ||
+            normalized.includes('exito');
+
+          // Si el HTTP fue 200, en la prÃ¡ctica ya se desactivÃ³; evitar mensaje confuso al usuario.
+          Swal.fire('Listo', 'Cita desactivada.', 'success');
+          if (!ok) {
+            // Solo para diagnÃ³stico: el backend a veces responde textos no estÃ¡ndar.
+            // eslint-disable-next-line no-console
+            console.warn('[DesactivarCita] Respuesta inesperada:', resp);
           }
+
+          // Solo quitar la fila seleccionada (evita que el refresh esconda todas las citas).
+          this.quitarFilaContingencia(item);
         },
         error: (err: any) => {
+          if (err?.name === 'TimeoutError') {
+            Swal.fire('Tiempo de espera', 'El servicio no respondiÃ³ a tiempo al desactivar la cita.', 'warning');
+            return;
+          }
           const msg =
             err?.error?.mensaje ??
             err?.message ??
             (typeof err === 'string' ? err : 'Error al desactivar la cita.');
           Swal.fire('Error', msg, 'error');
-        },
-        complete: () => {
-          this.loading = false;
         }
       });
     });
@@ -629,27 +1004,54 @@ export class VistahcComponent {
       return;
     }
 
-    if (citaId === undefined || citaId === null || citaId === '') {
+    const resolvedCitaId = this.resolveCitaId(citaId);
+    if (resolvedCitaId === undefined || resolvedCitaId === null || resolvedCitaId === '') {
       Swal.fire('Dato faltante', 'No se encontro el id del turno/cita.', 'warning');
       return;
     }
 
-    this.medicoServices.llamadoPaciente(String(identificacion), Number(citaId), this.medicoServices.ticketId).subscribe({
+    const everestId = Number(resolvedCitaId);
+    if (!Number.isFinite(everestId)) {
+      Swal.fire('Dato inválido', 'El id del turno/cita no es numérico.', 'warning');
+      return;
+    }
+
+    const turnoKey = this.getRowKey({ identificacion, citaId: resolvedCitaId }, 'turno');
+    if (turnoKey && this.turnoLoadingKeys.has(turnoKey)) return;
+    if (turnoKey) this.turnoLoadingKeys.add(turnoKey);
+    this.llamadaService.loading = true;
+
+    this.medicoServices
+      .llamadoPaciente(String(identificacion), everestId, this.medicoServices.ticketId)
+      .pipe(
+        timeout(20000),
+        finalize(() => {
+          if (turnoKey) this.turnoLoadingKeys.delete(turnoKey);
+          this.llamadaService.loading = false;
+        })
+      )
+      .subscribe({
       next: (res: any) => {
         if (res?.ticketId === 0) {
           Swal.fire('Informacion', res?.mensaje ?? 'No fue posible llamar al paciente.', 'info');
           return;
         }
 
-        if (res?.swSegirLlamando) {
+        const seguirLlamando = res?.swSegirLlamando ?? res?.swSeguirLlamando;
+        if (seguirLlamando) {
           Swal.fire('Llamado exitoso', 'Llamando al paciente...', 'success');
           this.medicoServices.ticketId = res.ticketId;
           this.medicoServices.ticketMensaje = res?.mensaje ?? '';
+          this.consultarEstadoLlamado();
         } else {
           Swal.fire('Informacion', res?.mensaje ?? 'No se puede realizar el llamado.', 'info');
         }
       },
       error: (err: any) => {
+        if (err?.name === 'TimeoutError') {
+          Swal.fire('Tiempo de espera', 'Digiturno no respondiÃ³ a tiempo al llamar el turno.', 'warning');
+          return;
+        }
         const msg =
           err?.error?.mensaje ??
           err?.message ??

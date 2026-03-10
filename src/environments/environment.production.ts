@@ -21,7 +21,7 @@ UrlCIsign: "http://172.27.83.196:82/Apieveresttest/APIConsentimientoInformado/ap
   vistaHC: "",
 URLApiCorreo: "http://172.27.83.196:82/Apieveresttest/APIEnvioCorreo/api",
 URLWhatsapp:"http://172.27.83.196:82/Apieveresttest/ApiWhatsapp",
-UrlIntegracionDigiturno: "http://172.27.83.196:82/Apieveresttest/ApiIntegarcionEverestDigiturnoPrueba/api",
+UrlIntegracionDigiturno: "http://172.27.83.196:82/Apieveresttest/ApiIntegracionEverestDigiturno/api",
 UrlParametrizacionRecurso: "http://172.27.83.196:82/Apieveresttest/APIParametrizacionRecurso",
 UrlAgendamiento: "",
 IdPais:1,

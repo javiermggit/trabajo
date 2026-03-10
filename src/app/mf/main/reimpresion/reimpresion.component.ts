@@ -382,30 +382,14 @@ public consultarPaciente() {
   const pacienteId = row.pacienteId;
   const citaId = row.consultaId;
 
-  let tipo = '';
+  let tipo: 'Morbidity' | 'nursing' | 'dentistry' | 'procedure';
 
-  switch (row.link) {
-
-    case 'impresion':
-      tipo = 'Morbidity';
-      break;
-
-    case 'impresionEnfermeria':
-      tipo = 'nursing';
-      break;
-
-    case 'impresionOdontologia':
-      tipo = 'dentistry';
-      break;
-
-    case 'impresionProcedimiento':
-      tipo = 'procedure';
-      break;
-
-    default:
-      Swal.fire('', 'No se encuentra habilitado en estos momentos', 'info');
-      this.loadingImpresion = false;
-      return;
+  try {
+    tipo = this.resolverTipoHistoria(row);
+  } catch {
+    Swal.fire('', 'No se encuentra habilitado en estos momentos', 'info');
+    this.loadingImpresion = false;
+    return;
   }
 
   this.rs.abrirMorbidity(tipo, clientId, pacienteId, citaId)
@@ -448,31 +432,24 @@ private construirUrlHistoria(row: Reimpresion): string {
   const clientId = Number(this.idcliente);
   const pacienteId = row.pacienteId;
   const citaId = row.consultaId;
-  //console.log(citaId);
-
-  let tipo = '';
-
-  switch (row.link) {
-    case 'impresion':
-      tipo = 'Morbidity';
-      break;
-
-    case 'impresionEnfermeria':
-      tipo = 'nursing';
-      break;
-
-    case 'impresionOdontologia':
-      tipo = 'dentistry';
-      break;
-
-    case 'impresionProcedimiento':
-      tipo = 'procedure';
-      break;
-  }
-
-  const base = window.location.origin; //
+  const tipo = this.resolverTipoHistoria(row);
 
   return `${environment.apiReal}/ApiImpresionUnificada/api/Prints/${tipo}/${clientId}/${pacienteId}/${citaId}`;
+}
+
+private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'dentistry' | 'procedure' {
+  switch (row?.link) {
+    case 'impresion':
+      return 'Morbidity';
+    case 'impresionEnfermeria':
+      return 'nursing';
+    case 'impresionOdontologia':
+      return 'dentistry';
+    case 'impresionProcedimiento':
+      return 'procedure';
+    default:
+      throw new Error('UNSUPPORTED_HISTORY_TYPE');
+  }
 }
 
  imprimirUnificadacronica() {
@@ -1032,12 +1009,7 @@ private construirUrlHistoria(row: Reimpresion): string {
       //console.log('2️ PDF generado correctamente:', linkPdf);
     } catch {
       Swal.close();
-      const mensajeFallback = this.construirMensajeEnvio(row, tipoTexto);
-      if (canal === 'correo') {
-        this.enviarFallbackCorreo(destino, tipoTexto, mensajeFallback);
-      } else {
-        this.enviarFallbackWhatsapp(destino, mensajeFallback, tipoTexto);
-      }
+      Swal.fire('Error', 'No se pudo construir el enlace de la historia clínica.', 'error');
       return;
     }
 

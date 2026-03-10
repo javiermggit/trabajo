@@ -103,7 +103,7 @@ export class ReimpresionService {
   pacienteId: number
 ): Observable<Blob> {
 
-  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}?program=pes`;
+  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}?programs=Pes`;
 
   return this.http.get(url, {
     responseType: 'blob',

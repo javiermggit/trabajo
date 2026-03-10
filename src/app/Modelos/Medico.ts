@@ -17,6 +17,11 @@ export class Citas {
     disableButton: boolean =false;
     edadAnios:number =30;
     edadMeses:number =24;
+    contador?: number;
+    ticket_Id?: number | null;
+    swExcedioLimiteLlamada?: number;
+    swTiempoRestanteLlamado?: boolean;
+    swSeguirLlamando?: boolean;
 }
 
 export class Especialidad {

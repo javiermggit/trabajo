@@ -124,6 +124,18 @@ export class MedicoService {
     return this.http.get<Array<Citas>>(this._baseUrl + '/api/Medico/ObtenerConsultasAnteriores?especialidadId=' + filtro + '&profesionalId=' + this.medicoId, { responseType: "json" });
   }
 
+  public obtenerEstadoLlamado(citasIds: Array<string | number>) {
+    const url = `${this._apiIntegracion}/Digiturno/ObtenerEstadoLlamado?tipoIntegracion=${this.tipoIntegracion}`;
+    return this.http.post<any>(url, citasIds, { responseType: 'json' as const });
+  }
+
+  public obtenerHistoricoAsistioCita(especialidadId: number, pacienteId: number, incluirAnteriores: boolean) {
+    return this.http.get<any[]>(
+      `${environment.URLMedico}/api/medico//ObtenerHistoricoAsistioCita?especialidadId=${especialidadId}&pacienteId=${pacienteId}&swSoloEspecialidad=${incluirAnteriores}`,
+      { responseType: "json" }
+    );
+  }
+
   public consultarLink(citaID: String) {
 
     return this.http.get(this.urlTeleconsulta + '/api/TeleLlamada/GenerarLinkTeleLlamada?citaId=' + citaID + '&esPaciente=false&servidor=' + this.servidor, { responseType: "text" });
@@ -208,6 +220,10 @@ estadoTraductor(estado: string): string {
   public FinalizarTicket(citaID: string) {
     var UsuarioId:Number = this.medico.id
     return this.http.get<any>(`${this._apiIntegracion}/Digiturno/FinalizarTicket?tipoIntegracion=${this.tipoIntegracion}&TicketId=${this.ticketId}&UsuarioId=${UsuarioId}&EverestId=${citaID}`,{ responseType: "json" });
+  }
+
+  public finalizar(citaID: string) {
+    return this.http.get<any>(this._baseUrl + '/api/Medico/FinalizarCitaLaboratorio?TurnoId=' + citaID)
   }
 
   public ExamenfisicoisOpcional()

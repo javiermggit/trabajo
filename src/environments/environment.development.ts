@@ -5,7 +5,7 @@ export const environment = {
   version: '3.0.0-beta',
   
  
-vistaCI: '/everest_test/cisign', 
+vistaCI: '/Everesttest/cisign', 
 URLHc: "/Apieveresttest/APIHCHealth",
 URLParametrizacion: "/Apieveresttest/APIParametrizacionGeneralHealth",
 URLPaciente: "/Apieveresttest/APIPacienteV2",
@@ -22,7 +22,7 @@ UrlCIsign: "/Apieveresttest/APIConsentimientoInformado/api",
   vistaHC: "",
 URLApiCorreo: "/Apieveresttest/APIEnvioCorreo/api",
 URLWhatsapp:"/Apieveresttest/ApiWhatsapp",
-UrlIntegracionDigiturno: "/Apieveresttest/ApiIntegarcionEverestDigiturnoPrueba/api",
+UrlIntegracionDigiturno: "/Apieveresttest/ApiIntegracionEverestDigiturno/api",
 UrlParametrizacionRecurso: "/Apieveresttest/APIParametrizacionRecurso",
 UrlAgendamiento: "",
 IdPais:1,
