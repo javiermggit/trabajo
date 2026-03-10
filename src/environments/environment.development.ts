@@ -29,10 +29,10 @@ IdPais:1,
 UrlPdf: "/Apieveresttest/ApiImpresionUnificada/api/Prints",
 //tituloCliente:'EVEREST',
 numeroCliente:'1',
+telefonocliente:'5756475610',
+plantillaCliente:'c2e0eac5-bfd5-4f3c-96a4-5e3e73d7e7ea',
+tituloCliente:'Viva1A Ips',
 //telefonocliente:'573011347279',
 //plantillaCliente:'a88bc7e7-24eb-474b-9f0c-0d56b793b407',
-tituloCliente:'Viva1A Ips',
-telefonocliente:'573011347279',
-plantillaCliente:'a88bc7e7-24eb-474b-9f0c-0d56b793b407',
  apiReal: 'http://172.27.83.196:82/Apieveresttest' // o tu servidor real
 };
