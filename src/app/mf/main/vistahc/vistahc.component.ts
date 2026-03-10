@@ -1,15 +1,33 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { VistahcService } from './vistahc.service';
 import Swal from 'sweetalert2';
-//import { AccordionModule } from 'primeng/accordion';
 import { MedicoService } from 'src/app/medico/medico.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Citas } from 'src/app/Modelos/Medico';
 import { environment } from 'src/environments/environment';
 import { CookieService } from 'ngx-cookie-service';
-import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, switchMap, timeout } from 'rxjs';
-//import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.service';
+import { resolveApiErrorMessage } from 'src/app/utils/api-error';
+import { escapeHtml as escapeHtmlUtil } from 'src/app/utils/string';
+import {
+  DEFAULT_TABLE_PAGE_SIZE,
+  ISO_DATE_ONLY_LENGTH,
+  LLAMADO_ESTADO_POLL_MS,
+  TIMEOUT_DESACTIVAR_CITA_MS,
+  TIMEOUT_LLAMAR_TURNO_MS
+} from 'src/app/utils/constants';
+import { resolveCitaId as resolveCitaIdUtil } from 'src/app/utils/cita';
+import { hasLoadingKey, setLoadingKey } from 'src/app/utils/loading-keys';
+import { toNumberOrNull } from 'src/app/utils/primitive';
+import { buildHistoricoHtml as buildHistoricoHtmlUtil } from '../../../utils/historico-html';
+import { maybeFixMojibake as maybeFixMojibakeUtil } from 'src/app/utils/mojibake';
+import {
+  SWAL_MSG_DEBE_SELECCIONAR_ESPECIALIDAD,
+  SWAL_MSG_ERROR_CONSULTAR_CITA,
+  SWAL_MSG_NO_HAY_LINK_ABRIR,
+  SWAL_TITULO_ADVERTENCIA_DOBLE,
+  SWAL_TITULO_DATO_FALTANTE
+} from 'src/app/utils/swal-messages';
 
 declare const __webpack_require__: { p?: string } | undefined;
 
@@ -18,7 +36,7 @@ declare const __webpack_require__: { p?: string } | undefined;
   templateUrl: './vistahc.component.html',
   styleUrls: ['./vistahc.component.css']
 })
-export class VistahcComponent {
+export class VistahcComponent implements OnInit, OnDestroy {
  public llamadaService: any = { loading: false, estado: false };  
  public filtro = undefined;
   public loadingCI: boolean = false;
@@ -34,14 +52,13 @@ export class VistahcComponent {
   /** Recuperación (adicionales) */
   public dataSourceEti: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
 
-  /** Contingencia */
-  public dataSourceCont: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
-  public loginId: String;
-  public cookieService: CookieService;
-  row_: any;
-  listado_citas: any;
-  listado_citas_recuperacion: any;
-  listado_contingencia: any;
+	  /** Contingencia */
+	  public dataSourceCont: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
+	  public loginId: string;
+	  row_: any;
+	  listado_citas: any;
+	  listado_citas_recuperacion: any;
+	  listado_contingencia: any;
   loading = false;
   especialidad?: string;
   errorHcTable: string = '';
@@ -50,9 +67,9 @@ export class VistahcComponent {
   hcPage: number = 1;
   notasPage: number = 1;
   otrosPage: number = 1;
-  hcPageSize: number = 5;
-  notasPageSize: number = 5;
-  otrosPageSize: number = 5;
+	  hcPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
+	  notasPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
+	  otrosPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
 
 
   /////
@@ -66,7 +83,7 @@ export class VistahcComponent {
     SwBoton: boolean = false;
     PacienteIdInd: number=0;
     link: string='';
-    fechahoy = new Date().toISOString().substring(0, 10);    
+    fechahoy = new Date().toISOString().substring(0, ISO_DATE_ONLY_LENGTH);
     private readonly baseDisplayedColumns: string[] = [
     'hora',
     'paciente',
@@ -103,15 +120,13 @@ export class VistahcComponent {
    
 
   //////
-  constructor(
-    public rs: VistahcService,
-    public medicoServices: MedicoService,
-    private router: Router,
-    private route: ActivatedRoute,
-    //public du: DatosPacienteService
-   ){
+	  constructor(
+	    public rs: VistahcService,
+	    public medicoServices: MedicoService,
+	    private cookieService: CookieService,
+	   ){
 
-     this.loginId = environment.production == false ? "mprueba" : this.cookieService.get('UsuarioMedico');
+     this.loginId = environment.production == false ? 'mprueba' : this.cookieService.get('UsuarioMedico');
       //this.loginId = environment.production == false ? "JARAMIREZ" : this.cookieService.get('UsuarioMedico');
   }
 
@@ -247,17 +262,17 @@ export class VistahcComponent {
 
         }, (error) => {
           this.loading = false;
-          Swal.fire('Error!!', "Error al consultar la cita", 'error')
+          Swal.fire('Error!!', SWAL_MSG_ERROR_CONSULTAR_CITA, 'error')
         })
     } else {
-      Swal.fire('Advertencia!!', 'Debe seleccionar una especialidad', 'warning')
+      Swal.fire(SWAL_TITULO_ADVERTENCIA_DOBLE, SWAL_MSG_DEBE_SELECCIONAR_ESPECIALIDAD, 'warning')
     }
 
   }
 
    public consultarCitas(): void {
     if (this.filtro === undefined || this.filtro === null) {
-      Swal.fire('Advertencia!!', 'Debe seleccionar una especialidad', 'warning');
+      Swal.fire(SWAL_TITULO_ADVERTENCIA_DOBLE, SWAL_MSG_DEBE_SELECCIONAR_ESPECIALIDAD, 'warning');
       return;
     }
 
@@ -331,7 +346,7 @@ export class VistahcComponent {
         this.loadingHcTable = false;
         this.loadingNotasTable = false;
         this.detenerEstadoLlamadoTimer();
-        Swal.fire('Error!!', 'Error al consultar la cita', 'error');
+        Swal.fire('Error!!', SWAL_MSG_ERROR_CONSULTAR_CITA, 'error');
       }
     );
   }
@@ -345,11 +360,8 @@ export class VistahcComponent {
      }, (error) => {
  
        //this.loadingReimpresion = false;
-       if (error.error.error == undefined) {
-         Swal.fire('Advertencia!!', error.error.mensaje, 'error')
-       } else {
-         Swal.fire('Advertencia!!', error.error.error, 'error')
-       }
+       const msg = resolveApiErrorMessage(error, 'Ocurrió un error');
+       Swal.fire('Advertencia!!', msg, 'error');
        //console.log(error)
      })
  }
@@ -405,7 +417,7 @@ export class VistahcComponent {
 
   private iniciarEstadoLlamadoTimer(): void {
     this.detenerEstadoLlamadoTimer();
-    this.estadoLlamadoTimer = setInterval(() => this.consultarEstadoLlamado(), 1000);
+    this.estadoLlamadoTimer = setInterval(() => this.consultarEstadoLlamado(), LLAMADO_ESTADO_POLL_MS);
   }
 
   private detenerEstadoLlamadoTimer(): void {
@@ -499,13 +511,13 @@ export class VistahcComponent {
       item?.idPaciente;
 
     if (pacienteId === undefined || pacienteId === null || pacienteId === '') {
-      Swal.fire('Dato faltante', 'No se encontró el paciente para consultar el histórico de citas.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontró el paciente para consultar el histórico de citas.', 'warning');
       return;
     }
 
     const especialidadId = Number(this.filtro?.id ?? 0);
     if (!especialidadId) {
-      Swal.fire('Dato faltante', 'No se encontró la especialidad para consultar el histórico de citas.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontró la especialidad para consultar el histórico de citas.', 'warning');
       return;
     }
 
@@ -541,6 +553,8 @@ export class VistahcComponent {
   }
 
   private buildHistoricoHtml(citas: any[]): string {
+    return buildHistoricoHtmlUtil(citas);
+    /* legacy (mismo HTML, mantenido por rollback fácil)
     const rows = citas.map((cita: any) => {
       const fecha = this.formatHistoricoDate(cita?.fechaCita);
       const profesional = this.escapeHtml(cita?.nombreProfesional ?? '');
@@ -576,6 +590,7 @@ export class VistahcComponent {
         </table>
       </div>
     `;
+    */
   }
 
   private formatHistoricoDate(value: any): string {
@@ -586,44 +601,14 @@ export class VistahcComponent {
   }
 
   private escapeHtml(value: string): string {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+    return escapeHtmlUtil(value);
   }
 
   // Los endpoints retornan ids con nombres distintos según la consulta (citaId, ConsultaId, CitaId, etc).
   // Esta función centraliza la resolución para que los botones (turno/desactivar/historia) funcionen parejo.
-  resolveCitaId(rowOrId: any): string | number | null {
-    if (rowOrId === undefined || rowOrId === null) return null;
-    if (typeof rowOrId === 'string' || typeof rowOrId === 'number') return rowOrId;
-
-    const candidate =
-      rowOrId?.citaId ??
-      rowOrId?.citaID ??
-      rowOrId?.CitaId ??
-      rowOrId?.CitaID ??
-      rowOrId?.citaIdCode ??
-      rowOrId?.consultaId ??
-      rowOrId?.ConsultaId ??
-      rowOrId?.consultaID ??
-      rowOrId?.ConsultaID ??
-      rowOrId?.turnoId ??
-      rowOrId?.TurnoId ??
-      rowOrId?.everestId ??
-      rowOrId?.EverestId ??
-      rowOrId?.everestID ??
-      rowOrId?.EverestID ??
-      rowOrId?.everest_Id ??
-      rowOrId?.Everest_Id ??
-      rowOrId?.id ??
-      rowOrId?.Id;
-
-    if (candidate === undefined || candidate === null || candidate === '') return null;
-    return candidate;
-  }
+	  resolveCitaId(rowOrId: any): string | number | null {
+	    return resolveCitaIdUtil(rowOrId);
+	  }
 
   private getRowKey(row: any, prefix: 'turno' | 'desactivar'): string | null {
     const citaId = this.resolveCitaId(row);
@@ -632,15 +617,15 @@ export class VistahcComponent {
     return null;
   }
 
-  isTurnoLoading(row: any): boolean {
-    const key = this.getRowKey(row, 'turno');
-    return key ? this.turnoLoadingKeys.has(key) : false;
-  }
+	  isTurnoLoading(row: any): boolean {
+	    const key = this.getRowKey(row, 'turno');
+	    return hasLoadingKey(this.turnoLoadingKeys, key);
+	  }
 
-  isDesactivarLoading(row: any): boolean {
-    const key = this.getRowKey(row, 'desactivar');
-    return key ? this.desactivarLoadingKeys.has(key) : false;
-  }
+	  isDesactivarLoading(row: any): boolean {
+	    const key = this.getRowKey(row, 'desactivar');
+	    return hasLoadingKey(this.desactivarLoadingKeys, key);
+	  }
 
   private quitarFilaContingencia(item: any): void {
     const citaId = this.resolveCitaId(item);
@@ -658,6 +643,8 @@ export class VistahcComponent {
   }
 
   private maybeFixMojibake(value: any): string {
+    return maybeFixMojibakeUtil(value);
+    /* legacy (mismo comportamiento, mantenido por rollback fácil)
     const text = String(value ?? '');
     if (!text) return text;
 
@@ -718,6 +705,7 @@ export class VistahcComponent {
     } catch {
       return text;
     }
+    */
   }
 
   private normalizarTextoCitas(list: any[]): void {
@@ -735,42 +723,6 @@ export class VistahcComponent {
     // tu implementación existente
   }
 
-   /*  irAci(row: any) {
-    this.loading = true;
-    this.du.ObtenerPacientePorId(row.pacienteId).subscribe((response) => {
-      console.log(response)
-      let data: any = {
-        "id": response.id,
-        "tipoIdentificacion": response.tipo_Identificacion,
-        "identificacion": response.identificacion,
-        "nombres": response.nombre,
-        "apellidos": response.primer_Apellido + " " + response.segundo_Apellido,
-        "telefono": response.telefono,
-        "correo": response.correo,
-        "swPermiteEnviar": true
-      }
-
-      this.medicoServices.guardarConsentimientoUsuario(data).subscribe({
-        next: (res: any) => {
-          console.log(res)
-          window.open(environment.vistaCI + res.data.idDocumento, "_target");
-        },
-        error: (err: any) => {
-          console.log(err)
-          Swal.fire({
-            icon: 'error',
-            title: 'Error...',
-            text: err,
-          })
-          this.loading = false
-        },
-        complete: () => {
-          this.loading = false
-        }
-      })
-    }, (error) => {
-    });
-  } */
 
   private getConsentimientoKey(row: any): string {
     const citaId = this.resolveCitaId(row);
@@ -795,7 +747,7 @@ export class VistahcComponent {
       row?.idPaciente;
 
     if (pacienteId === undefined || pacienteId === null || pacienteId === '') {
-      Swal.fire('Dato faltante', 'No se encontrÃ³ el `pacienteId` para abrir Consentimientos.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontrÃ³ el `pacienteId` para abrir Consentimientos.', 'warning');
       return;
     }
 
@@ -865,7 +817,7 @@ export class VistahcComponent {
   finalizar(item: any): void {
     const citaId = this.resolveCitaId(item);
     if (citaId === undefined || citaId === null || citaId === '') {
-      Swal.fire('Dato faltante', 'No se encontro citaId para finalizar la cita.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontro citaId para finalizar la cita.', 'warning');
       return;
     }
 
@@ -929,12 +881,12 @@ export class VistahcComponent {
   desactivarCita(item: any): void {
     const citaId = this.resolveCitaId(item);
     if (citaId === undefined || citaId === null || citaId === '') {
-      Swal.fire('Dato faltante', 'No se encontró el id de la cita para desactivar.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontró el id de la cita para desactivar.', 'warning');
       return;
     }
 
-    const loadingKey = this.getRowKey(item, 'desactivar');
-    if (loadingKey && this.desactivarLoadingKeys.has(loadingKey)) return;
+	    const loadingKey = this.getRowKey(item, 'desactivar');
+	    if (hasLoadingKey(this.desactivarLoadingKeys, loadingKey)) return;
 
     Swal.fire({
       title: 'Esta seguro que desea desactivar la cita?',
@@ -946,17 +898,17 @@ export class VistahcComponent {
       const confirmed = result?.isConfirmed ?? result?.value;
       if (!confirmed) return;
 
-      this.loading = true;
-      if (loadingKey) this.desactivarLoadingKeys.add(loadingKey);
-      this.medicoServices
-        .desactivarCitasAnteriores(String(citaId))
-        .pipe(
-          timeout(15000),
-          finalize(() => {
-            this.loading = false;
-            if (loadingKey) this.desactivarLoadingKeys.delete(loadingKey);
-          })
-        )
+	      this.loading = true;
+	      setLoadingKey(this.desactivarLoadingKeys, loadingKey, true);
+	      this.medicoServices
+	        .desactivarCitasAnteriores(String(citaId))
+	        .pipe(
+	          timeout(TIMEOUT_DESACTIVAR_CITA_MS),
+	          finalize(() => {
+	            this.loading = false;
+	            setLoadingKey(this.desactivarLoadingKeys, loadingKey, false);
+	          })
+	        )
         .subscribe({
         next: (resp: any) => {
           const normalized = String(resp ?? '')
@@ -1000,33 +952,33 @@ export class VistahcComponent {
 
   llamarPaciente(identificacion: string, citaId: any): void {
     if (!identificacion) {
-      Swal.fire('Dato faltante', 'No se encontro la identificacion del paciente.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontro la identificacion del paciente.', 'warning');
       return;
     }
 
     const resolvedCitaId = this.resolveCitaId(citaId);
     if (resolvedCitaId === undefined || resolvedCitaId === null || resolvedCitaId === '') {
-      Swal.fire('Dato faltante', 'No se encontro el id del turno/cita.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontro el id del turno/cita.', 'warning');
       return;
     }
 
-    const everestId = Number(resolvedCitaId);
-    if (!Number.isFinite(everestId)) {
+    const everestId = toNumberOrNull(resolvedCitaId);
+    if (everestId === null) {
       Swal.fire('Dato inválido', 'El id del turno/cita no es numérico.', 'warning');
       return;
     }
 
     const turnoKey = this.getRowKey({ identificacion, citaId: resolvedCitaId }, 'turno');
-    if (turnoKey && this.turnoLoadingKeys.has(turnoKey)) return;
-    if (turnoKey) this.turnoLoadingKeys.add(turnoKey);
+    if (hasLoadingKey(this.turnoLoadingKeys, turnoKey)) return;
+    setLoadingKey(this.turnoLoadingKeys, turnoKey, true);
     this.llamadaService.loading = true;
 
     this.medicoServices
       .llamadoPaciente(String(identificacion), everestId, this.medicoServices.ticketId)
       .pipe(
-        timeout(20000),
+        timeout(TIMEOUT_LLAMAR_TURNO_MS),
         finalize(() => {
-          if (turnoKey) this.turnoLoadingKeys.delete(turnoKey);
+          setLoadingKey(this.turnoLoadingKeys, turnoKey, false);
           this.llamadaService.loading = false;
         })
       )
@@ -1067,7 +1019,7 @@ export class VistahcComponent {
 
   openZoom(link: string): void {
     if (!link) {
-      Swal.fire('Dato faltante', 'No hay link para abrir.', 'info');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, SWAL_MSG_NO_HAY_LINK_ABRIR, 'info');
       return;
     }
     window.open(link, '_blank');
@@ -1075,7 +1027,7 @@ export class VistahcComponent {
 
   abrirZoom(link: string): void {
     if (!link) {
-      Swal.fire('Dato faltante', 'No hay link para abrir.', 'info');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, SWAL_MSG_NO_HAY_LINK_ABRIR, 'info');
       return;
     }
     window.open(link, '_blank');

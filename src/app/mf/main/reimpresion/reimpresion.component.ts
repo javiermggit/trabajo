@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ReimpresionService } from './reimpresion.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT } from '@angular/common';
@@ -6,11 +6,39 @@ import Swal from 'sweetalert2';
 import { MatTableDataSource } from '@angular/material/table';
 import { Reimpresion } from 'src/app/Modelos/Reimpresion';
 import { NotaAdministrativaService } from 'src/app/nota-administrativa/nota-administrativa.service';
-import { Router } from '@angular/router';
 import { EnviarPlantillaCorreo } from 'src/app/Modelos/whatsapp';
 import { environment } from 'src/environments/environment';
 import { catchError, debounceTime, distinctUntilChanged, finalize, firstValueFrom, map, of, Subject, switchMap, takeUntil, timeout } from 'rxjs';
 import { MedicoService } from 'src/app/medico/medico.service';
+import { resolveApiErrorMessage } from 'src/app/utils/api-error';
+import { normalizeText } from 'src/app/utils/string';
+import {
+  DEFAULT_TABLE_PAGE_SIZE,
+  ISO_DATE_ONLY_LENGTH,
+  MAX_PROFESIONALES_VISIBLE,
+  PROFESIONAL_SEARCH_DEBOUNCE_MS,
+  PROFESIONAL_SEARCH_MIN_LENGTH,
+  TIMEOUT_PROFESIONALES_MS,
+  TIPO_DOCUMENTO_DEFAULT_RETRY_DELAY_MS,
+  TIPO_DOCUMENTO_DEFAULT_RETRY_MAX
+} from 'src/app/utils/constants';
+import { sanitizarTerminoProfesional as sanitizarTerminoProfesionalUtil } from 'src/app/utils/sanitize';
+import { buildHistoriaClinicaCorreoHtml } from 'src/app/utils/correo-hc';
+import { buildMensajeEnvioHistoriaClinica } from 'src/app/utils/mensaje-envio';
+import {
+  SWAL_MSG_ERROR_500,
+  SWAL_MSG_HC_NO_EXISTE,
+  SWAL_MSG_NO_PDF,
+  SWAL_MSG_NO_REGISTROS_CONSULTA,
+  SWAL_MSG_NO_REGISTROS_PACIENTE,
+  SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE,
+  SWAL_MSG_RECURSO_NO_EXISTE,
+  SWAL_TITULO_ADVERTENCIA,
+  SWAL_TITULO_ERROR,
+  SWAL_TITULO_ERROR_SERVIDOR,
+  SWAL_TITULO_NO_ENCONTRADO,
+  SWAL_TITULO_SIN_DATOS
+} from 'src/app/utils/swal-messages';
 
 @Component({
   selector: 'app-reimpresion',
@@ -23,7 +51,6 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   private readonly profesionalFallbackValue = '__medico_prueba__';
   private readonly profesionalFallbackLabel = 'Medico Prueba';
   private readonly profesionalesInicial = 40;
-  private readonly profesionalesPaso = 200;
   private readonly profesionalesMaxApi = 50;
   private profesionalLogueadoOption: { label: string; value: string } | null = null;
   private readonly profesionalTermino$ = new Subject<string>();
@@ -45,7 +72,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   SwBoton: boolean = false;
   PacienteIdInd: number=0;
   link: string='';
-  fechahoy = new Date().toISOString().substring(0, 10); 
+  fechahoy = new Date().toISOString().substring(0, ISO_DATE_ONLY_LENGTH);
   public dataSource: MatTableDataSource<Reimpresion> = new MatTableDataSource<Reimpresion>([]);
   public dataSource2: MatTableDataSource<any> = new MatTableDataSource<any>([]);
   public dataSource3: MatTableDataSource<any> = new MatTableDataSource<any>([]);
@@ -71,19 +98,17 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   hcPage: number = 1;
   notasPage: number = 1;
   otrosPage: number = 1;
-  hcPageSize: number = 5;
-  notasPageSize: number = 5;
-  otrosPageSize: number = 5;
+  hcPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
+  notasPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
+  otrosPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
   idcliente :string;
 
-  constructor(
-    public rs:ReimpresionService ,
-    public router: Router,  
-    public changeDetectorRefs: ChangeDetectorRef,
-    public nota: NotaAdministrativaService,
-    public medicoServices: MedicoService,
-    @Inject(DOCUMENT) private document: any 
-   ) {
+	  constructor(
+	    public rs:ReimpresionService ,
+	    public nota: NotaAdministrativaService,
+	    public medicoServices: MedicoService,
+	    @Inject(DOCUMENT) private document: any 
+	   ) {
    
     this.idcliente= environment.numeroCliente;
    }
@@ -154,22 +179,22 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
 	  private configurarAutocompleteProfesionales(): void {
 	    this.profesionalTermino$
 	      .pipe(
-	        debounceTime(350),
+	        debounceTime(PROFESIONAL_SEARCH_DEBOUNCE_MS),
 	        distinctUntilChanged(),
 	        switchMap((termino) => {
 	          const clean = String(termino ?? '').trim();
-	          if (clean.length < 3) {
+	          if (clean.length < PROFESIONAL_SEARCH_MIN_LENGTH) {
 	            return of([]);
 	          }
 
-	          this.loadingProfesionales = true;
-	          return this.rs.ObtenerProfesionalesPorTermino(clean).pipe(
-	            timeout({ first: 8000 }),
-	            catchError(() => of([])),
-	            finalize(() => {
-	              this.loadingProfesionales = false;
-	            })
-	          );
+		          this.loadingProfesionales = true;
+		          return this.rs.ObtenerProfesionalesPorTermino(clean).pipe(
+		            timeout({ first: TIMEOUT_PROFESIONALES_MS }),
+		            catchError(() => of([])),
+		            finalize(() => {
+		              this.loadingProfesionales = false;
+		            })
+		          );
 	        }),
 	        map((listado: any[]) => this.mapProfesionalesToOptions(listado)),
 	        takeUntil(this.destroy$)
@@ -194,10 +219,13 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
 
 
 	  private sanitizarTerminoProfesional(value: string): string {
+	    return sanitizarTerminoProfesionalUtil(value);
+	    /* legacy (mismo comportamiento, mantenido por rollback fácil)
 	    return String(value ?? '')
 	      .replace(/[^A-Za-zÀ-ÿÑñ\s]/g, ' ')
 	      .replace(/\s+/g, ' ')
 	      .trim();
+	    */
 	  }
 
 	  private mapProfesionalesToOptions(listado: any[]): Array<{ label: string; value: string }> {
@@ -303,23 +331,19 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       
       this.loadingReimpresion = false;
       this.loadingHcTable = false;
-    }, (error) => {
-      this.rs.reimpresion = new Array<Reimpresion>();
+	    }, (error) => {
+	      this.rs.reimpresion = new Array<Reimpresion>();
 	      this.dataSource = new MatTableDataSource(this.rs.reimpresion);
 	      this.hcDataOriginal = [];
 	      this.filtroProfesional = null;
 	      this.construirOpcionesProfesionales();
 	      
 	      this.loadingReimpresion = false;
-      if (error.error.error == undefined) {
-        this.errorHcTable = error?.error?.mensaje ?? 'Error al consultar historias clínicas';
-        Swal.fire('Advertencia!!', error.error.mensaje, 'warning')
-      } else {
-        this.errorHcTable = error?.error?.error ?? 'Error al consultar historias clínicas';
-        Swal.fire('Advertencia!!', error.error.error, 'warning')
-      }
-      this.loadingHcTable = false;
-    })
+	      const msg = resolveApiErrorMessage(error, 'Error al consultar historias clínicas');
+	      this.errorHcTable = msg;
+	      Swal.fire('Advertencia!!', msg, 'warning');
+	      this.loadingHcTable = false;
+	    })
 
   }
 
@@ -471,10 +495,10 @@ public consultarPaciente() {
 	        this.filtroProfesional = null;
 	        this.construirOpcionesProfesionales();
 
-        const msg = error?.error?.mensaje ?? error?.error?.error ?? 'No fue posible cargar el profesional logueado';
-        Swal.fire('Advertencia!!', msg, 'error');
-      }
-    }
+	        const msg = resolveApiErrorMessage(error, 'No fue posible cargar el profesional logueado');
+	        Swal.fire('Advertencia!!', msg, 'error');
+	      }
+	    }
 
  imprimirHistoriaClinicaPDF(row: Reimpresion) {
 
@@ -513,19 +537,19 @@ public consultarPaciente() {
         switch (err.message) {
 
           case 'NO_DATA':
-            Swal.fire('Sin datos', 'No existen registros para esta consulta.', 'info');
+            Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_CONSULTA, 'info');
             break;
 
           case 'NOT_FOUND':
-            Swal.fire('No encontrado', 'La historia clínica no existe.', 'warning');
+            Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_HC_NO_EXISTE, 'warning');
             break;
 
           case 'SERVER_ERROR':
-            Swal.fire('Error servidor', 'Ocurrió un error interno (500).', 'error');
+            Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
             break;
 
           default:
-            Swal.fire('Error', 'No se pudo generar el PDF.', 'error');
+            Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
         }
       }
     });
@@ -559,7 +583,7 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
  imprimirUnificadacronica() {
 
   if (!this.rs?.datoPaciente?.id) {
-    Swal.fire('Advertencia', 'Primero debes consultar un paciente', 'warning');
+    Swal.fire(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE, 'warning');
     return;
   }
 
@@ -584,19 +608,19 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
         switch (err.message) {
 
           case 'NO_DATA':
-            Swal.fire('Sin datos', 'No existen registros para este paciente.', 'info');
+            Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_PACIENTE, 'info');
             break;
 
           case 'NOT_FOUND':
-            Swal.fire('No encontrado', 'El recurso no existe.', 'warning');
+            Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_RECURSO_NO_EXISTE, 'warning');
             break;
 
           case 'SERVER_ERROR':
-            Swal.fire('Error servidor', 'Ocurrió un error interno (500).', 'error');
+            Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
             break;
 
           default:
-            Swal.fire('Error', 'No se pudo generar el PDF.', 'error');
+            Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
         }
       }
     });
@@ -605,7 +629,7 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
  imprimirUnificadageneral() {
 
   if (!this.rs?.datoPaciente?.id) {
-    Swal.fire('Advertencia', 'Primero debes consultar un paciente', 'warning');
+    Swal.fire(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE, 'warning');
     return;
   }
 
@@ -630,19 +654,19 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
         switch (err.message) {
 
           case 'NO_DATA':
-            Swal.fire('Sin datos', 'No existen registros para este paciente.', 'info');
+            Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_PACIENTE, 'info');
             break;
 
           case 'NOT_FOUND':
-            Swal.fire('No encontrado', 'El recurso no existe.', 'warning');
+            Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_RECURSO_NO_EXISTE, 'warning');
             break;
 
           case 'SERVER_ERROR':
-            Swal.fire('Error servidor', 'Ocurrió un error interno (500).', 'error');
+            Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
             break;
 
           default:
-            Swal.fire('Error', 'No se pudo generar el PDF.', 'error');
+            Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
         }
       }
     });
@@ -867,8 +891,11 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
       return;
     }
 
-    if (intento < 20) {
-      setTimeout(() => this.inicializarTipoDocumentoPorDefecto(intento + 1), 150);
+    if (intento < TIPO_DOCUMENTO_DEFAULT_RETRY_MAX) {
+      setTimeout(
+        () => this.inicializarTipoDocumentoPorDefecto(intento + 1),
+        TIPO_DOCUMENTO_DEFAULT_RETRY_DELAY_MS
+      );
     }
   }
 
@@ -911,25 +938,11 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
   }
 
   private normalizarTexto(value: string): string {
-    return String(value ?? '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
+    return normalizeText(value);
   }
 
   get totalProfesionales(): number {
     return this.profesionalesAllOptions?.length ?? 0;
-  }
-
-  verMasProfesionales(): void {
-    const total = this.totalProfesionales;
-    if (!total) {
-      return;
-    }
-    this.profesionalesVisibleLimit = Math.min(total, this.profesionalesVisibleLimit + this.profesionalesPaso);
-    this.actualizarOpcionesProfesionalesVisibles();
   }
 
 		  onProfesionalFilter(event: any): void {
@@ -937,7 +950,7 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
 		    const termino = this.sanitizarTerminoProfesional(raw);
 		    this.profesionalFilterValue = termino;
 
-		    if (termino.length < 3) {
+		    if (termino.length < PROFESIONAL_SEARCH_MIN_LENGTH) {
 		      this.profesionalSearchActivo = false;
 		      this.loadingProfesionales = false;
 		      this.catalogoProfesionalesOptions = [];
@@ -976,8 +989,8 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
       visibles = all.filter(o => this.normalizarTexto(o.label).includes(filtroKey));
 
       // Evita renderizar miles de items si el filtro es muy amplio.
-      if (visibles.length > 300) {
-        visibles = visibles.slice(0, 300);
+      if (visibles.length > MAX_PROFESIONALES_VISIBLE) {
+        visibles = visibles.slice(0, MAX_PROFESIONALES_VISIBLE);
       }
     } else {
       const limit = Math.max(0, this.profesionalesVisibleLimit ?? this.profesionalesInicial);
@@ -1133,7 +1146,6 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
 
        //const paciente = await firstValueFrom(this.rs.Obtenercitadet(row.consultaId));
     //console.log('Datos del paciente:', paciente);
-      //linkPdf = await this.generarYSubirPdf(row, tipoHistoria);
      linkPdf = this.construirUrlHistoria(row);
      //console.log('URL generada:', linkPdf);
       //console.log('2️ PDF generado correctamente:', linkPdf);
@@ -1192,47 +1204,29 @@ await firstValueFrom(
   }
 
   private construirMensajeEnvio(row: Reimpresion, tipoTexto: string, linkPdf?: string): string {
-    const medico = row?.medico ?? 'N/A';
-    const especialidad = row?.especialidad ?? 'N/A';
+    const medico = String(row?.medico ?? 'N/A');
+    const especialidad = String(row?.especialidad ?? 'N/A');
     const fecha = row?.fecha ? new Date(row.fecha).toLocaleDateString('es-CO') : 'N/A';
-    const linkTexto = linkPdf ? `\nEnlace: ${linkPdf}` : '';
-    return `Adjunto Historia Clínica ${tipoTexto}.\nMédico: ${medico}\nEspecialidad: ${especialidad}\nFecha: ${fecha}${linkTexto}`;
+    return buildMensajeEnvioHistoriaClinica({ tipoTexto, medico, especialidad, fechaTexto: fecha, linkPdf });
   }
 
-  private construirHtmlCorreo(row: Reimpresion, tipoTexto: string, linkPdf: string): string {
-    const fecha = this.formatearFechaTexto(row?.fecha);
-    const medico = row?.medico ?? 'N/A';
-    const especialidad = row?.especialidad ?? 'N/A';
-    const paciente = this.obtenerNombrePacientePlano();
-    return `<div style="font-family:Segoe UI,Arial,sans-serif;color:#1f2937;">
-      <h3 style="margin:0 0 10px;">Historia Clínica ${tipoTexto}</h3>
-      <p style="margin:0 0 8px;">Paciente: ${paciente}</p>
-      <p style="margin:0 0 8px;">Médico: ${medico}</p>
-      <p style="margin:0 0 8px;">Especialidad: ${especialidad}</p>
-      <p style="margin:0 0 12px;">Fecha: ${fecha}</p>
-      <a href="${linkPdf}" target="_blank" rel="noopener noreferrer"
-         style="display:inline-block;padding:8px 14px;background:#2d6cdf;color:#fff;text-decoration:none;border-radius:6px;">
-         Descargar historia clínica
-      </a>
-    </div>`;
+	  private construirHtmlCorreo(row: Reimpresion, tipoTexto: string, linkPdf: string): string {
+	    const fecha = this.formatearFechaTexto(row?.fecha);
+	    const medico = String(row?.medico ?? 'N/A');
+	    const especialidad = String(row?.especialidad ?? 'N/A');
+	    const paciente = this.obtenerNombrePacientePlano();
+	    return buildHistoriaClinicaCorreoHtml({
+	      tipoTexto,
+	      paciente,
+      medico,
+      especialidad,
+      fechaTexto: fecha,
+      linkPdf,
+    });
+
   }
 
-  private async generarYSubirPdf(row: Reimpresion, tipoHistoria: 'full' | 'lite'): Promise<string> {
-    const blob = await this.generarPdfBlobDesdeFila(row);
-    const nombre = `hc-${row?.consultaId ?? 'consulta'}-${tipoHistoria}.pdf`;
-    const archivo = new File([blob], nombre, { type: 'application/pdf' });
-    const formData = new FormData();
-    formData.append('file', archivo);
-
-    const response = await firstValueFrom(this.rs.uploadPDF(formData));
-    if (!response || response.isError || !response.link) {
-      throw new Error(response?.mensaje || 'No fue posible cargar el PDF');
-    }
-
-    return response.link;
-  }
-
-  private async generarPdfBlobDesdeFila(row: Reimpresion): Promise<Blob> {
+	  private async generarPdfBlobDesdeFila(row: Reimpresion): Promise<Blob> {
 
   const clientId = 1; // o dinámico si lo tienes
   const pacienteId = row?.pacienteId;

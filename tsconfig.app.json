@@ -7,8 +7,8 @@
   "files": [
     "src/main.ts"
   ],
-  "include": [
-    "src/**/*.d.ts",
-    "src/app/mf/app-mf.module.ts"
+  "exclude": [
+    "src/test.ts",
+    "src/**/*.spec.ts"
   ]
 }

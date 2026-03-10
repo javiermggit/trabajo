@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { Especialidad, Citas } from 'src/app/Modelos/Medico';
-import { catchError, EMPTY, map, Observable, throwError } from 'rxjs';
-import { HttpClient, HttpErrorResponse, HttpParams, HttpResponse, } from '@angular/common/http';
-import { delayedRetry } from 'src/app/pipes/reintentoApi';
+import { HttpClient } from '@angular/common/http';
 import { VMPaciente } from 'src/app/Modelos/Modelos';
 
 export type VistahcFiltro = any;
