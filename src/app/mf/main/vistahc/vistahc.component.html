@@ -195,12 +195,12 @@
                 <ng-template #turnoBtnTpl>
                   <div class="flex align-items-center gap-2">
                     <button class="icon-btn icon-btn-turno"
-                      [class.disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
-                      [disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
+                      [class.disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
+                      [disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
                       title="Llamar turno"
                       (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
                       <img
-                        [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
+                        [src]="(item.disableButton && item.ticket_Id != null)
                           ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
                           : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
                         alt="Llamar turno">
@@ -389,12 +389,12 @@
                   <ng-template #turnoBtnRecTpl>
                     <div class="flex align-items-center gap-2">
                       <button class="icon-btn icon-btn-turno"
-                        [class.disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
-                        [disabled]="(item.disableButton && medicoServices.Especialidad.id !== 139) || isTurnoLoading(item)"
+                        [class.disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
+                        [disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
                         title="Llamar turno"
                         (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
                         <img
-                          [src]="(item.disableButton && medicoServices.Especialidad.id !== 139)
+                          [src]="(item.disableButton && item.ticket_Id != null)
                             ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
                             : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
                           alt="Llamar turno">

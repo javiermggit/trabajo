@@ -165,6 +165,11 @@ export class VistahcComponent implements OnInit, OnDestroy {
         this.listado_citas_recuperacion = state.citasEti ?? this.listado_citas_recuperacion;
         this.listado_contingencia = state.citasCont ?? this.listado_contingencia;
 
+        // Si el estado viene cacheado (navegación/restore), normalizar strings para evitar mojibake.
+        this.normalizarTextoCitas(this.listado_citas as any);
+        this.normalizarTextoCitas(this.listado_citas_recuperacion as any);
+        this.normalizarTextoCitas(this.listado_contingencia as any);
+
         this.dataSource = new MatTableDataSource<Citas>(state.citas ?? []);
         this.dataSourceEti = new MatTableDataSource<Citas>(state.citasEti ?? []);
         this.dataSourceCont = new MatTableDataSource<Citas>(state.citasCont ?? []);
