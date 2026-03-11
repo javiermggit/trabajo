@@ -752,7 +752,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
       row?.idPaciente;
 
     if (pacienteId === undefined || pacienteId === null || pacienteId === '') {
-      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontrÃ³ el `pacienteId` para abrir Consentimientos.', 'warning');
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontró el `pacienteId` para abrir Consentimientos.', 'warning');
       return;
     }
 
@@ -790,7 +790,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           const docId = res?.data?.idDocumento;
           if (!docId) {
-            Swal.fire('Error', 'No se recibiÃ³ `idDocumento` al generar el consentimiento.', 'error');
+            Swal.fire('Error', 'No se recibió `idDocumento` al generar el consentimiento.', 'error');
             return;
           }
 
@@ -804,7 +804,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
           if (!popup) {
             Swal.fire(
               'Ventana bloqueada',
-              'Tu navegador bloqueÃ³ la pestaÃ±a. Permite ventanas emergentes para abrir el consentimiento.',
+              'Tu navegador bloqueó la pestaña. Permite ventanas emergentes para abrir el consentimiento.',
               'info'
             );
           }
@@ -813,7 +813,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
           const msg =
             err?.error?.message ??
             err?.message ??
-            (typeof err === 'string' ? err : 'OcurriÃ³ un error al generar el consentimiento.');
+            (typeof err === 'string' ? err : 'Ocurrió un error al generar el consentimiento.');
           Swal.fire('Error', msg, 'error');
         }
       });
@@ -929,10 +929,10 @@ export class VistahcComponent implements OnInit, OnDestroy {
             normalized.includes('success') ||
             normalized.includes('exito');
 
-          // Si el HTTP fue 200, en la prÃ¡ctica ya se desactivÃ³; evitar mensaje confuso al usuario.
+          // Si el HTTP fue 200, en la práctica ya se desactivó; evitar mensaje confuso al usuario.
           Swal.fire('Listo', 'Cita desactivada.', 'success');
           if (!ok) {
-            // Solo para diagnÃ³stico: el backend a veces responde textos no estÃ¡ndar.
+            // Solo para diagnóstico: el backend a veces responde textos no estándar.
             // eslint-disable-next-line no-console
             console.warn('[DesactivarCita] Respuesta inesperada:', resp);
           }
@@ -942,7 +942,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
         },
         error: (err: any) => {
           if (err?.name === 'TimeoutError') {
-            Swal.fire('Tiempo de espera', 'El servicio no respondiÃ³ a tiempo al desactivar la cita.', 'warning');
+            Swal.fire('Tiempo de espera', 'El servicio no respondió a tiempo al desactivar la cita.', 'warning');
             return;
           }
           const msg =
@@ -1006,7 +1006,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         if (err?.name === 'TimeoutError') {
-          Swal.fire('Tiempo de espera', 'Digiturno no respondiÃ³ a tiempo al llamar el turno.', 'warning');
+          Swal.fire('Tiempo de espera', 'Digiturno no respondió a tiempo al llamar el turno.', 'warning');
           return;
         }
         const msg =
