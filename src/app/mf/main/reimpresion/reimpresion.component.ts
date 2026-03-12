@@ -219,13 +219,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
 
 
 	  private sanitizarTerminoProfesional(value: string): string {
-	    return sanitizarTerminoProfesionalUtil(value);
-	    /* legacy (mismo comportamiento, mantenido por rollback fácil)
-	    return String(value ?? '')
-	      .replace(/[^A-Za-zÀ-ÿÑñ\s]/g, ' ')
-	      .replace(/\s+/g, ' ')
-	      .trim();
-	    */
+	    return sanitizarTerminoProfesionalUtil(value);	    
 	  }
 
 	  private mapProfesionalesToOptions(listado: any[]): Array<{ label: string; value: string }> {
