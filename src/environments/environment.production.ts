@@ -4,7 +4,7 @@ export const environment = {
   env: 'Production',
   version: '3.0.0-beta',
 
-vistaCI: 'http://172.27.83.196:82/Apieveresttest/everest_test/cisign', 
+vistaCI: 'http://172.27.83.196:82/Apieveresttest/Everesttest/cisign', 
 URLHc: "http://172.27.83.196:82/Apieveresttest/APIHCHealth",
 URLParametrizacion: "http://172.27.83.196:82/Apieveresttest/APIParametrizacionGeneralHealth",
 URLPaciente: "http://172.27.83.196:82/Apieveresttest/APIPacienteV2",
@@ -18,7 +18,7 @@ UrlTeleconsulta: "https://appcita.viva1a.com.co:8051/teleconsulta",
 URLExtension: "https://appcita.viva1a.com.co:8051/Directorioclicktocallapi/api",
 UrlCIsign: "http://172.27.83.196:82/Apieveresttest/APIConsentimientoInformado/api",
   // Vista externa de Historia Clínica (configurar según despliegue)
-  vistaHC: "",
+vistaHC: "",
 URLApiCorreo: "http://172.27.83.196:82/Apieveresttest/APIEnvioCorreo/api",
 URLWhatsapp:"http://172.27.83.196:82/Apieveresttest/ApiWhatsapp",
 UrlIntegracionDigiturno: "http://172.27.83.196:82/Apieveresttest/ApiIntegracionEverestDigiturno/api",
