@@ -345,6 +345,7 @@
   color: #0f172a;
   border-bottom: 1px solid var(--reimp-border-soft);
   padding: 0.85rem 1rem;
+   align-items: center;
 }
 
 :host ::ng-deep .reimp-table .mat-mdc-row:nth-child(even),

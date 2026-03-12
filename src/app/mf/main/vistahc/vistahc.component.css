@@ -435,12 +435,9 @@
 /* Celdas con íconos/botones: centra de forma robusta (MDC usa flex) */
 :host ::ng-deep .reimp-table .mat-mdc-cell.icon-cell,
 :host ::ng-deep .reimp-table .mat-cell.icon-cell {
-  display: flex;
+ display: flex;
   align-items: center;
   justify-content: center;
-  /* Evita que el separador (border-bottom) quede a media fila cuando la celda
-     no estira al alto de la fila (row más alto por columnas con texto). */
-  align-self: stretch;
 }
 
 /* Sort header centrado en columnas centradas */
@@ -605,6 +602,10 @@
 /* ───────── ICON BUTTONS ───────── */
 .icon-cell { text-align: center; }
 
+.reimp-table .icon-cell .icon-btn {
+  margin-top: 0px;
+}
+
 .icon-btn {
   display: inline-flex;
   align-items: center;
@@ -640,7 +641,11 @@
 
 /* Turno (hablando-fuerte): hover mÃ¡s suave y ajuste visual de alineaciÃ³n */
 .icon-btn.icon-btn-turno {
-  margin-top: 12px;
+  margin-top: 0px;
+}
+
+.icon-btn.icon-btn-acceso {
+  margin-top: 0px;
 }
 
 .icon-btn.icon-btn-turno:hover:not(.disabled):not([disabled]) {
@@ -1217,4 +1222,56 @@
 :host ::ng-deep .p-button,
 :host ::ng-deep .icon-btn {
   box-shadow: none !important;
+}
+
+.acceso-actions{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+}
+
+
+.icon-cell{
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.icon-cell2{
+/* display:flex;
+align-items:center; */
+justify-content:center;
+}
+
+.vhc-swal-popup {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+/* header moderno */
+.vhc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #001f61;
+  color: white;
+  padding: 12px 15px;
+}
+
+/* botón cerrar */
+.vhc-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.swal2-content {
+  margin: -41x !important;
+  padding: 0 !important;
 }

@@ -20,6 +20,8 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { HttpClientModule } from '@angular/common/http';
 import { AccordionModule } from 'primeng/accordion';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { environment } from 'src/environments/environment';
 
 @NgModule({
   imports: [
@@ -39,7 +41,8 @@ import { AccordionModule } from 'primeng/accordion';
     MatSortModule,
     MatPaginatorModule,
     HttpClientModule,
-    AccordionModule   
+    AccordionModule,
+    NgbModule   
     
   ],
   declarations: [
@@ -48,6 +51,14 @@ import { AccordionModule } from 'primeng/accordion';
     VistahcComponent,
     HistoriaClinicaComponent
   ],
-  providers: [DatePipe]
+  providers: [
+    DatePipe,
+    { provide: 'URLHc', useValue: environment.URLHc },
+    { provide: 'URLParametrizacionGeneral', useValue: environment.URLParametrizacion },
+    { provide: 'URLParametrizacion', useValue: environment.URLParametrizacion },
+    { provide: 'UrlPrestador', useValue: environment.UrlPrestador },
+    { provide: 'UrlOrdenamientoHealth', useValue: environment.UrlOrdenamiento },
+    { provide: 'UrlMedicamento', useValue: '' }
+  ]
 })
 export class AppMfModule { }

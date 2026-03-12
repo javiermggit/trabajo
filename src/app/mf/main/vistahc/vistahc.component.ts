@@ -9,6 +9,8 @@ import { CookieService } from 'ngx-cookie-service';
 import { finalize, switchMap, timeout } from 'rxjs';
 import { resolveApiErrorMessage } from 'src/app/utils/api-error';
 import { escapeHtml as escapeHtmlUtil } from 'src/app/utils/string';
+import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import { DatosPacienteService } from 'src/app/datos-paciente/datos-paciente.service';
 import {
   DEFAULT_TABLE_PAGE_SIZE,
   ISO_DATE_ONLY_LENGTH,
@@ -37,7 +39,7 @@ declare const __webpack_require__: { p?: string } | undefined;
   styleUrls: ['./vistahc.component.css']
 })
 export class VistahcComponent implements OnInit, OnDestroy {
- public llamadaService: any = { loading: false, estado: false };  
+ public llamadaService: any = { loading: false, estado: false };
  public filtro = undefined;
   public loadingCI: boolean = false;
   private consentimientoLoadingKey: string | null = null;
@@ -84,10 +86,30 @@ export class VistahcComponent implements OnInit, OnDestroy {
     PacienteIdInd: number=0;
     link: string='';
     fechahoy = new Date().toISOString().substring(0, ISO_DATE_ONLY_LENGTH);
+
+    // Modal (informaciónPaciente)
+    ref: any;
+    videconsulta: boolean = false;
+    citaId: string = '';
+    observacion: any;
+    datoUsuario: any;
+    arrayContacto: Array<string> = [];
+    colgar: boolean = false;
+    validadorMute: boolean = false;
+    minuto: number = 0;
+    segundos: number = 0;
+    tiempo: any;
+    telefonoData: string = '';
+    modalOptions: NgbModalOptions = {
+      size: 'lg',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true
+    };
     private readonly baseDisplayedColumns: string[] = [
     'hora',
     'paciente',
-    //'acceso',
+    'acceso',
     'turno',
     'estado',
     'historias',
@@ -98,6 +120,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
   displayedColumnsCont: string[] = [
     'fecha',
     'paciente',
+    'acceso',
     'verificado',
     'historias',
     'acciones'
@@ -120,11 +143,13 @@ export class VistahcComponent implements OnInit, OnDestroy {
    
 
   //////
-	  constructor(
-	    public rs: VistahcService,
-	    public medicoServices: MedicoService,
-	    private cookieService: CookieService,
-	   ){
+ 	  constructor(
+ 	    public rs: VistahcService,
+ 	    public medicoServices: MedicoService,
+ 	    private cookieService: CookieService,
+      private modalService: NgbModal,
+      public du: DatosPacienteService,
+ 	   ){
 
      this.loginId = environment.production == false ? 'mprueba' : this.cookieService.get('UsuarioMedico');
       //this.loginId = environment.production == false ? "JARAMIREZ" : this.cookieService.get('UsuarioMedico');
@@ -598,6 +623,47 @@ export class VistahcComponent implements OnInit, OnDestroy {
     */
   }
 
+  tipoAgendaAccesoUpper(item: any): string {
+    return String(item?.tipoAgendaAcceso ?? '').toUpperCase();
+  }
+
+  accesoCase(item: any):
+    | 'extramural'
+    | 'lupa'
+    | 'office'
+    | 'video_modal'
+    | 'video_zoom'
+    | 'phone_modal'
+    | 'none' {
+    const tipo = this.tipoAgendaAccesoUpper(item);
+    const modalidad = String(item?.tipoModalidad ?? '').toUpperCase();
+    const accesoId = Number(item?.tipoAgendaAccesoId ?? NaN);
+    const link = String(item?.linkVideoconsulta ?? '').trim();
+    const hasLink = !!link;
+
+    const isExtramural = accesoId === 11 || tipo === 'EXTRAMURAL';
+    if (isExtramural) return 'extramural';
+
+    const isPresencial = tipo === 'PRESENCIAL' || modalidad === 'PRESENCIAL' || accesoId === 1 || accesoId === 6;
+    const isTipo7 = accesoId === 7;
+    if (isTipo7 && isPresencial && !hasLink) return 'lupa';
+    if (isPresencial) return 'office';
+
+    const isTelexperticia = modalidad === 'TELEXPERTICIA' || tipo === 'TELEXPERTICIA';
+    if (isTelexperticia) return hasLink ? 'video_zoom' : 'video_modal';
+
+    const isVideo = tipo === 'VIDEOCONSULTA';
+    if (isVideo) return hasLink ? 'video_zoom' : 'video_modal';
+
+    const isTele = tipo === 'TELECONSULTA' || tipo === 'TELECONSULTA SEDE';
+    if (isTele) return hasLink ? 'video_zoom' : 'phone_modal';
+
+    // Tipo 7 (no presencial)
+    if (isTipo7) return hasLink ? 'video_zoom' : 'phone_modal';
+
+    return 'none';
+  }
+
   private formatHistoricoDate(value: any): string {
     if (!value) return '';
     const d = new Date(value);
@@ -1018,10 +1084,379 @@ export class VistahcComponent implements OnInit, OnDestroy {
     });
   }
 
-  abrirModal(item: any, template: any): void {
-    // tu implementación existente
-  }
+ abrirModal(item: any): void {
+  if (!item) return;
 
+  this.loading = true;
+  this.rs.ObtenerPacientePorId(item.pacienteId).subscribe({
+    next: (response: any) => {
+      this.loading = false;
+      this.datoUsuario = response;
+
+      this.arrayContacto = [];
+      const telefono = String(response?.telefono ?? '').trim();
+      const celular = String(response?.celular ?? '').trim();
+      if (telefono && telefono.toUpperCase() !== 'NO') this.arrayContacto.push(telefono);
+      if (celular && celular.toUpperCase() !== 'NO') this.arrayContacto.push(celular);
+
+      this.observacion = item?.observacion ?? '';
+      this.videconsulta = String(item?.tipoAgendaAcceso ?? '').toUpperCase() === 'VIDEOCONSULTA';
+      this.colgar = false;
+      this.validadorMute = false;
+      this.minuto = 0;
+      this.segundos = 0;
+
+      const html = `
+  <div style="
+    max-height:300px; 
+    overflow:auto; 
+    font-family:sans-serif; 
+    border-radius:8px; 
+    background-color:white;
+  ">
+    <div style="
+      display:flex; 
+      justify-content:space-between; 
+      align-items:center; 
+      background-color:#001f61; 
+      color:white; 
+      padding:12px 16px; 
+      border-top-left-radius:8px; 
+      border-top-right-radius:8px;
+    ">
+      <div style="font-size:15px; font-weight:700; letter-spacing:0.5px;">INFORMACIÓN</div>
+      ${this.colgar ? '<div style="font-size:12px; background:rgba(255,255,255,0.2); padding:3px 8px; border-radius:12px;">EN LLAMADA</div>' : ''}
+      <button id="btnCerrar" style="
+        background:none; border:none; color:white; font-size:22px; cursor:pointer; line-height:1; padding:0;
+      ">&times;</button>
+    </div>
+
+    <div style="padding:16px 20px; font-size:14px; line-height:1.6;">
+      <p style="margin:0 0 14px 0; font-size:14px;">
+        <strong>Nombre Paciente:</strong> ${response?.nombre ?? ''} ${response?.primer_Apellido ?? ''}
+      </p>
+
+      ${this.arrayContacto.length > 0 ? `
+        <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+          <thead>
+            <tr>
+              <th style="
+                border-bottom:2px solid #e0e0e0; 
+                text-align:left; 
+                padding:8px 0; 
+                color:#001f61; 
+                font-size:13px;
+              ">Teléfono</th>
+              <th style="
+                border-bottom:2px solid #e0e0e0; 
+                text-align:right; 
+                padding:8px 0; 
+                color:#001f61; 
+                font-size:13px;
+              ">Llamar</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.arrayContacto.map(tel => `
+              <tr>
+                <td style="padding:8px 0; color:#333; vertical-align:middle;">${tel}</td>
+                <td style="text-align:right; padding:8px 0; vertical-align:middle;">
+                  <button class="btnCall" data-tel="${tel}" style="
+                    background-color:#001f61;
+                    border:none;
+                    border-radius:6px;
+                    color:white;
+                    width:34px;
+                    height:34px;
+                    cursor:pointer;
+                    font-size:16px;
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    transition:background 0.2s;
+                  ">📞</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      ` : ''}
+
+      <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <button type="button" id="btnActivar" 
+          ${this.llamadaService?.estado ? 'style="display:none;"' : ''}
+          style="
+            background-color:#001f61;
+            color:white;
+            border:none;
+            border-radius:6px;
+            padding:8px 18px;
+            font-size:13px;
+            font-weight:600;
+            cursor:pointer;
+          ">Activar</button>
+        <button type="button" id="btnDesactivar" 
+          ${!this.llamadaService?.estado ? 'style="display:none;"' : ''}
+          style="
+            background-color:#c0392b;
+            color:white;
+            border:none;
+            border-radius:6px;
+            padding:8px 18px;
+            font-size:13px;
+            font-weight:600;
+            cursor:pointer;
+          ">Desactivar</button>
+      </div>
+
+      ${this.colgar ? `
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+          <button id="btnColgar" style="
+            background-color:#c0392b;
+            color:white;
+            border:none;
+            border-radius:6px;
+            padding:8px 16px;
+            font-size:13px;
+            font-weight:600;
+            cursor:pointer;
+          ">📴 Colgar</button>
+          <div style="font-size:13px; color:#555; font-variant-numeric:tabular-nums;">
+            ${this.minuto}:${String(this.segundos).padStart(2,'0')}
+          </div>
+          <button id="btnMute" style="
+            background-color:#7f8c8d;
+            color:white;
+            border:none;
+            border-radius:6px;
+            padding:8px 14px;
+            font-size:14px;
+            cursor:pointer;
+          ">${this.validadorMute ? '🎤' : '🔇'}</button>
+        </div>
+      ` : ''}
+
+      ${this.videconsulta ? `
+        <button id="btnVideo" style="
+          background-color:#001f61;
+          color:white;
+          border:none;
+          border-radius:6px;
+          padding:9px 18px;
+          font-size:13px;
+          font-weight:600;
+          cursor:pointer;
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          margin-top:8px;
+        ">🎥 Abrir Videoconsulta</button>
+      ` : ''}
+
+      ${this.observacion ? `
+        <p style="margin:12px 0 0 0; font-size:13px; color:#555;">
+          <strong>Observación:</strong> ${this.observacion}
+        </p>
+      ` : ''}
+    </div>
+  </div>
+`;
+
+      Swal.fire({
+        html,
+        showConfirmButton: false,
+        width: '650px',
+        padding: '0',           // ← elimina el padding interno de sweetalert
+        background: 'transparent', // ← fondo transparente
+        onOpen: (popup: any) => {
+          popup.querySelector('#btnCerrar')?.addEventListener('click', () => Swal.close());
+          popup.querySelectorAll('.btnCall').forEach((btn: any) => {
+            btn.addEventListener('click', (e: any) => {
+              const tel = (e.currentTarget as HTMLElement).getAttribute('data-tel');
+              if (this.llamadaService?.estado) {
+                this.sipCall('call-audio', tel);
+              } else {
+                Swal.fire({
+                  title: 'Información',
+                  text: 'Debes activar el sistema antes de llamar',
+                  icon: 'info',
+                  showConfirmButton: true,
+                  allowOutsideClick: true
+                });
+              }
+            });
+          });
+
+          popup.querySelector('#btnVideo')?.addEventListener('click', () => this.generarLink(item));
+          popup.querySelector('#btnColgar')?.addEventListener('click', () => this.sipHangUp());
+          popup.querySelector('#btnMute')?.addEventListener('click', () => {
+            this.validadorMute = !this.validadorMute;
+            this.sipToggleMute(this.validadorMute);
+          });
+
+          const btnActivar = popup.querySelector('#btnActivar');
+          btnActivar?.addEventListener('click', () => {
+            this.sipRegister();
+            btnActivar.style.display = 'none';
+            popup.querySelector('#btnDesactivar')!.style.display = 'inline-block';
+          });
+
+          const btnDesactivar = popup.querySelector('#btnDesactivar');
+          btnDesactivar?.addEventListener('click', () => {
+            this.sipUnRegister();
+            btnDesactivar.style.display = 'none';
+            popup.querySelector('#btnActivar')!.style.display = 'inline-block';
+          });
+        }
+      });
+
+    },
+    error: (err) => {
+      this.loading = false;
+      Swal.fire('Error', 'No se pudo cargar la información del paciente', 'error');
+    }
+  });
+}
+  
+
+ /*  abrirModal(item: any): void {
+  if (!item) return;
+
+  this.loading = true;
+  this.du.ObtenerPacientePorId(item.pacienteId).subscribe({
+    next: (response: any) => {
+      this.loading = false;
+      this.datoUsuario = response;
+
+      // Construimos array de contactos
+      this.arrayContacto = [];
+      const telefono = String(response?.telefono ?? '').trim();
+      const celular = String(response?.celular ?? '').trim();
+      if (telefono && telefono.toUpperCase() !== 'NO') this.arrayContacto.push(telefono);
+      if (celular && celular.toUpperCase() !== 'NO') this.arrayContacto.push(celular);
+
+      this.observacion = item?.observacion ?? '';
+      this.videconsulta = String(item?.tipoAgendaAcceso ?? '').toUpperCase() === 'VIDEOCONSULTA';
+      this.colgar = false;
+      this.validadorMute = false;
+      this.minuto = 0;
+      this.segundos = 0;
+
+      const html = `
+        <div style="max-height:400px; overflow:auto; font-family:sans-serif;">
+          <div style="display:flex; justify-content:space-between; align-items:center; background-color:#001f61; color:white; padding:10px;">
+            <div><strong>INFORMACIÓN</strong></div>
+            ${this.colgar ? '<div>EN LLAMADA</div>' : ''}
+            <button id="btnCerrar" style="background:none; border:none; color:white; font-size:18px; cursor:pointer;">&times;</button>
+          </div>
+          <div style="padding:10px;">
+            <p><strong>Nombre Paciente:</strong> ${response?.nombres ?? ''} ${response?.primer_Apellido ?? ''}</p>
+
+            ${this.arrayContacto.length > 0 ? `
+              <table style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+                <thead>
+                  <tr>
+                    <th style="border-bottom:1px solid #ccc; text-align:left;">Teléfono</th>
+                    <th style="border-bottom:1px solid #ccc;">Llamar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${this.arrayContacto.map(tel => `
+                    <tr>
+                      <td>${tel}</td>
+                      <td style="text-align:center;">
+                        <button class="btnCall" data-tel="${tel}" style="cursor:pointer;">📞</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : ''}
+
+            <!-- Botones Activar / Desactivar -->
+            <div class="flex gap-2" style="margin-bottom:10px;">
+              <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact" id="btnActivar" ${this.llamadaService?.estado ? 'style="display:none;"' : ''}>Activar</button>
+              <button type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact" id="btnDesactivar" ${!this.llamadaService?.estado ? 'style="display:none;"' : ''}>Desactivar</button>
+            </div>
+
+            ${this.colgar ? `
+              <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+                <button id="btnColgar" style="cursor:pointer;">📴 Colgar</button>
+                <div>${this.minuto}:${String(this.segundos).padStart(2,'0')}</div>
+                <button id="btnMute" style="cursor:pointer;">${this.validadorMute ? '🎤' : '🔇'}</button>
+              </div>
+            ` : ''}
+
+            ${this.videconsulta ? `
+              <button id="btnVideo" style="cursor:pointer; display:flex; align-items:center; gap:5px; margin-top:10px;">
+                🎥 Abrir Videoconsulta
+              </button>
+            ` : ''}
+
+            ${this.observacion ? `<p><strong>Observación:</strong> ${this.observacion}</p>` : ''}
+          </div>
+        </div>
+      `;
+
+      Swal.fire({
+        html,
+        showConfirmButton: false,
+        width: '600px',
+        onOpen: (popup: any) => {
+          // Cerrar modal
+          popup.querySelector('#btnCerrar')?.addEventListener('click', () => Swal.close());
+
+          // Llamadas
+          popup.querySelectorAll('.btnCall').forEach((btn: any) => {
+            btn.addEventListener('click', (e: any) => {
+              const tel = (e.currentTarget as HTMLElement).getAttribute('data-tel');
+              if (this.llamadaService?.estado) {
+                this.sipCall('call-audio', tel);
+              } else {
+                Swal.fire('Información', 'Debes activar el sistema antes de llamar', 'info');
+              }
+            });
+          });
+
+          // Videoconsulta
+          popup.querySelector('#btnVideo')?.addEventListener('click', () => this.generarLink(item));
+
+          // Colgar
+          popup.querySelector('#btnColgar')?.addEventListener('click', () => this.sipHangUp());
+
+          // Mute
+          popup.querySelector('#btnMute')?.addEventListener('click', () => {
+            this.validadorMute = !this.validadorMute;
+            this.sipToggleMute(this.validadorMute);
+          });
+
+          // Activar
+          const btnActivar = popup.querySelector('#btnActivar');
+          btnActivar?.addEventListener('click', () => {
+            this.sipRegister();
+            btnActivar.style.display = 'none';
+            popup.querySelector('#btnDesactivar')!.style.display = 'inline-block';
+          });
+
+          // Desactivar
+          const btnDesactivar = popup.querySelector('#btnDesactivar');
+          btnDesactivar?.addEventListener('click', () => {
+            this.sipUnRegister();
+            btnDesactivar.style.display = 'none';
+            popup.querySelector('#btnActivar')!.style.display = 'inline-block';
+          });
+        }
+      });
+
+    },
+    error: (err) => {
+      this.loading = false;
+      Swal.fire('Error', 'No se pudo cargar la información del paciente', 'error');
+    }
+  });
+} */
+
+  
   openZoom(link: string): void {
     if (!link) {
       Swal.fire(SWAL_TITULO_DATO_FALTANTE, SWAL_MSG_NO_HAY_LINK_ABRIR, 'info');
@@ -1039,33 +1474,112 @@ export class VistahcComponent implements OnInit, OnDestroy {
   }
 
   cerraModalLlamada(): void {
-    // tu implementación existente
+    try {
+      this.ref?.close?.();
+    } catch {
+      // ignore
+    }
+    this.sipHangUp();
+    this.sipUnRegister();
   }
 
-  generarLink(): void {
-    // tu implementación existente
+  generarLink(item?: any): void {
+    const citaId = item ? this.resolveCitaId(item) : null;
+    if (citaId === undefined || citaId === null || citaId === '') {
+      Swal.fire(SWAL_TITULO_DATO_FALTANTE, 'No se encontró citaId para generar el link.', 'warning');
+      return;
+    }
+
+    this.loading = true;
+    this.medicoServices
+      .consultarLink(String(citaId))
+      .pipe(
+        timeout(15000),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        next: (url: any) => {
+          const value = String(url ?? '').trim();
+          if (!value) {
+            Swal.fire('Sin respuesta', 'No se recibió un link para abrir.', 'info');
+            return;
+          }
+          window.open(value, '_blank');
+        },
+        error: (err: any) => {
+          const msg =
+            err?.error?.mensaje ??
+            err?.message ??
+            (typeof err === 'string' ? err : 'Error al generar el link.');
+          Swal.fire('Error', msg, 'error');
+        }
+      });
   }
 
   // ── SIP / Llamadas ────────────────────────────────────────────────────────
 
   sipRegister(): void {
-    // tu implementación existente
+    this.llamadaService.estado = true;
   }
 
   sipUnRegister(): void {
-    // tu implementación existente
+    this.llamadaService.estado = false;
   }
 
   sipCall(type: string, number: string): void {
-    // tu implementación existente
+    void type;
+    const tel = String(number ?? '').trim();
+    if (!tel || tel.toUpperCase() === 'NO') return;
+
+    if (!this.llamadaService?.estado) {
+      Swal.fire('Anuncio', 'Por favor activar para realizar llamadas', 'warning');
+      return;
+    }
+
+    this.telefonoData = tel;
+    this.colgar = true;
+    this.startCallTimer();
+
+    // Fallback (MF): dispara handler tel: del navegador/SO.
+    try {
+      window.open(`tel:${encodeURIComponent(tel)}`);
+    } catch {
+      // ignore
+    }
   }
 
   sipHangUp(): void {
-    // tu implementación existente
+    if (!this.colgar) return;
+    this.colgar = false;
+    this.stopCallTimer();
+    Swal.fire('Anuncio', 'Llamada finalizada', 'success');
   }
 
   sipToggleMute(mute: boolean): void {
-    // tu implementación existente
+    this.validadorMute = !!mute;
+  }
+
+  private startCallTimer(): void {
+    this.stopCallTimer();
+    this.tiempo = setInterval(() => {
+      this.segundos += 1;
+      if (this.segundos >= 60) {
+        this.segundos = 0;
+        this.minuto += 1;
+        if (this.minuto >= 60) this.minuto = 0;
+      }
+    }, 1000);
+  }
+
+  private stopCallTimer(): void {
+    if (this.tiempo) {
+      clearInterval(this.tiempo);
+      this.tiempo = null;
+    }
+    this.minuto = 0;
+    this.segundos = 0;
   }
 
   

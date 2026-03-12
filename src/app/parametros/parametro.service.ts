@@ -1,4 +1,4 @@
-import { Injectable, Inject, EventEmitter } from '@angular/core';
+import { Injectable, Inject, EventEmitter, Optional } from '@angular/core';
 import { Parentesco, CategoriaResponsable, Medicamento, VMMedicamento, Diagnostico, ParMetodoPlanificacion, ParPresentacionesFetales, ParMetodoAnticonceptivos, OrientacionSexual, Ciudad, VMCup, RootObject, FinalidadConsulta, DiagnosticoPrincipal, CausaExterna, TipoDiagnosticoPpal, VMHistoricoResultado, IdentidadGenero } from '../Modelos/Modelos';
 import { HttpClient } from '@angular/common/http';
 import { MedicoService } from '../medico/medico.service';
@@ -7,6 +7,7 @@ import { EMPTY, Observable } from 'rxjs';
 import { delayedRetry } from '../pipes/reintentoApi';
 import { Paquete, parCupsAlertasHc } from '../Modelos/Parametrizacion';
 import { RedPrestador } from '../Modelos/RedPrestador';
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -60,21 +61,21 @@ export class ParametroService {
   public listadoProgramaPaquete: Array<Paquete>;
   public listadoCupsAlert: Array<parCupsAlertasHc>;
   constructor(private http: HttpClient,
-    @Inject('URLHc') hcURL: string,
-    @Inject('URLParametrizacionGeneral') parametUrl: string,
-    @Inject('UrlPrestador') prestadortUrl: string,
-    @Inject('UrlOrdenamientoHealth') baseUrlOrde: string,
-    @Inject('UrlMedicamento') baseUrlMedicamento: string,
-    @Inject('URLParametrizacion') baseUrlParametrizacion: string,
+    @Optional() @Inject('URLHc') hcURL: string | null,
+    @Optional() @Inject('URLParametrizacionGeneral') parametUrl: string | null,
+    @Optional() @Inject('UrlPrestador') prestadortUrl: string | null,
+    @Optional() @Inject('UrlOrdenamientoHealth') baseUrlOrde: string | null,
+    @Optional() @Inject('UrlMedicamento') baseUrlMedicamento: string | null,
+    @Optional() @Inject('URLParametrizacion') baseUrlParametrizacion: string | null,
     
     public medico: MedicoService) {
 
-    this._baseUrl = parametUrl;
-    this._baseUrlHC = hcURL;
-    this._baseUrlPrestador = prestadortUrl
-    this._baseUrlOrde = baseUrlOrde
-    this._baseUrlMedicamentos = baseUrlMedicamento
-    this._baseUrlParametrizacion = baseUrlParametrizacion
+    this._baseUrl = parametUrl ?? environment.URLParametrizacion;
+    this._baseUrlHC = hcURL ?? environment.URLHc;
+    this._baseUrlPrestador = prestadortUrl ?? environment.UrlPrestador;
+    this._baseUrlOrde = baseUrlOrde ?? environment.UrlOrdenamiento;
+    this._baseUrlMedicamentos = baseUrlMedicamento ?? '';
+    this._baseUrlParametrizacion = baseUrlParametrizacion ?? environment.URLParametrizacion;
   }
 
 
