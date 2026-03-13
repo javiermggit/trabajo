@@ -7,19 +7,9 @@
 
         <div class="filter-group">
           <span class="p-float-label full-width">
-            <p-dropdown
-              inputId="especialidad"
-              appendTo="body"
-              [autoZIndex]="true"
-              [baseZIndex]="10000"
-              panelStyleClass="reimp-dropdown-panel"
-              [scrollHeight]="'260px'"
-              [options]="rs.listadoEspecialidad"
-              optionLabel="descripcion"
-              [(ngModel)]="filtro"
-              [filter]="true"
-              filterBy="descripcion"
-              [showClear]="true"
+            <p-dropdown inputId="especialidad" appendTo="body" [autoZIndex]="true" [baseZIndex]="10000"
+              panelStyleClass="reimp-dropdown-panel" [scrollHeight]="'260px'" [options]="rs.listadoEspecialidad"
+              optionLabel="descripcion" [(ngModel)]="filtro" [filter]="true" filterBy="descripcion" [showClear]="true"
               styleClass="w-full modern-dropdown">
             </p-dropdown>
             <label for="especialidad">Especialidad</label>
@@ -58,9 +48,7 @@
 
       <div class="reimp-table-shell">
         <div class="table-responsive">
-          <table mat-table
-            [dataSource]="paginatedRows(dataSource?.data ?? [], hcPage, hcPageSize)"
-            matSort
+          <table mat-table [dataSource]="paginatedRows(dataSource?.data ?? [], hcPage, hcPageSize)" matSort
             class="w-full reimp-table">
 
             <!-- HORA -->
@@ -75,127 +63,121 @@
             <ng-container matColumnDef="paciente">
               <th mat-header-cell *matHeaderCellDef mat-sort-header>Paciente</th>
               <td mat-cell *matCellDef="let item">
-            
-                <div class="patient-metaacceso"  [ngClass]="{
+
+                <div class="patient-metaacceso" [ngClass]="{
                   'mod-video':      item.tipoAgendaAcceso === 'VIDEOCONSULTA' || item.tipoAgendaAcceso === 'VideoConsulta',
                   'mod-presencial': item.tipoAgendaAccesoId === 1 || item.tipoAgendaAccesoId === 6,
                   'mod-tele':       item.tipoAgendaAcceso === 'TELECONSULTA' || item.tipoAgendaAcceso === 'TeleConsulta',
                   'mod-tele-sede':  item.tipoAgendaAcceso === 'TELECONSULTA SEDE',
                   'mod-telexp':     item.tipoModalidad === 'TELEXPERTICIA'
                 }">{{ item.tipoAgendaAcceso }}
-              </div>              
+                </div>
                 <div class="patient-meta">
                   {{ item.identificacion }} ·
                   <ng-container *ngIf="item.edadAnios === 0">{{ item.edadMeses }} Meses</ng-container>
                   <ng-container *ngIf="item.edadAnios !== 0">{{ item.edadAnios }} años</ng-container>
                 </div>
-                 <div class="patient-name">{{ item.nombrePaciente | uppercase }}</div>
+                <div class="patient-name">{{ item.nombrePaciente | uppercase }}</div>
                 <label>
-						Última cita: {{ item.fechaUltimaConsulta | date: 'dd/MM/yyyy' }},
-						<span [ngClass]="{'text-danger': item.estadoUltimaCita == 'No asistió'}">
-							{{ item.estadoUltimaCita }}
-						</span>
-					</label>
+                  Última cita: {{ item.fechaUltimaConsulta | date: 'dd/MM/yyyy' }},
+                  <span [ngClass]="{'text-danger': item.estadoUltimaCita == 'No asistió'}">
+                    {{ item.estadoUltimaCita }}
+                  </span>
+                </label>
               </td>
             </ng-container>
 
             <!-- ACCESO -->
             <!-- ACCESO -->
-<ng-container matColumnDef="acceso">
-  <th mat-header-cell *matHeaderCellDef>Acceso</th>
-  <td mat-cell *matCellDef="let item" class="icon-cell2">
+            <ng-container matColumnDef="acceso">
+              <th mat-header-cell *matHeaderCellDef>Acceso</th>
+              <td mat-cell *matCellDef="let item" class="icon-cell2">
 
-    <ng-container [ngSwitch]="item.tipoAgendaAccesoId">
+                <ng-container [ngSwitch]="item.tipoAgendaAccesoId">
 
-      <!-- PRESENCIAL -->
-      <button *ngSwitchCase="1"
-        class="icon-btn icon-btn-acceso"
-        [disabled]="item.disableButton"
-        title="Presencial">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <path d="M9 22V12h6v10"/>
-          <path d="M3 9h18"/>
-        </svg>
-      </button>
+                  <!-- PRESENCIAL -->
+                  <button *ngSwitchCase="1"
+  class="icon-btn icon-btn-acceso no-link"
+  [disabled]="true"
+  title="No disponible">
 
-      <!-- VIDEO -->
-      <button *ngSwitchCase="2"
-        class="icon-btn icon-btn-acceso"
-        [disabled]="item.disableButton"
-        title="Videoconsulta"
-        (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="23 7 16 12 23 17 23 7"/>
-          <rect x="1" y="5" width="15" height="14" rx="2"/>
-        </svg>
-      </button>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="M9 22V12h6v10"/>
+    <path d="M3 9h18"/>
+    <line x1="4" y1="4" x2="20" y2="20"/> <!-- línea de prohibido -->
+  </svg>
 
-      <!-- TELECONSULTA -->
-      <button *ngSwitchCase="4"
-        class="icon-btn icon-btn-acceso"
-        [disabled]="item.disableButton"
-        title="Teleconsulta"
-        (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="23 7 16 12 23 17 23 7"/>
-          <rect x="1" y="5" width="15" height="14" rx="2"/>
-        </svg>
-      </button>
+</button>
 
-      <!-- EXTRAMURAL -->
-      <button *ngSwitchCase="11"
-        class="icon-btn icon-btn-acceso"
-        [disabled]="item.disableButton"
-        title="Extramural">
-        <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" style="width:28px;height:28px;">
-      </button>
+                  <!-- VIDEO -->
+                  <button *ngSwitchCase="2" class="icon-btn icon-btn-acceso" [disabled]="item.disableButton"
+                    title="Videoconsulta"
+                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7" />
+                      <rect x="1" y="5" width="15" height="14" rx="2" />
+                    </svg>
+                  </button>
 
-      <!-- DEFAULT -->
-      <span *ngSwitchDefault>—</span>
+                  <!-- TELECONSULTA -->
+                  <button *ngSwitchCase="4" class="icon-btn icon-btn-acceso" [disabled]="item.disableButton"
+                    title="Teleconsulta"
+                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="23 7 16 12 23 17 23 7" />
+                      <rect x="1" y="5" width="15" height="14" rx="2" />
+                    </svg>
+                  </button>
 
-    </ng-container>
+                  <!-- EXTRAMURAL -->
+                  <button *ngSwitchCase="11" class="icon-btn icon-btn-acceso" [disabled]="item.disableButton"
+                    title="Extramural">
+                    <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" style="width:28px;height:28px;">
+                  </button>
 
-  </td>
-</ng-container>
+                  <!-- DEFAULT -->
+                  <span *ngSwitchDefault>—</span>
 
-            
+                </ng-container>
+
+              </td>
+            </ng-container>
+
+
             <!-- TURNO -->
-<ng-container matColumnDef="turno">
-  <th mat-header-cell *matHeaderCellDef>Turno</th>
-  <td mat-cell *matCellDef="let item" class="icon-cell2">
+            <ng-container matColumnDef="turno">
+              <th mat-header-cell *matHeaderCellDef>Turno</th>
+              <td mat-cell *matCellDef="let item" class="icon-cell2">
 
-    <ng-container *ngIf="item.swExcedioLimiteLlamada === 1; else turnoBtnTpl">
-      <span class="status-badge status-consulta">Paciente llamado</span>
-    </ng-container>
+                <ng-container *ngIf="item.swExcedioLimiteLlamada === 1; else turnoBtnTpl">
+                  <span class="status-badge status-consulta">Paciente llamado</span>
+                </ng-container>
 
-    <ng-template #turnoBtnTpl>
+                <ng-template #turnoBtnTpl>
 
-      <ng-container *ngIf="!(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL'); else turnoNoAplicaTpl">
-        <button
-          class="icon-btn icon-btn-turno"
-          [class.disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
-          [disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
-          title="Llamar turno"
-          (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
+                  <ng-container
+                    *ngIf="!(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL'); else turnoNoAplicaTpl">
+                    <button class="icon-btn icon-btn-turno"
+                      [class.disabled]="item.estadoCita !== 'FACT' || (item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
+                      [disabled]="item.estadoCita !== 'FACT' || (item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
+                      title="Llamar turno" (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
 
-          <img
-            [src]="(item.disableButton && item.ticket_Id != null)
-              ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
-              : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
-            alt="Llamar turno">
+                      <img [src]="(item.estadoCita !== 'FACT' || (item.disableButton && item.ticket_Id != null) || isTurnoLoading(item))
+      ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
+      : mfAssetUrl('assets/Iconos/hablando-fuerte.png')" alt="Llamar turno">
 
-        </button>
-      </ng-container>
+                    </button>
+                  </ng-container>
 
-      <ng-template #turnoNoAplicaTpl>
-        <span class="patient-meta">—</span>
-      </ng-template>
+                  <ng-template #turnoNoAplicaTpl>
+                    <span class="patient-meta">—</span>
+                  </ng-template>
 
-    </ng-template>
+                </ng-template>
 
-  </td>
-</ng-container>
+              </td>
+            </ng-container>
 
             <!-- ESTADO -->
             <ng-container matColumnDef="estado">
@@ -215,13 +197,10 @@
               <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
               <td mat-cell *matCellDef="let item">
                 <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                  <button [disabled]="item.disableButton" type="button"
-                    class="reimp-btn reimp-btn-compact"
-                    [ngClass]="{
+                  <button [disabled]="item.disableButton" type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
                       'reimp-btn-secondary': item.tipoAgendaAccesoId === 7 || item.tipoAgendaAccesoId === 8,
                       'reimp-btn-primary':   item.tipoAgendaAccesoId !== 7 && item.tipoAgendaAccesoId !== 8
-                    }"
-                    (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
+                    }" (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
                 </ng-container>
                 <ng-container *ngIf="medicoServices.Especialidad.id === 139">
                   <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
@@ -234,11 +213,8 @@
             <ng-container matColumnDef="consentimientos">
               <th mat-header-cell *matHeaderCellDef>Consentimientos</th>
               <td mat-cell *matCellDef="let item">
-                <button
-                  type="button"
-                  class="reimp-btn reimp-btn-secondary reimp-btn-compact"
-                  [disabled]="isConsentimientoLoading(item)"
-                  (click)="irAci(item)">
+                <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                  [disabled]="isConsentimientoLoading(item)" (click)="irAci(item)">
                   <ng-container *ngIf="!isConsentimientoLoading(item); else ciLoadingTpl">Consentimientos</ng-container>
                   <ng-template #ciLoadingTpl>
                     <i class="pi pi-spin pi-spinner" style="font-size: 0.85rem; margin-right: 0.35rem;"></i>
@@ -252,9 +228,7 @@
             <ng-container matColumnDef="historico" *ngIf="mostrarHistoricoCitas()">
               <th mat-header-cell *matHeaderCellDef>Histórico citas</th>
               <td mat-cell *matCellDef="let item">
-                <button
-                  type="button"
-                  class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
                   (click)="obtenerHistoricoAsistioCita(item)">
                   Histórico citas
                 </button>
@@ -276,9 +250,10 @@
           <span class="reimp-counter">{{ buildCounterText(dataSource?.data?.length ?? 0, hcPage, hcPageSize) }}</span>
           <div class="reimp-pager">
             <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
-              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-              [disabled]="hcPage === 1" (click)="previousPage('hc')"></button>
-            <span class="reimp-page-indicator">{{ hcPage }} / {{ totalPages(dataSource?.data?.length ?? 0, hcPageSize) }}</span>
+              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="hcPage === 1"
+              (click)="previousPage('hc')"></button>
+            <span class="reimp-page-indicator">{{ hcPage }} / {{ totalPages(dataSource?.data?.length ?? 0, hcPageSize)
+              }}</span>
             <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
               class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
               [disabled]="!hasNextPage(dataSource?.data?.length ?? 0, hcPage, hcPageSize)"
@@ -306,10 +281,10 @@
         </ng-template>
 
         <div class="reimp-table-shell">
-          <div *ngIf="loadingNotasTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...</div>
+          <div *ngIf="loadingNotasTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...
+          </div>
           <div class="table-responsive">
-            <table mat-table
-              [dataSource]="paginatedRows(dataSourceEti?.data ?? [], notasPage, notasPageSize)"
+            <table mat-table [dataSource]="paginatedRows(dataSourceEti?.data ?? [], notasPage, notasPageSize)"
               class="w-full reimp-table">
 
               <ng-container matColumnDef="hora">
@@ -341,29 +316,56 @@
                 <th mat-header-cell *matHeaderCellDef>Acceso</th>
                 <td mat-cell *matCellDef="let item">
                   <ng-container *ngIf="item.tipoModalidad === 'VIDEOCONSULTA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Videoconsulta" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Videoconsulta" (click)="abrirModal(item)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
                     </button>
                   </ng-container>
                   <ng-container *ngIf="item.tipoModalidad === 'TELEXPERTICIA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Telexperticia" (click)="openZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Telexperticia" (click)="openZoom(item.linkVideoconsulta)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
                     </button>
                   </ng-container>
                   <ng-container *ngIf="item.tipoModalidad === 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Presencial">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M3 9h18"/></svg>
+                    <button class="icon-btn icon-btn-acceso" 
+                    [class.disabled]="item.disableButton"
+                      [disabled]="true" title="Presencial">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M9 22V12h6v10" />
+                        <path d="M3 9h18" />
+                         <!-- línea de prohibido cuando no hay link -->
+                      <line *ngIf="item.tipoModalidad === 'PRESENCIAL'" x1="4" y1="4" x2="20" y2="20" />
+                      </svg>
                     </button>
                   </ng-container>
                   <ng-container *ngIf="item.tipoModalidad === 'TELECONSULTA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Teleconsulta" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Teleconsulta" (click)="abrirModal(item)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
                     </button>
                   </ng-container>
 
-                  <ng-container *ngIf="(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL') && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Extramural">
-                      <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" alt="Extramural" style="width: 28px; height: 28px;">
+                  <ng-container
+                    *ngIf="(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL') && !item.linkVideoconsulta">
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Extramural">
+                      <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" alt="Extramural"
+                        style="width: 28px; height: 28px;">
                     </button>
                   </ng-container>
                 </td>
@@ -377,16 +379,24 @@
                   </ng-container>
                   <ng-template #turnoBtnRecTpl>
                     <div class="flex align-items-center gap-2">
-                      <button class="icon-btn icon-btn-turno"
-                        [class.disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
-                        [disabled]="(item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
-                        title="Llamar turno"
-                        (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
-                        <img
-                          [src]="(item.disableButton && item.ticket_Id != null)
-                            ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
-                            : mfAssetUrl('assets/Iconos/hablando-fuerte.png')"
-                          alt="Llamar turno">
+                      <button class="icon-btn icon-btn-turno" [class.disabled]="
+    item.estadoCita !== 'FACT' ||
+    item.disableButton ||
+    !(item.tipoAgendaAccesoId != 11 || item.tipoAgendaAcceso != 'EXTRAMURAL')
+  " [disabled]="
+    item.estadoCita !== 'FACT' ||
+    item.disableButton ||
+    !(item.tipoAgendaAccesoId != 11 || item.tipoAgendaAcceso != 'EXTRAMURAL')
+  " title="Llamar turno" (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
+
+                        <img [src]="(
+      item.estadoCita !== 'FACT' ||
+      item.disableButton ||
+      !(item.tipoAgendaAccesoId != 11 || item.tipoAgendaAcceso != 'EXTRAMURAL')
+    )
+      ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
+      : mfAssetUrl('assets/Iconos/hablando-fuerte.png')" alt="Llamar turno">
+
                       </button>
                       <span class="patient-meta" *ngIf="item.disableButton && item.ticket_Id != null">
                         Reintento en {{ item.contador }}s
@@ -413,13 +423,10 @@
                 <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
                 <td mat-cell *matCellDef="let item">
                   <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                    <button [disabled]="item.disableButton" type="button"
-                      class="reimp-btn reimp-btn-compact"
-                      [ngClass]="{
+                    <button [disabled]="item.disableButton" type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
                         'reimp-btn-secondary': item.tipoAgendaAccesoId === 7 || item.tipoAgendaAccesoId === 8,
                         'reimp-btn-primary':   item.tipoAgendaAccesoId !== 7 && item.tipoAgendaAccesoId !== 8
-                      }"
-                      (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
+                      }" (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
                   </ng-container>
                   <ng-container *ngIf="medicoServices.Especialidad.id === 139">
                     <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
@@ -431,12 +438,10 @@
               <ng-container matColumnDef="consentimientos">
                 <th mat-header-cell *matHeaderCellDef>Consentimientos</th>
                 <td mat-cell *matCellDef="let item">
-                  <button
-                    type="button"
-                    class="reimp-btn reimp-btn-secondary reimp-btn-compact"
-                    [disabled]="isConsentimientoLoading(item)"
-                    (click)="irAci(item)">
-                    <ng-container *ngIf="!isConsentimientoLoading(item); else ciLoadingTplRec">Consentimientos</ng-container>
+                  <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                    [disabled]="isConsentimientoLoading(item)" (click)="irAci(item)">
+                    <ng-container
+                      *ngIf="!isConsentimientoLoading(item); else ciLoadingTplRec">Consentimientos</ng-container>
                     <ng-template #ciLoadingTplRec>
                       <i class="pi pi-spin pi-spinner" style="font-size: 0.85rem; margin-right: 0.35rem;"></i>
                       Abriendo...
@@ -448,9 +453,7 @@
               <ng-container matColumnDef="historico" *ngIf="mostrarHistoricoCitas()">
                 <th mat-header-cell *matHeaderCellDef>Histórico citas</th>
                 <td mat-cell *matCellDef="let item">
-                  <button
-                    type="button"
-                    class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                  <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
                     (click)="obtenerHistoricoAsistioCita(item)">
                     Histórico citas
                   </button>
@@ -468,12 +471,14 @@
           </div>
 
           <div class="reimp-table-footer" *ngIf="dataSourceEti?.data?.length">
-            <span class="reimp-counter">{{ buildCounterText(dataSourceEti?.data?.length ?? 0, notasPage, notasPageSize) }}</span>
+            <span class="reimp-counter">{{ buildCounterText(dataSourceEti?.data?.length ?? 0, notasPage, notasPageSize)
+              }}</span>
             <div class="reimp-pager">
               <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
-                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-                [disabled]="notasPage === 1" (click)="previousPage('notas')"></button>
-              <span class="reimp-page-indicator">{{ notasPage }} / {{ totalPages(dataSourceEti?.data?.length ?? 0, notasPageSize) }}</span>
+                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="notasPage === 1"
+                (click)="previousPage('notas')"></button>
+              <span class="reimp-page-indicator">{{ notasPage }} / {{ totalPages(dataSourceEti?.data?.length ?? 0,
+                notasPageSize) }}</span>
               <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
                 class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
                 [disabled]="!hasNextPage(dataSourceEti?.data?.length ?? 0, notasPage, notasPageSize)"
@@ -496,10 +501,10 @@
         </ng-template>
 
         <div class="reimp-table-shell">
-          <div *ngIf="loadingOtrosTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...</div>
+          <div *ngIf="loadingOtrosTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...
+          </div>
           <div class="table-responsive">
-            <table mat-table
-              [dataSource]="paginatedRows(dataSourceCont?.data ?? [], otrosPage, otrosPageSize)"
+            <table mat-table [dataSource]="paginatedRows(dataSourceCont?.data ?? [], otrosPage, otrosPageSize)"
               class="w-full reimp-table">
 
               <ng-container matColumnDef="fecha">
@@ -530,17 +535,25 @@
                   <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
                     && (item.tipoAgendaAcceso === 'VIDEOCONSULTA' || item.tipoAgendaAcceso === 'VideoConsulta')
                     && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton"
-                      title="Iniciar videoconsulta" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Iniciar videoconsulta" (click)="abrirModal(item)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
                     </button>
                   </ng-container>
 
                   <!-- Telexperticia -->
                   <ng-container *ngIf="item.tipoModalidad === 'TELEXPERTICIA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton"
-                      title="Abrir Zoom" (click)="openZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="openZoom(item.linkVideoconsulta)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
                     </button>
                   </ng-container>
 
@@ -548,46 +561,78 @@
                   <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
                     && (item.tipoAgendaAcceso === 'VIDEOCONSULTA' || item.tipoAgendaAcceso === 'VideoConsulta' || item.tipoAgendaAcceso === 'TELEXPERTICIA')
                     && !!item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton"
-                      title="Abrir Zoom" (click)="openZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="openZoom(item.linkVideoconsulta)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
                     </button>
                   </ng-container>
 
                   <!-- Presencial -->
-                  <ng-container *ngIf="item.tipoAgendaAccesoId === 1 || item.tipoAgendaAccesoId === 6 || (item.tipoAgendaAcceso === 'PRESENCIAL' && item.tipoAgendaAccesoId !== 7)">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Presencial">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 22V12h6v10"/><path d="M3 9h18"/></svg>
+                  <ng-container
+                    *ngIf="item.tipoAgendaAccesoId === 1 || item.tipoAgendaAccesoId === 6 || (item.tipoAgendaAcceso === 'PRESENCIAL' && item.tipoAgendaAccesoId !== 7)">
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="true" title="Presencial">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <path d="M9 22V12h6v10" />
+                        <path d="M3 9h18" />
+                           <!-- línea de prohibido cuando no hay link -->
+                      <line *ngIf="item.tipoModalidad === 'PRESENCIAL'" x1="4" y1="4" x2="20" y2="20" />
+                      </svg>
                     </button>
                   </ng-container>
 
                   <!-- Tipo 7 presencial sin link -->
-                  <ng-container *ngIf="item.tipoAgendaAccesoId === 7 && !item.linkVideoconsulta && item.tipoAgendaAcceso === 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Buscar">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  <ng-container
+                    *ngIf="item.tipoAgendaAccesoId === 7 && !item.linkVideoconsulta && item.tipoAgendaAcceso === 'PRESENCIAL'">
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Buscar">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                      </svg>
                     </button>
                   </ng-container>
 
                   <!-- Extramural -->
-                  <ng-container *ngIf="(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL') && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton" title="Extramural">
-                      <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" alt="Extramural" style="width: 28px; height: 28px;">
+                  <ng-container
+                    *ngIf="(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL') && !item.linkVideoconsulta">
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Extramural">
+                      <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" alt="Extramural"
+                        style="width: 28px; height: 28px;">
                     </button>
                   </ng-container>
 
                   <!-- Tipo 7 video con link -->
-                  <ng-container *ngIf="item.tipoAgendaAccesoId === 7 && !!item.linkVideoconsulta && item.tipoAgendaAcceso !== 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton"
-                      title="Abrir Zoom" (click)="abrirZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                  <ng-container
+                    *ngIf="item.tipoAgendaAccesoId === 7 && !!item.linkVideoconsulta && item.tipoAgendaAcceso !== 'PRESENCIAL'">
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="abrirZoom(item.linkVideoconsulta)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
                     </button>
                   </ng-container>
 
                   <!-- Tipo 7 teléfono sin link -->
-                  <ng-container *ngIf="item.tipoAgendaAccesoId === 7 && !item.linkVideoconsulta && item.tipoAgendaAcceso !== 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton"
-                      title="Llamar" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <ng-container
+                    *ngIf="item.tipoAgendaAccesoId === 7 && !item.linkVideoconsulta && item.tipoAgendaAcceso !== 'PRESENCIAL'">
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Llamar" (click)="abrirModal(item)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
                     </button>
                   </ng-container>
 
@@ -595,9 +640,13 @@
                   <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
                     && (item.tipoAgendaAcceso === 'TELECONSULTA' || item.tipoAgendaAcceso === 'TeleConsulta' || item.tipoAgendaAcceso === 'TELECONSULTA SEDE')
                     && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton"
-                      title="Llamar" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Llamar" (click)="abrirModal(item)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                      </svg>
                     </button>
                   </ng-container>
 
@@ -605,9 +654,13 @@
                   <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
                     && (item.tipoAgendaAcceso === 'TELECONSULTA' || item.tipoAgendaAcceso === 'TeleConsulta' || item.tipoAgendaAcceso === 'TELECONSULTA SEDE')
                     && !!item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton" [disabled]="item.disableButton"
-                      title="Abrir Zoom" (click)="abrirZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
+                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="abrirZoom(item.linkVideoconsulta)">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" />
+                      </svg>
                     </button>
                   </ng-container>
 
@@ -617,9 +670,9 @@
               <ng-container matColumnDef="verificado">
                 <th mat-header-cell *matHeaderCellDef>Verificado</th>
                 <td mat-cell *matCellDef="let item" class="icon-cell">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                    stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </td>
               </ng-container>
@@ -628,13 +681,10 @@
                 <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
                 <td mat-cell *matCellDef="let item">
                   <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                    <button [disabled]="item.disableButton" type="button"
-                      class="reimp-btn reimp-btn-compact"
-                      [ngClass]="{
+                    <button [disabled]="item.disableButton" type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
                         'reimp-btn-secondary': item.tipoAgendaAccesoId === 7 || item.tipoAgendaAccesoId === 8,
                         'reimp-btn-primary':   item.tipoAgendaAccesoId !== 7 && item.tipoAgendaAccesoId !== 8
-                      }"
-                      (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
+                      }" (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
                   </ng-container>
                   <ng-container *ngIf="medicoServices.Especialidad.id === 139">
                     <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
@@ -647,8 +697,8 @@
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let item">
                   <button type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact"
-                    [disabled]="isDesactivarLoading(item)"
-                    (click)="desactivarCita(item)">{{ isDesactivarLoading(item) ? 'Desactivando...' : 'Desactivar' }}</button>
+                    [disabled]="isDesactivarLoading(item)" (click)="desactivarCita(item)">{{ isDesactivarLoading(item) ?
+                    'Desactivando...' : 'Desactivar' }}</button>
                 </td>
               </ng-container>
 
@@ -663,12 +713,14 @@
           </div>
 
           <div class="reimp-table-footer" *ngIf="dataSourceCont?.data?.length">
-            <span class="reimp-counter">{{ buildCounterText(dataSourceCont?.data?.length ?? 0, otrosPage, otrosPageSize) }}</span>
+            <span class="reimp-counter">{{ buildCounterText(dataSourceCont?.data?.length ?? 0, otrosPage, otrosPageSize)
+              }}</span>
             <div class="reimp-pager">
               <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
-                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-                [disabled]="otrosPage === 1" (click)="previousPage('otros')"></button>
-              <span class="reimp-page-indicator">{{ otrosPage }} / {{ totalPages(dataSourceCont?.data?.length ?? 0, otrosPageSize) }}</span>
+                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="otrosPage === 1"
+                (click)="previousPage('otros')"></button>
+              <span class="reimp-page-indicator">{{ otrosPage }} / {{ totalPages(dataSourceCont?.data?.length ?? 0,
+                otrosPageSize) }}</span>
               <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
                 class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
                 [disabled]="!hasNextPage(dataSourceCont?.data?.length ?? 0, otrosPage, otrosPageSize)"
@@ -714,10 +766,10 @@
           <span class="text-danger patient-meta" *ngIf="!llamadaService?.estado">Inactivo para realizar llamadas</span>
         </div>
         <div class="flex gap-2">
-          <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
-            *ngIf="!llamadaService?.estado" (click)="sipRegister()">Activar</button>
-          <button type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact"
-            *ngIf="llamadaService?.estado" (click)="sipUnRegister()">Desactivar</button>
+          <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact" *ngIf="!llamadaService?.estado"
+            (click)="sipRegister()">Activar</button>
+          <button type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact" *ngIf="llamadaService?.estado"
+            (click)="sipUnRegister()">Desactivar</button>
         </div>
       </div>
 
@@ -746,8 +798,7 @@
         </button>
         <div class="vhc-timer">{{ minuto }}:{{ segundos | number: '2.0' }}</div>
         <button type="button" class="icon-btn" [ngClass]="{ 'vhc-muted': validadorMute }"
-          [title]="validadorMute ? 'Activar micrófono' : 'Silenciar micrófono'"
-          (click)="sipToggleMute(!validadorMute)">
+          [title]="validadorMute ? 'Activar micrófono' : 'Silenciar micrófono'" (click)="sipToggleMute(!validadorMute)">
           <i class="ri-mic-line" *ngIf="!validadorMute"></i>
           <i class="ri-mic-off-line" *ngIf="validadorMute"></i>
         </button>
@@ -755,13 +806,11 @@
     </div>
 
     <div class="vhc-videocall-btn" *ngIf="videconsulta">
-      <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
-        (click)="generarLink(row_)">
-        <img [src]="mfAssetUrl('assets/Iconos/video_icon.png')" alt="Video" style="width: 16px; height: 16px; margin-right: 6px;">
+      <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact" (click)="generarLink(row_)">
+        <img [src]="mfAssetUrl('assets/Iconos/video_icon.png')" alt="Video"
+          style="width: 16px; height: 16px; margin-right: 6px;">
         Abrir Videoconsulta
       </button>
     </div>
   </div>
 </ng-template>
-
-

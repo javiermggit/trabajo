@@ -62,16 +62,16 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   });
 
   loadingReimpresion: boolean = false;
-  loadingImpresion :boolean =false;
+  loadingImpresion: boolean = false;
   identificacion!: string;
-   tipo!: string;
-   especialidad?: string;
-   identificacionNoTemporal! : string;
-  tipoNoTemporal! : string;
-  especialidadNoTemporal? : string; 
+  tipo!: string;
+  especialidad?: string;
+  identificacionNoTemporal!: string;
+  tipoNoTemporal!: string;
+  especialidadNoTemporal?: string;
   SwBoton: boolean = false;
-  PacienteIdInd: number=0;
-  link: string='';
+  PacienteIdInd: number = 0;
+  link: string = '';
   fechahoy = new Date().toISOString().substring(0, ISO_DATE_ONLY_LENGTH);
   public dataSource: MatTableDataSource<Reimpresion> = new MatTableDataSource<Reimpresion>([]);
   public dataSource2: MatTableDataSource<any> = new MatTableDataSource<any>([]);
@@ -101,17 +101,17 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   hcPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
   notasPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
   otrosPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
-  idcliente :string;
+  idcliente: string;
 
-	  constructor(
-	    public rs:ReimpresionService ,
-	    public nota: NotaAdministrativaService,
-	    public medicoServices: MedicoService,
-	    @Inject(DOCUMENT) private document: any 
-	   ) {
-   
-    this.idcliente= environment.numeroCliente;
-   }
+  constructor(
+    public rs: ReimpresionService,
+    public nota: NotaAdministrativaService,
+    public medicoServices: MedicoService,
+    @Inject(DOCUMENT) private document: any
+  ) {
+
+    this.idcliente = environment.numeroCliente;
+  }
 
   ngOnInit(): void {
     this.setProfesionalFallback();
@@ -171,96 +171,96 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       if (wrapper) {
         wrapper.style.maxHeight = `${wrapperMax}px`;
       }
-	  } catch {
-	      // no-op
-	    }
-	  }
+    } catch {
+      // no-op
+    }
+  }
 
-	  private configurarAutocompleteProfesionales(): void {
-	    this.profesionalTermino$
-	      .pipe(
-	        debounceTime(PROFESIONAL_SEARCH_DEBOUNCE_MS),
-	        distinctUntilChanged(),
-	        switchMap((termino) => {
-	          const clean = String(termino ?? '').trim();
-	          if (clean.length < PROFESIONAL_SEARCH_MIN_LENGTH) {
-	            return of([]);
-	          }
+  private configurarAutocompleteProfesionales(): void {
+    this.profesionalTermino$
+      .pipe(
+        debounceTime(PROFESIONAL_SEARCH_DEBOUNCE_MS),
+        distinctUntilChanged(),
+        switchMap((termino) => {
+          const clean = String(termino ?? '').trim();
+          if (clean.length < PROFESIONAL_SEARCH_MIN_LENGTH) {
+            return of([]);
+          }
 
-		          this.loadingProfesionales = true;
-		          return this.rs.ObtenerProfesionalesPorTermino(clean).pipe(
-		            timeout({ first: TIMEOUT_PROFESIONALES_MS }),
-		            catchError(() => of([])),
-		            finalize(() => {
-		              this.loadingProfesionales = false;
-		            })
-		          );
-	        }),
-	        map((listado: any[]) => this.mapProfesionalesToOptions(listado)),
-	        takeUntil(this.destroy$)
-	      )
-		      .subscribe((options) => {
-		        this.catalogoProfesionalesOptions = options;
-		        this.construirOpcionesProfesionales();
+          this.loadingProfesionales = true;
+          return this.rs.ObtenerProfesionalesPorTermino(clean).pipe(
+            timeout({ first: TIMEOUT_PROFESIONALES_MS }),
+            catchError(() => of([])),
+            finalize(() => {
+              this.loadingProfesionales = false;
+            })
+          );
+        }),
+        map((listado: any[]) => this.mapProfesionalesToOptions(listado)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((options) => {
+        this.catalogoProfesionalesOptions = options;
+        this.construirOpcionesProfesionales();
 
-		        if (this.profesionalDropdownAbierto && (this.profesionalFilterValue?.length ?? 0) >= 3) {
-		          setTimeout(() => {
-		            try {
-		              this.profesionalDropdown?.show?.();
-		              this.profesionalDropdown?.focusFilter?.();
-		              this.ajustarPanelDropdown('filtroMedico');
-		            } catch {
-		              // no-op
-		            }
-		          }, 0);
-		        }
-		      });
-		  }
+        if (this.profesionalDropdownAbierto && (this.profesionalFilterValue?.length ?? 0) >= 3) {
+          setTimeout(() => {
+            try {
+              this.profesionalDropdown?.show?.();
+              this.profesionalDropdown?.focusFilter?.();
+              this.ajustarPanelDropdown('filtroMedico');
+            } catch {
+              // no-op
+            }
+          }, 0);
+        }
+      });
+  }
 
 
-	  private sanitizarTerminoProfesional(value: string): string {
-	    return sanitizarTerminoProfesionalUtil(value);	    
-	  }
+  private sanitizarTerminoProfesional(value: string): string {
+    return sanitizarTerminoProfesionalUtil(value);
+  }
 
-	  private mapProfesionalesToOptions(listado: any[]): Array<{ label: string; value: string }> {
-	    const out: Array<{ label: string; value: string }> = [];
-	    const seen = new Set<string>();
+  private mapProfesionalesToOptions(listado: any[]): Array<{ label: string; value: string }> {
+    const out: Array<{ label: string; value: string }> = [];
+    const seen = new Set<string>();
 
-	    for (const item of (listado ?? [])) {
-	      const nombres = String(item?.nombres ?? item?.Nombres ?? item?.nombre ?? item?.Nombre ?? '').trim();
-	      const apellidos = String(item?.apellidos ?? item?.Apellidos ?? '').trim();
-	      const rawLabel = String(
-	        `${nombres} ${apellidos}`.replace(/\s+/g, ' ').trim()
-	          || item?.nombreCompleto
-	          || item?.NombreCompleto
-	          || item?.descripcion
-	          || item?.Descripcion
-	          || ''
-	      ).trim();
+    for (const item of (listado ?? [])) {
+      const nombres = String(item?.nombres ?? item?.Nombres ?? item?.nombre ?? item?.Nombre ?? '').trim();
+      const apellidos = String(item?.apellidos ?? item?.Apellidos ?? '').trim();
+      const rawLabel = String(
+        `${nombres} ${apellidos}`.replace(/\s+/g, ' ').trim()
+        || item?.nombreCompleto
+        || item?.NombreCompleto
+        || item?.descripcion
+        || item?.Descripcion
+        || ''
+      ).trim();
 
-	      if (!rawLabel) {
-	        continue;
-	      }
+      if (!rawLabel) {
+        continue;
+      }
 
-	      const key = this.normalizarTexto(rawLabel);
-	      if (!key || seen.has(key)) {
-	        continue;
-	      }
+      const key = this.normalizarTexto(rawLabel);
+      if (!key || seen.has(key)) {
+        continue;
+      }
 
-	      seen.add(key);
-	      out.push({ label: rawLabel, value: rawLabel });
+      seen.add(key);
+      out.push({ label: rawLabel, value: rawLabel });
 
-	      if (out.length >= this.profesionalesMaxApi) {
-	        break;
-	      }
-	    }
+      if (out.length >= this.profesionalesMaxApi) {
+        break;
+      }
+    }
 
-	    return out;
-	  }
-	  
-	
-	  //
-	   consultarDatoGenerales() {
+    return out;
+  }
+
+
+  //
+  consultarDatoGenerales() {
     if (this.tipo != undefined && this.identificacion != '' && this.identificacion != undefined) {
       this.limpiarDataSources();
       this.identificacionNoTemporal = this.identificacion;
@@ -279,7 +279,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       Swal.fire('Advertencia!!', 'Faltan campos por digitar', 'warning')
     }
   }
-  
+
   private limpiarDataSources() {
     this.rs.reimpresion = [];
     this.dataSource = new MatTableDataSource([]);
@@ -305,13 +305,13 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
     this.otrosPage = 1;
   }
 
-   public consultarDatos() {
+  public consultarDatos() {
     this.loadingReimpresion = true;
     this.loadingHcTable = true;
     this.errorHcTable = '';
     this.SwBoton = false;
     this.rs.ObtenerConsulta(this.identificacion, this.tipo, this.especialidad).subscribe((x) => {
-   
+
       this.rs.reimpresion = x
 
       if (x.length > 0) {
@@ -322,26 +322,26 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.construirOpcionesProfesionales();
       this.aplicarFiltrosLocalesHC();
       this.hcPage = 1;
-      
+
       this.loadingReimpresion = false;
       this.loadingHcTable = false;
-	    }, (error) => {
-	      this.rs.reimpresion = new Array<Reimpresion>();
-	      this.dataSource = new MatTableDataSource(this.rs.reimpresion);
-	      this.hcDataOriginal = [];
-	      this.filtroProfesional = null;
-	      this.construirOpcionesProfesionales();
-	      
-	      this.loadingReimpresion = false;
-	      const msg = resolveApiErrorMessage(error, 'Error al consultar historias clínicas');
-	      this.errorHcTable = msg;
-	      Swal.fire('Advertencia!!', msg, 'warning');
-	      this.loadingHcTable = false;
-	    })
+    }, (error) => {
+      this.rs.reimpresion = new Array<Reimpresion>();
+      this.dataSource = new MatTableDataSource(this.rs.reimpresion);
+      this.hcDataOriginal = [];
+      this.filtroProfesional = null;
+      this.construirOpcionesProfesionales();
+
+      this.loadingReimpresion = false;
+      const msg = resolveApiErrorMessage(error, 'Error al consultar historias clínicas');
+      this.errorHcTable = msg;
+      Swal.fire('Advertencia!!', msg, 'warning');
+      this.loadingHcTable = false;
+    })
 
   }
 
-public consultarPaciente() {
+  public consultarPaciente() {
     this.nota.ObtenerDatosPaciente(this.identificacion, this.tipo).subscribe(x => {
       this.rs.datoPaciente = x;
       if (!x) {
@@ -362,7 +362,7 @@ public consultarPaciente() {
       this.errorNotasTable = 'Error al consultar notas administrativas';
       this.rs.listadonotas = new Array<any>();
       this.dataSource2 = new MatTableDataSource(this.rs.listadonotas);
-      
+
     })
   }
 
@@ -381,7 +381,7 @@ public consultarPaciente() {
       this.aplicarFiltrosLocalesHC();
       this.notasPage = 1;
       this.loadingNotasTable = false;
-     
+
     }, (error) => {
       this.rs.listadonotas = new Array<any>();
       this.dataSource2 = new MatTableDataSource(this.rs.listadonotas);
@@ -389,7 +389,7 @@ public consultarPaciente() {
       this.construirOpcionesProfesionales();
       this.aplicarFiltrosLocalesHC();
       this.loadingNotasTable = false;
-      this.errorNotasTable = 'Error al consultar notas administrativas';      
+      this.errorNotasTable = 'Error al consultar notas administrativas';
       //console.log(error)
 
     })
@@ -397,7 +397,7 @@ public consultarPaciente() {
   }
 
   public consultarHCIntegra() {
-   
+
     this.loadingOtrosTable = true;
     this.errorOtrosTable = '';
     this.nota.ObtenerDatosPaciente(this.identificacion, this.tipo).subscribe(x => {
@@ -416,7 +416,7 @@ public consultarPaciente() {
         this.construirOpcionesProfesionales();
         this.aplicarFiltrosLocalesHC();
         this.otrosPage = 1;
-        this.loadingOtrosTable = false;       
+        this.loadingOtrosTable = false;
       }, (error) => {
 
         this.rs.listadoHcIntegra = new Array<any>();
@@ -426,9 +426,9 @@ public consultarPaciente() {
         this.aplicarFiltrosLocalesHC();
         this.loadingOtrosTable = false;
         this.errorOtrosTable = 'Error al consultar historias de otros sistemas';
-       
+
         console.log(error)
-     
+
       })
     }, () => {
       this.loadingOtrosTable = false;
@@ -437,234 +437,258 @@ public consultarPaciente() {
   }
 
   public consultarEspecialidad() {
-      //this.loadingReimpresion = true;
-        this.rs.ObtenerEspecialidad().subscribe((x) => {    
-  
-        this.rs.listadoEspecialidad = x
-        //this.loadingReimpresion = false;
-      }, (error) => {
-  
-        //this.loadingReimpresion = false;
-        if (error.error.error == undefined) {
-          Swal.fire('Advertencia!!', error.error.mensaje, 'error')
-        } else {
-          Swal.fire('Advertencia!!', error.error.error, 'error')
-        }
-        //console.log(error)
-      })
+    //this.loadingReimpresion = true;
+    this.rs.ObtenerEspecialidad().subscribe((x) => {
+
+      this.rs.listadoEspecialidad = x
+      //this.loadingReimpresion = false;
+    }, (error) => {
+
+      //this.loadingReimpresion = false;
+      if (error.error.error == undefined) {
+        Swal.fire('Advertencia!!', error.error.mensaje, 'error')
+      } else {
+        Swal.fire('Advertencia!!', error.error.error, 'error')
+      }
+      //console.log(error)
+    })
+  }
+
+  public async consultarprofesionales() {
+    // NO cargar el combo desde /api/ParProfesionales.
+    // Se toma el profesional del usuario logueado (cookie UsuarioMedico).
+    this.loadingProfesionales = true;
+
+    try {
+      const resp = await firstValueFrom(this.medicoServices.obtenerDatosLoginByLogin$());
+      const nombres = String(resp?.nombres ?? resp?.Nombres ?? '').trim();
+      const apellidos = String(resp?.apellidos ?? resp?.Apellidos ?? '').trim();
+      const label = `${nombres} ${apellidos}`.replace(/\s+/g, ' ').trim();
+
+      if (label) {
+        this.profesionalLogueadoOption = { label, value: label };
+        this.catalogoProfesionalesOptions = [this.profesionalLogueadoOption];
+        // Solo se carga como opción por defecto; NO se selecciona para no afectar el consultar/filtro local.
+        this.filtroProfesional = null;
+      } else {
+        this.profesionalLogueadoOption = null;
+        this.catalogoProfesionalesOptions = [];
+        this.filtroProfesional = null;
+      }
+
+      // Ya no usamos el listado completo de profesionales.
+      this.rs.listadoprofesinal = [];
+
+      this.loadingProfesionales = false;
+      this.construirOpcionesProfesionales();
+    } catch (error: any) {
+      this.loadingProfesionales = false;
+      this.profesionalLogueadoOption = null;
+      this.catalogoProfesionalesOptions = [];
+      this.rs.listadoprofesinal = [];
+      this.filtroProfesional = null;
+      this.construirOpcionesProfesionales();
+
+      const msg = resolveApiErrorMessage(error, 'No fue posible cargar el profesional logueado');
+      Swal.fire('Advertencia!!', msg, 'error');
+    }
+  }
+
+  imprimirHistoriaClinicaPDF(row: Reimpresion) {
+
+    this.loadingImpresion = true;
+
+    this.rs.ObtenerHcDatoAsociado(row.consultaId);
+
+    const clientId = Number(this.idcliente);
+    const pacienteId = row.pacienteId;
+    let citaId = row.consultaId;
+
+    // Validar y normalizar Base64
+    citaId = this.normalizarBase64(citaId);
+
+    if (!citaId) {
+      Swal.fire('Error', 'El identificador de la cita no es válido', 'error');
+      this.loadingImpresion = false;
+      return;
     }
 
-     public async consultarprofesionales() {
-      // NO cargar el combo desde /api/ParProfesionales.
-      // Se toma el profesional del usuario logueado (cookie UsuarioMedico).
-      this.loadingProfesionales = true;
+    let tipo: 'Morbidity' | 'nursing' | 'dentistry' | 'procedure';
 
-      try {
-        const resp = await firstValueFrom(this.medicoServices.obtenerDatosLoginByLogin$());
-        const nombres = String(resp?.nombres ?? resp?.Nombres ?? '').trim();
-        const apellidos = String(resp?.apellidos ?? resp?.Apellidos ?? '').trim();
-        const label = `${nombres} ${apellidos}`.replace(/\s+/g, ' ').trim();
+    try {
+      tipo = this.resolverTipoHistoria(row);
+    } catch {
+      Swal.fire('', 'No se encuentra habilitado en estos momentos', 'info');
+      this.loadingImpresion = false;
+      return;
+    }
 
-	        if (label) {
-	          this.profesionalLogueadoOption = { label, value: label };
-	          this.catalogoProfesionalesOptions = [this.profesionalLogueadoOption];
-	          // Solo se carga como opción por defecto; NO se selecciona para no afectar el consultar/filtro local.
-	          this.filtroProfesional = null;
-	        } else {
-	          this.profesionalLogueadoOption = null;
-	          this.catalogoProfesionalesOptions = [];
-	          this.filtroProfesional = null;
-	        }
+    this.rs.abrirMorbidity(tipo, clientId, pacienteId, citaId)
+      .subscribe({
+        next: (blob) => {
 
-        // Ya no usamos el listado completo de profesionales.
-        this.rs.listadoprofesinal = [];
+          const fileURL = URL.createObjectURL(blob);
+          window.open(fileURL, '_blank');
 
-        this.loadingProfesionales = false;
-        this.construirOpcionesProfesionales();
-	      } catch (error: any) {
-	        this.loadingProfesionales = false;
-	        this.profesionalLogueadoOption = null;
-	        this.catalogoProfesionalesOptions = [];
-	        this.rs.listadoprofesinal = [];
-	        this.filtroProfesional = null;
-	        this.construirOpcionesProfesionales();
+          this.loadingImpresion = false;
+        },
 
-	        const msg = resolveApiErrorMessage(error, 'No fue posible cargar el profesional logueado');
-	        Swal.fire('Advertencia!!', msg, 'error');
-	      }
-	    }
+        error: (err) => {
 
- imprimirHistoriaClinicaPDF(row: Reimpresion) {
+          this.loadingImpresion = false;
 
-  this.loadingImpresion = true;
+          switch (err.message) {
 
-  this.rs.ObtenerHcDatoAsociado(row.consultaId);
+            case 'NO_DATA':
+              Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_CONSULTA, 'info');
+              break;
 
-  const clientId = Number(this.idcliente);
-  const pacienteId = row.pacienteId;
-  const citaId = row.consultaId;
+            case 'NOT_FOUND':
+              Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_HC_NO_EXISTE, 'warning');
+              break;
 
-  let tipo: 'Morbidity' | 'nursing' | 'dentistry' | 'procedure';
+            case 'SERVER_ERROR':
+              Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
+              break;
 
-  try {
-    tipo = this.resolverTipoHistoria(row);
-  } catch {
-    Swal.fire('', 'No se encuentra habilitado en estos momentos', 'info');
-    this.loadingImpresion = false;
-    return;
-  }
-
-  this.rs.abrirMorbidity(tipo, clientId, pacienteId, citaId)
-    .subscribe({
-      next: (blob) => {
-
-        const fileURL = URL.createObjectURL(blob);
-        window.open(fileURL, '_blank');
-
-        this.loadingImpresion = false;
-      },
-
-      error: (err) => {
-
-        this.loadingImpresion = false;
-
-        switch (err.message) {
-
-          case 'NO_DATA':
-            Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_CONSULTA, 'info');
-            break;
-
-          case 'NOT_FOUND':
-            Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_HC_NO_EXISTE, 'warning');
-            break;
-
-          case 'SERVER_ERROR':
-            Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
-            break;
-
-          default:
-            Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
+            default:
+              Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
+          }
         }
-      }
-    });
-}
-
-private construirUrlHistoria(row: Reimpresion): string {
-
-  const clientId = Number(this.idcliente);
-  const pacienteId = row.pacienteId;
-  const citaId = row.consultaId;
-  const tipo = this.resolverTipoHistoria(row);
-
-  return `${environment.apiReal}/ApiImpresionUnificada/api/Prints/${tipo}/${clientId}/${pacienteId}/${citaId}`;
-}
-
-private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'dentistry' | 'procedure' {
-  switch (row?.link) {
-    case 'impresion':
-      return 'Morbidity';
-    case 'impresionEnfermeria':
-      return 'nursing';
-    case 'impresionOdontologia':
-      return 'dentistry';
-    case 'impresionProcedimiento':
-      return 'procedure';
-    default:
-      throw new Error('UNSUPPORTED_HISTORY_TYPE');
-  }
-}
-
- imprimirUnificadacronica() {
-
-  if (!this.rs?.datoPaciente?.id) {
-    Swal.fire(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE, 'warning');
-    return;
+      });
   }
 
-  const clientId = Number(this.idcliente);
-  const pacienteId = this.rs.datoPaciente.id;
 
-  this.loadingImpresion = true;
-//pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
-  this.rs.abrircronica('unified-morbidity', clientId, pacienteId)
-    .subscribe({
-      next: (blob) => {
+  private normalizarBase64(str: string): string | null {
+    // Quitar espacios y '=' al final
+    str = str.trim().replace(/=+$/, '');
 
-        const fileURL = URL.createObjectURL(blob);
-        window.open(fileURL, '_blank');
+    // Revisar caracteres válidos Base64
+    if (!/^[A-Za-z0-9+/]*$/.test(str)) {
+      return null;
+    }
 
-        this.loadingImpresion = false;
-      },
-      error: (err) => {
+    // Completar '=' para que la longitud sea múltiplo de 4
+    const padding = (4 - (str.length % 4)) % 4;
+    return str + '='.repeat(padding);
+  }
 
-        this.loadingImpresion = false;
+  private construirUrlHistoria(row: Reimpresion): string {
 
-        switch (err.message) {
+    const clientId = Number(this.idcliente);
+    const pacienteId = row.pacienteId;
+    const citaId = row.consultaId;
+    const tipo = this.resolverTipoHistoria(row);
 
-          case 'NO_DATA':
-            Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_PACIENTE, 'info');
-            break;
+    return `${environment.apiReal}/ApiImpresionUnificada/api/Prints/${tipo}/${clientId}/${pacienteId}/${citaId}`;
+  }
 
-          case 'NOT_FOUND':
-            Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_RECURSO_NO_EXISTE, 'warning');
-            break;
+  private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'dentistry' | 'procedure' {
+    switch (row?.link) {
+      case 'impresion':
+        return 'Morbidity';
+      case 'impresionEnfermeria':
+        return 'nursing';
+      case 'impresionOdontologia':
+        return 'dentistry';
+      case 'impresionProcedimiento':
+        return 'procedure';
+      default:
+        throw new Error('UNSUPPORTED_HISTORY_TYPE');
+    }
+  }
 
-          case 'SERVER_ERROR':
-            Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
-            break;
+  imprimirUnificadacronica() {
 
-          default:
-            Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
+    if (!this.rs?.datoPaciente?.id) {
+      Swal.fire(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE, 'warning');
+      return;
+    }
+
+    const clientId = Number(this.idcliente);
+    const pacienteId = this.rs.datoPaciente.id;
+
+    this.loadingImpresion = true;
+    //pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
+    this.rs.abrircronica('unified-morbidity', clientId, pacienteId)
+      .subscribe({
+        next: (blob) => {
+
+          const fileURL = URL.createObjectURL(blob);
+          window.open(fileURL, '_blank');
+
+          this.loadingImpresion = false;
+        },
+        error: (err) => {
+
+          this.loadingImpresion = false;
+
+          switch (err.message) {
+
+            case 'NO_DATA':
+              Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_PACIENTE, 'info');
+              break;
+
+            case 'NOT_FOUND':
+              Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_RECURSO_NO_EXISTE, 'warning');
+              break;
+
+            case 'SERVER_ERROR':
+              Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
+              break;
+
+            default:
+              Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
+          }
         }
-      }
-    });
-}
-
- imprimirUnificadageneral() {
-
-  if (!this.rs?.datoPaciente?.id) {
-    Swal.fire(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE, 'warning');
-    return;
+      });
   }
 
-  const clientId = Number(this.idcliente);
-  const pacienteId = this.rs.datoPaciente.id;
+  imprimirUnificadageneral() {
 
-  this.loadingImpresion = true;
-//pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
-  this.rs.abrirunificada('unified-morbidity', clientId, pacienteId)
-    .subscribe({
-      next: (blob) => {
+    if (!this.rs?.datoPaciente?.id) {
+      Swal.fire(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE, 'warning');
+      return;
+    }
 
-        const fileURL = URL.createObjectURL(blob);
-        window.open(fileURL, '_blank');
+    const clientId = Number(this.idcliente);
+    const pacienteId = this.rs.datoPaciente.id;
 
-        this.loadingImpresion = false;
-      },
-      error: (err) => {
+    this.loadingImpresion = true;
+    //pacienteId=2 pruebas ,cuando no pasarle la variable pacienteId
+    this.rs.abrirunificada('unified-morbidity', clientId, pacienteId)
+      .subscribe({
+        next: (blob) => {
 
-        this.loadingImpresion = false;
+          const fileURL = URL.createObjectURL(blob);
+          window.open(fileURL, '_blank');
 
-        switch (err.message) {
+          this.loadingImpresion = false;
+        },
+        error: (err) => {
 
-          case 'NO_DATA':
-            Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_PACIENTE, 'info');
-            break;
+          this.loadingImpresion = false;
 
-          case 'NOT_FOUND':
-            Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_RECURSO_NO_EXISTE, 'warning');
-            break;
+          switch (err.message) {
 
-          case 'SERVER_ERROR':
-            Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
-            break;
+            case 'NO_DATA':
+              Swal.fire(SWAL_TITULO_SIN_DATOS, SWAL_MSG_NO_REGISTROS_PACIENTE, 'info');
+              break;
 
-          default:
-            Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
+            case 'NOT_FOUND':
+              Swal.fire(SWAL_TITULO_NO_ENCONTRADO, SWAL_MSG_RECURSO_NO_EXISTE, 'warning');
+              break;
+
+            case 'SERVER_ERROR':
+              Swal.fire(SWAL_TITULO_ERROR_SERVIDOR, SWAL_MSG_ERROR_500, 'error');
+              break;
+
+            default:
+              Swal.fire(SWAL_TITULO_ERROR, SWAL_MSG_NO_PDF, 'error');
+          }
         }
-      }
-    });
-}
+      });
+  }
 
   setDateRange(months: number): void {
     const endDate = new Date();
@@ -768,11 +792,11 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     this.otrosPage = 1;
   }
 
-		  limpiarFiltrosLocalesHC() {
-		    this.filtroProfesional = null;
-		    this.filtroFechaRango = null;
-		    this.aplicarFiltrosLocalesHC();
-		  }
+  limpiarFiltrosLocalesHC() {
+    this.filtroProfesional = null;
+    this.filtroFechaRango = null;
+    this.aplicarFiltrosLocalesHC();
+  }
 
   limpiarTodosFiltros() {
     this.tipo = undefined as any;
@@ -780,43 +804,43 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     this.especialidad = undefined;
     this.identificacionNoTemporal = '';
     this.tipoNoTemporal = '';
-	    this.especialidadNoTemporal = undefined;
-		    this.filtroProfesional = null;
-		    this.filtroFechaRango = null;
+    this.especialidadNoTemporal = undefined;
+    this.filtroProfesional = null;
+    this.filtroFechaRango = null;
     this.filtersFormGroup.controls.dateRangeControl.setValue(null);
     this.SwBoton = false;
     this.limpiarDataSources();
     // Mantiene la opción quemada visible, pero sin selección aplicada.
-		    this.filtroProfesional = null;
-		    this.construirOpcionesProfesionales();
-		  }
+    this.filtroProfesional = null;
+    this.construirOpcionesProfesionales();
+  }
 
-	  private construirOpcionesProfesionales() {
-	    const allRows: any[] = [
-	      ...(this.hcDataOriginal ?? []),
-	      ...(this.notasDataOriginal ?? []),
-	      ...(this.otrosDataOriginal ?? []),
-	    ];
+  private construirOpcionesProfesionales() {
+    const allRows: any[] = [
+      ...(this.hcDataOriginal ?? []),
+      ...(this.notasDataOriginal ?? []),
+      ...(this.otrosDataOriginal ?? []),
+    ];
 
-	    const nombresEnTablas = this.profesionalSearchActivo
-	      ? []
-	      : allRows
-	        .map(item => this.obtenerNombreProfesional(item))
-	        .filter(Boolean);
+    const nombresEnTablas = this.profesionalSearchActivo
+      ? []
+      : allRows
+        .map(item => this.obtenerNombreProfesional(item))
+        .filter(Boolean);
 
-	    const optionsByKey = new Map<string, { label: string; value: string }>();
+    const optionsByKey = new Map<string, { label: string; value: string }>();
 
-	    if (this.profesionalLogueadoOption) {
-	      const key = this.normalizarTexto(this.profesionalLogueadoOption.value);
-	      if (key && !optionsByKey.has(key)) {
-	        optionsByKey.set(key, this.profesionalLogueadoOption);
-	      }
-	    }
-	
-	    for (const opt of (this.catalogoProfesionalesOptions ?? [])) {
-	      const key = this.normalizarTexto(opt.value);
-	      if (key && !optionsByKey.has(key)) {
-	        optionsByKey.set(key, opt);
+    if (this.profesionalLogueadoOption) {
+      const key = this.normalizarTexto(this.profesionalLogueadoOption.value);
+      if (key && !optionsByKey.has(key)) {
+        optionsByKey.set(key, this.profesionalLogueadoOption);
+      }
+    }
+
+    for (const opt of (this.catalogoProfesionalesOptions ?? [])) {
+      const key = this.normalizarTexto(opt.value);
+      if (key && !optionsByKey.has(key)) {
+        optionsByKey.set(key, opt);
       }
     }
 
@@ -856,18 +880,18 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
         this.normalizarTexto(o.value) === this.normalizarTexto(this.filtroProfesional!)
       );
 
-		    if (!existeSeleccion) {
-		      this.filtroProfesional = null;
-		    }
-		  }
+    if (!existeSeleccion) {
+      this.filtroProfesional = null;
+    }
+  }
 
-		  private setProfesionalFallback() {
-		    this.profesionalesAllOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
-		    this.profesionalesVisibleLimit = this.profesionalesInicial;
-		    this.profesionalFilterValue = '';
-		    this.actualizarOpcionesProfesionalesVisibles();
-		    this.filtroProfesional = null;
-		  }
+  private setProfesionalFallback() {
+    this.profesionalesAllOptions = [{ label: this.profesionalFallbackLabel, value: this.profesionalFallbackValue }];
+    this.profesionalesVisibleLimit = this.profesionalesInicial;
+    this.profesionalFilterValue = '';
+    this.actualizarOpcionesProfesionalesVisibles();
+    this.filtroProfesional = null;
+  }
 
   private inicializarTipoDocumentoPorDefecto(intento: number = 0): void {
     const yaSeleccionado = this.tipo !== undefined && this.tipo !== null && this.tipo !== '';
@@ -939,38 +963,38 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     return this.profesionalesAllOptions?.length ?? 0;
   }
 
-		  onProfesionalFilter(event: any): void {
-		    const raw = String(event?.filter ?? '');
-		    const termino = this.sanitizarTerminoProfesional(raw);
-		    this.profesionalFilterValue = termino;
+  onProfesionalFilter(event: any): void {
+    const raw = String(event?.filter ?? '');
+    const termino = this.sanitizarTerminoProfesional(raw);
+    this.profesionalFilterValue = termino;
 
-		    if (termino.length < PROFESIONAL_SEARCH_MIN_LENGTH) {
-		      this.profesionalSearchActivo = false;
-		      this.loadingProfesionales = false;
-		      this.catalogoProfesionalesOptions = [];
-		      this.profesionalTermino$.next('');
-		      this.construirOpcionesProfesionales();
-		      return;
-		    }
+    if (termino.length < PROFESIONAL_SEARCH_MIN_LENGTH) {
+      this.profesionalSearchActivo = false;
+      this.loadingProfesionales = false;
+      this.catalogoProfesionalesOptions = [];
+      this.profesionalTermino$.next('');
+      this.construirOpcionesProfesionales();
+      return;
+    }
 
-		    this.profesionalSearchActivo = true;
-		    this.loadingProfesionales = true;
-		    this.profesionalTermino$.next(termino);
-		  }
+    this.profesionalSearchActivo = true;
+    this.loadingProfesionales = true;
+    this.profesionalTermino$.next(termino);
+  }
 
-		  onProfesionalShow(): void {
-		    this.profesionalDropdownAbierto = true;
-		  }
+  onProfesionalShow(): void {
+    this.profesionalDropdownAbierto = true;
+  }
 
-		  onProfesionalHide(): void {
-		    this.profesionalFilterValue = '';
-		    this.profesionalSearchActivo = false;
-		    this.profesionalDropdownAbierto = false;
-		    this.loadingProfesionales = false;
-		    this.catalogoProfesionalesOptions = [];
-		    this.profesionalTermino$.next('');
-		    this.construirOpcionesProfesionales();
-		  }
+  onProfesionalHide(): void {
+    this.profesionalFilterValue = '';
+    this.profesionalSearchActivo = false;
+    this.profesionalDropdownAbierto = false;
+    this.loadingProfesionales = false;
+    this.catalogoProfesionalesOptions = [];
+    this.profesionalTermino$.next('');
+    this.construirOpcionesProfesionales();
+  }
 
   private actualizarOpcionesProfesionalesVisibles(): void {
     const all = this.profesionalesAllOptions ?? [];
@@ -1003,12 +1027,12 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
       }
     }
 
-	    // Evita que el overlay de PrimeNG se cierre al cambiar la referencia del arreglo.
-	    if (!this.profesionalesOptions) {
-	      this.profesionalesOptions = [];
-	    }
-	    this.profesionalesOptions.splice(0, this.profesionalesOptions.length, ...visibles);
-	  }
+    // Evita que el overlay de PrimeNG se cierre al cambiar la referencia del arreglo.
+    if (!this.profesionalesOptions) {
+      this.profesionalesOptions = [];
+    }
+    this.profesionalesOptions.splice(0, this.profesionalesOptions.length, ...visibles);
+  }
 
   private obtenerFechaItem(item: any): Date | null {
     const value = item?.fecha ?? item?.fechaCreacion ?? item?.fechaRegistro ?? item?.fechaAtencion ?? null;
@@ -1026,7 +1050,7 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
   }
 
-  
+
   async seleccionarTipoImpresion(row: Reimpresion) {
     const tipoResult = await Swal.fire({
       title: 'Tipo de impresión',
@@ -1126,7 +1150,7 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
     destino: string
   ): Promise<void> {
     const tipoTexto = tipoHistoria === 'full' ? 'Full' : 'Lite';
-    let linkPdf = '';    
+    let linkPdf = '';
 
     Swal.fire({
       title: 'Preparando envio',
@@ -1134,14 +1158,14 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
       allowOutsideClick: false,
       onOpen: () => Swal.showLoading()
     });
-     //console.log('1. Método enviarHistoriaSeleccionada ejecutado');
+    //console.log('1. Método enviarHistoriaSeleccionada ejecutado');
 
     try {
 
-       //const paciente = await firstValueFrom(this.rs.Obtenercitadet(row.consultaId));
-    //console.log('Datos del paciente:', paciente);
-     linkPdf = this.construirUrlHistoria(row);
-     //console.log('URL generada:', linkPdf);
+      //const paciente = await firstValueFrom(this.rs.Obtenercitadet(row.consultaId));
+      //console.log('Datos del paciente:', paciente);
+      linkPdf = this.construirUrlHistoria(row);
+      //console.log('URL generada:', linkPdf);
       //console.log('2️ PDF generado correctamente:', linkPdf);
     } catch {
       Swal.close();
@@ -1167,34 +1191,34 @@ private resolverTipoHistoria(row: Reimpresion): 'Morbidity' | 'nursing' | 'denti
         this.enviarFallbackCorreo(destino, tipoTexto, mensaje);
       }
     } else {
-      
-
-  try {
-    // Guardamos celular limpio
-this.rs.celularEnvio = this.normalizarNumeroWhatsapp(destino).replace(/^57/, '');
 
 
-const responseAsociado = await firstValueFrom(this.rs.ObtenerPaciente(row.consultaId));
- //console.log('4. datos pacientes:', responseAsociado);
-
-if (!responseAsociado) {
-  throw new Error('No se pudo obtener datos asociados');
-}
+      try {
+        // Guardamos celular limpio
+        this.rs.celularEnvio = this.normalizarNumeroWhatsapp(destino).replace(/^57/, '');
 
 
+        const responseAsociado = await firstValueFrom(this.rs.ObtenerPaciente(row.consultaId));
+        //console.log('4. datos pacientes:', responseAsociado);
 
-// Enviamos WhatsApp
-await firstValueFrom(
-  //this.rs.sendWhatsapp(linkPdf, responseAsociado,row);
-  this.rs.sendWhatsapp(linkPdf, responseAsociado,row)
-   
-);
-    Swal.fire('Envío realizado', `WhatsApp enviado correctamente (${tipoTexto})`, 'success');
-  } catch {
-    
-    this.enviarFallbackWhatsapp(destino, mensaje, tipoTexto);
-  }
-}
+        if (!responseAsociado) {
+          throw new Error('No se pudo obtener datos asociados');
+        }
+
+
+
+        // Enviamos WhatsApp
+        await firstValueFrom(
+          //this.rs.sendWhatsapp(linkPdf, responseAsociado,row);
+          this.rs.sendWhatsapp(linkPdf, responseAsociado, row)
+
+        );
+        Swal.fire('Envío realizado', `WhatsApp enviado correctamente (${tipoTexto})`, 'success');
+      } catch {
+
+        this.enviarFallbackWhatsapp(destino, mensaje, tipoTexto);
+      }
+    }
   }
 
   private construirMensajeEnvio(row: Reimpresion, tipoTexto: string, linkPdf?: string): string {
@@ -1204,14 +1228,14 @@ await firstValueFrom(
     return buildMensajeEnvioHistoriaClinica({ tipoTexto, medico, especialidad, fechaTexto: fecha, linkPdf });
   }
 
-	  private construirHtmlCorreo(row: Reimpresion, tipoTexto: string, linkPdf: string): string {
-	    const fecha = this.formatearFechaTexto(row?.fecha);
-	    const medico = String(row?.medico ?? 'N/A');
-	    const especialidad = String(row?.especialidad ?? 'N/A');
-	    const paciente = this.obtenerNombrePacientePlano();
-	    return buildHistoriaClinicaCorreoHtml({
-	      tipoTexto,
-	      paciente,
+  private construirHtmlCorreo(row: Reimpresion, tipoTexto: string, linkPdf: string): string {
+    const fecha = this.formatearFechaTexto(row?.fecha);
+    const medico = String(row?.medico ?? 'N/A');
+    const especialidad = String(row?.especialidad ?? 'N/A');
+    const paciente = this.obtenerNombrePacientePlano();
+    return buildHistoriaClinicaCorreoHtml({
+      tipoTexto,
+      paciente,
       medico,
       especialidad,
       fechaTexto: fecha,
@@ -1220,22 +1244,22 @@ await firstValueFrom(
 
   }
 
-	  private async generarPdfBlobDesdeFila(row: Reimpresion): Promise<Blob> {
+  private async generarPdfBlobDesdeFila(row: Reimpresion): Promise<Blob> {
 
-  const clientId = 1; // o dinámico si lo tienes
-  const pacienteId = row?.pacienteId;
-  const citaId = row?.consultaId; // NO convertir a number si es string
+    const clientId = 1; // o dinámico si lo tienes
+    const pacienteId = row?.pacienteId;
+    const citaId = row?.consultaId; // NO convertir a number si es string
 
-  if (row?.link === 'impresion') {
-    return await firstValueFrom(
-      this.rs.descargarPdfDesdeUrl('mor',clientId, pacienteId, citaId)
-    );
+    if (row?.link === 'impresion') {
+      return await firstValueFrom(
+        this.rs.descargarPdfDesdeUrl('mor', clientId, pacienteId, citaId)
+      );
+    }
+
+    throw new Error('Tipo de historia clínica no soportado para envío');
   }
 
-  throw new Error('Tipo de historia clínica no soportado para envío');
-}
 
- 
   private enviarFallbackCorreo(destino: string, tipoTexto: string, mensaje: string): void {
     const asunto = encodeURIComponent(`Historia Clínica ${tipoTexto}`);
     const cuerpo = encodeURIComponent(mensaje);

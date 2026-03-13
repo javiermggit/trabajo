@@ -69,8 +69,9 @@ export class MedicoService {
     //this.loginId = environment.production == false ? "JHERNANDEZR" : this.cookieService.get('UsuarioMedico'); //odonto
      //this.loginId = environment.production == false ? "JARAMIREZ" : this.cookieService.get('UsuarioMedico');
     //this.loginId = environment.production == false ? "CMENDEZ" : this.cookieService.get('UsuarioMedico');
-    this.loginId = environment.production == false ? "mprueba" : this.cookieService.get('UsuarioMedico');
-
+    //this.loginId = environment.production == false ? "mprueba" : this.cookieService.get('UsuarioMedico');
+    this.loginId = environment.production == false ? 'mediprueba' : this.cookieService.get('UsuarioMedico');
+    
     this._baseUrlLogin = environment.UrlLogin;
     this._apiIntegracion = environment.UrlIntegracionDigiturno;
     this.urlExtension = environment.URLExtension;

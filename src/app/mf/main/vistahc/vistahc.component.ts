@@ -39,8 +39,8 @@ declare const __webpack_require__: { p?: string } | undefined;
   styleUrls: ['./vistahc.component.css']
 })
 export class VistahcComponent implements OnInit, OnDestroy {
- public llamadaService: any = { loading: false, estado: false };
- public filtro = undefined;
+  public llamadaService: any = { loading: false, estado: false };
+  public filtro = undefined;
   public loadingCI: boolean = false;
   private consentimientoLoadingKey: string | null = null;
   private turnoLoadingKeys = new Set<string>();
@@ -54,13 +54,13 @@ export class VistahcComponent implements OnInit, OnDestroy {
   /** Recuperación (adicionales) */
   public dataSourceEti: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
 
-	  /** Contingencia */
-	  public dataSourceCont: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
-	  public loginId: string;
-	  row_: any;
-	  listado_citas: any;
-	  listado_citas_recuperacion: any;
-	  listado_contingencia: any;
+  /** Contingencia */
+  public dataSourceCont: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
+  public loginId: string;
+  row_: any;
+  listado_citas: any;
+  listado_citas_recuperacion: any;
+  listado_contingencia: any;
   loading = false;
   especialidad?: string;
   errorHcTable: string = '';
@@ -69,44 +69,44 @@ export class VistahcComponent implements OnInit, OnDestroy {
   hcPage: number = 1;
   notasPage: number = 1;
   otrosPage: number = 1;
-	  hcPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
-	  notasPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
-	  otrosPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
+  hcPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
+  notasPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
+  otrosPageSize: number = DEFAULT_TABLE_PAGE_SIZE;
 
 
   /////
-  
-    loadingImpresion :boolean =false;
-    identificacion!: string;
-     tipo!: string;
-     identificacionNoTemporal! : string;
-    tipoNoTemporal! : string;
-    especialidadNoTemporal? : string; 
-    SwBoton: boolean = false;
-    PacienteIdInd: number=0;
-    link: string='';
-    fechahoy = new Date().toISOString().substring(0, ISO_DATE_ONLY_LENGTH);
 
-    // Modal (informaciónPaciente)
-    ref: any;
-    videconsulta: boolean = false;
-    citaId: string = '';
-    observacion: any;
-    datoUsuario: any;
-    arrayContacto: Array<string> = [];
-    colgar: boolean = false;
-    validadorMute: boolean = false;
-    minuto: number = 0;
-    segundos: number = 0;
-    tiempo: any;
-    telefonoData: string = '';
-    modalOptions: NgbModalOptions = {
-      size: 'lg',
-      backdrop: 'static',
-      keyboard: false,
-      centered: true
-    };
-    private readonly baseDisplayedColumns: string[] = [
+  loadingImpresion: boolean = false;
+  identificacion!: string;
+  tipo!: string;
+  identificacionNoTemporal!: string;
+  tipoNoTemporal!: string;
+  especialidadNoTemporal?: string;
+  SwBoton: boolean = false;
+  PacienteIdInd: number = 0;
+  link: string = '';
+  fechahoy = new Date().toISOString().substring(0, ISO_DATE_ONLY_LENGTH);
+
+  // Modal (informaciónPaciente)
+  ref: any;
+  videconsulta: boolean = false;
+  citaId: string = '';
+  observacion: any;
+  datoUsuario: any;
+  arrayContacto: Array<string> = [];
+  colgar: boolean = false;
+  validadorMute: boolean = false;
+  minuto: number = 0;
+  segundos: number = 0;
+  tiempo: any;
+  telefonoData: string = '';
+  modalOptions: NgbModalOptions = {
+    size: 'lg',
+    backdrop: 'static',
+    keyboard: false,
+    centered: true
+  };
+  private readonly baseDisplayedColumns: string[] = [
     'hora',
     'paciente',
     'acceso',
@@ -131,28 +131,30 @@ export class VistahcComponent implements OnInit, OnDestroy {
       ? [...this.baseDisplayedColumns, 'historico']
       : this.baseDisplayedColumns;
   }
-   
-    notasDataOriginal: any[] = [];
-    otrosDataOriginal: any[] = [];
-    profesionalesOptions: Array<{ label: string; value: string }> = [];
-    filtroProfesional: string | null = null;
-    filtroFechaRango: Date[] | null = null;
-    loadingHcTable: boolean = false;
-    loadingNotasTable: boolean = false;
-    loadingOtrosTable: boolean = false;
-   
+
+  notasDataOriginal: any[] = [];
+  otrosDataOriginal: any[] = [];
+  profesionalesOptions: Array<{ label: string; value: string }> = [];
+  filtroProfesional: string | null = null;
+  filtroFechaRango: Date[] | null = null;
+  loadingHcTable: boolean = false;
+  loadingNotasTable: boolean = false;
+  loadingOtrosTable: boolean = false;
+
 
   //////
- 	  constructor(
- 	    public rs: VistahcService,
- 	    public medicoServices: MedicoService,
- 	    private cookieService: CookieService,
-      private modalService: NgbModal,
-      public du: DatosPacienteService,
- 	   ){
+  constructor(
+    public rs: VistahcService,
+    public medicoServices: MedicoService,
+    private cookieService: CookieService,
+    private modalService: NgbModal,
+    public du: DatosPacienteService,
+  ) {
 
-     this.loginId = environment.production == false ? 'mprueba' : this.cookieService.get('UsuarioMedico');
-      //this.loginId = environment.production == false ? "JARAMIREZ" : this.cookieService.get('UsuarioMedico');
+    //this.loginId = environment.production == false ? 'mprueba' : this.cookieService.get('UsuarioMedico');
+     this.loginId = environment.production == false ? 'mediprueba' : this.cookieService.get('UsuarioMedico');
+   
+    //this.loginId = environment.production == false ? "JARAMIREZ" : this.cookieService.get('UsuarioMedico');
   }
 
   mfAssetUrl(path: string): string {
@@ -179,47 +181,47 @@ export class VistahcComponent implements OnInit, OnDestroy {
     return new URL(`/${cleanPath}`, origin).toString();
   }
 
-    ngOnInit(): void {    
-      this.consultarEspecialidad(); 
+  ngOnInit(): void {
+    this.consultarEspecialidad();
 
-      const state = this.rs.viewState;
-      if (state) {
-        this.filtro = state.filtro;
+    const state = this.rs.viewState;
+    if (state) {
+      this.filtro = state.filtro;
 
-        this.listado_citas = state.citas ?? this.listado_citas;
-        this.listado_citas_recuperacion = state.citasEti ?? this.listado_citas_recuperacion;
-        this.listado_contingencia = state.citasCont ?? this.listado_contingencia;
+      this.listado_citas = state.citas ?? this.listado_citas;
+      this.listado_citas_recuperacion = state.citasEti ?? this.listado_citas_recuperacion;
+      this.listado_contingencia = state.citasCont ?? this.listado_contingencia;
 
-        // Si el estado viene cacheado (navegación/restore), normalizar strings para evitar mojibake.
-        this.normalizarTextoCitas(this.listado_citas as any);
-        this.normalizarTextoCitas(this.listado_citas_recuperacion as any);
-        this.normalizarTextoCitas(this.listado_contingencia as any);
+      // Si el estado viene cacheado (navegación/restore), normalizar strings para evitar mojibake.
+      this.normalizarTextoCitas(this.listado_citas as any);
+      this.normalizarTextoCitas(this.listado_citas_recuperacion as any);
+      this.normalizarTextoCitas(this.listado_contingencia as any);
 
-        this.dataSource = new MatTableDataSource<Citas>(state.citas ?? []);
-        this.dataSourceEti = new MatTableDataSource<Citas>(state.citasEti ?? []);
-        this.dataSourceCont = new MatTableDataSource<Citas>(state.citasCont ?? []);
+      this.dataSource = new MatTableDataSource<Citas>(state.citas ?? []);
+      this.dataSourceEti = new MatTableDataSource<Citas>(state.citasEti ?? []);
+      this.dataSourceCont = new MatTableDataSource<Citas>(state.citasCont ?? []);
 
-        this.hcPage = state.hcPage ?? this.hcPage;
-        this.notasPage = state.notasPage ?? this.notasPage;
-        this.otrosPage = state.otrosPage ?? this.otrosPage;
+      this.hcPage = state.hcPage ?? this.hcPage;
+      this.notasPage = state.notasPage ?? this.notasPage;
+      this.otrosPage = state.otrosPage ?? this.otrosPage;
 
-        this.hcPageSize = state.hcPageSize ?? this.hcPageSize;
-        this.notasPageSize = state.notasPageSize ?? this.notasPageSize;
-        this.otrosPageSize = state.otrosPageSize ?? this.otrosPageSize;
-      }
-  }  
+      this.hcPageSize = state.hcPageSize ?? this.hcPageSize;
+      this.notasPageSize = state.notasPageSize ?? this.notasPageSize;
+      this.otrosPageSize = state.otrosPageSize ?? this.otrosPageSize;
+    }
+  }
 
   ngOnDestroy(): void {
     this.detenerEstadoLlamadoTimer();
   }
 
-    consultarCitasGeneral() {
-      if (this.filtro !== undefined && this.filtro !== null) {
-        this.medicoServices.Especialidad = this.filtro;
-      }
+  consultarCitasGeneral() {
+    if (this.filtro !== undefined && this.filtro !== null) {
+      this.medicoServices.Especialidad = this.filtro;
+    }
 
-      this.consultarCitas();
-      this.consultarCitasAnteriores();
+    this.consultarCitas();
+    this.consultarCitasAnteriores();
   }
 
   public consultarCitasAnteriores(): void {
@@ -276,13 +278,13 @@ export class VistahcComponent implements OnInit, OnDestroy {
 
           this.medicoServices.listadoCitas = x
           this.dataSource = new MatTableDataSource(x.filter(n => !n.adicional));
-          this.dataSourceEti = new MatTableDataSource(x.filter(n => n.adicional));        
+          this.dataSourceEti = new MatTableDataSource(x.filter(n => n.adicional));
 
 
           this.listado_citas_recuperacion = x.filter(n => n.adicional)
           this.listado_citas = x.filter(n => !n.adicional)
 
-          if(this.medicoServices.Especialidad.id == 139){
+          if (this.medicoServices.Especialidad.id == 139) {
             this.listado_citas = x.filter(n => n.estado != 'PRO')
             this.listado_citas_recuperacion = x.filter(n => n.estado != 'PRO')
           }
@@ -300,7 +302,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
 
   }
 
-   public consultarCitas(): void {
+  public consultarCitas(): void {
     if (this.filtro === undefined || this.filtro === null) {
       Swal.fire(SWAL_TITULO_ADVERTENCIA_DOBLE, SWAL_MSG_DEBE_SELECCIONAR_ESPECIALIDAD, 'warning');
       return;
@@ -340,27 +342,27 @@ export class VistahcComponent implements OnInit, OnDestroy {
         this.medicoServices.listadoCitas = x;
 
         // Separar citas normales y de recuperación
-        let citas       = x.filter(n => !n.adicional);
+        let citas = x.filter(n => !n.adicional);
         let recuperacion = x.filter(n => n.adicional);
 
         // Caso especial especialidad 139: excluir estado PRO
         if (this.medicoServices.Especialidad.id === 139) {
-          citas        = x.filter(n => n.estado !== 'PRO');
+          citas = x.filter(n => n.estado !== 'PRO');
           recuperacion = x.filter(n => n.estado !== 'PRO');
         }
 
         // Arrays raw
-        this.listado_citas              = citas;
+        this.listado_citas = citas;
         this.listado_citas_recuperacion = recuperacion;
-        this.listado_contingencia       = x.filter(n => n.adicional); // ajusta el filtro si tienes campo específico
+        this.listado_contingencia = x.filter(n => n.adicional); // ajusta el filtro si tienes campo específico
 
         // DataSources
-        this.dataSource    = new MatTableDataSource<Citas>(citas);
+        this.dataSource = new MatTableDataSource<Citas>(citas);
         this.dataSourceEti = new MatTableDataSource<Citas>(recuperacion);
         this.dataSourceCont = new MatTableDataSource<Citas>(this.listado_contingencia);
 
         // Resetear páginas
-        this.hcPage    = 1;
+        this.hcPage = 1;
         this.notasPage = 1;
         this.otrosPage = 1;
 
@@ -381,22 +383,22 @@ export class VistahcComponent implements OnInit, OnDestroy {
     );
   }
 
- public consultarEspecialidad() {
-     //this.loadingReimpresion = true;
-       this.rs.ObtenerEspecialidad().subscribe((x) => {    
- 
-       this.rs.listadoEspecialidad = x
-       //this.loadingReimpresion = false;
-     }, (error) => {
- 
-       //this.loadingReimpresion = false;
-       const msg = resolveApiErrorMessage(error, 'Ocurrió un error');
-       Swal.fire('Advertencia!!', msg, 'error');
-       //console.log(error)
-     })
- }
+  public consultarEspecialidad() {
+    //this.loadingReimpresion = true;
+    this.rs.ObtenerEspecialidad().subscribe((x) => {
 
- totalPages(total: number, size: number): number {
+      this.rs.listadoEspecialidad = x
+      //this.loadingReimpresion = false;
+    }, (error) => {
+
+      //this.loadingReimpresion = false;
+      const msg = resolveApiErrorMessage(error, 'Ocurrió un error');
+      Swal.fire('Advertencia!!', msg, 'error');
+      //console.log(error)
+    })
+  }
+
+  totalPages(total: number, size: number): number {
     if (!total || size <= 0) {
       return 1;
     }
@@ -512,25 +514,23 @@ export class VistahcComponent implements OnInit, OnDestroy {
       }
     });
   }
+  
+    abrirHistoriaClinica(item: any): void {
 
-  abrirHistoriaClinica(item: any): void {
-    const base = (environment as any).vistaHC as string;
-    if (!base) {
-      Swal.fire('Configuración pendiente', 'Falta configurar `environment.vistaHC` para abrir la Historia Clínica.', 'info');
-      return;
-    }
+  const link = item?.linkCompleto || item?.LinkCompleto;
 
-    const url = new URL(base, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
-    const citaId = this.resolveCitaId(item);
-    const pacienteId = item?.pacienteId ?? item?.paciente_Id ?? item?.PacienteId ?? item?.pacienteID;
-
-    if (citaId !== undefined && citaId !== null) url.searchParams.set('citaId', String(citaId));
-    if (pacienteId !== undefined && pacienteId !== null) url.searchParams.set('pacienteId', String(pacienteId));
-    if (item?.identificacion) url.searchParams.set('identificacion', String(item.identificacion));
-    if (this.filtro?.id) url.searchParams.set('especialidadId', String(this.filtro.id));
-
-    window.open(url.toString(), '_blank');
+  if (!link) {
+    Swal.fire('Error', 'No existe link para la Historia Clínica', 'warning');
+    return;
   }
+
+  try {
+    const url = new URL(link);
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+  } catch {
+    Swal.fire('Error', 'El link de la Historia Clínica no es válido', 'error');
+  }
+}
 
   obtenerHistoricoAsistioCita(item: any): void {
     const pacienteId =
@@ -583,7 +583,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
   }
 
   private buildHistoricoHtml(citas: any[]): string {
-    return buildHistoricoHtmlUtil(citas);   
+    return buildHistoricoHtmlUtil(citas);
   }
 
   tipoAgendaAccesoUpper(item: any): string {
@@ -640,9 +640,9 @@ export class VistahcComponent implements OnInit, OnDestroy {
 
   // Los endpoints retornan ids con nombres distintos según la consulta (citaId, ConsultaId, CitaId, etc).
   // Esta función centraliza la resolución para que los botones (turno/desactivar/historia) funcionen parejo.
-	  resolveCitaId(rowOrId: any): string | number | null {
-	    return resolveCitaIdUtil(rowOrId);
-	  }
+  resolveCitaId(rowOrId: any): string | number | null {
+    return resolveCitaIdUtil(rowOrId);
+  }
 
   private getRowKey(row: any, prefix: 'turno' | 'desactivar'): string | null {
     const citaId = this.resolveCitaId(row);
@@ -651,15 +651,15 @@ export class VistahcComponent implements OnInit, OnDestroy {
     return null;
   }
 
-	  isTurnoLoading(row: any): boolean {
-	    const key = this.getRowKey(row, 'turno');
-	    return hasLoadingKey(this.turnoLoadingKeys, key);
-	  }
+  isTurnoLoading(row: any): boolean {
+    const key = this.getRowKey(row, 'turno');
+    return hasLoadingKey(this.turnoLoadingKeys, key);
+  }
 
-	  isDesactivarLoading(row: any): boolean {
-	    const key = this.getRowKey(row, 'desactivar');
-	    return hasLoadingKey(this.desactivarLoadingKeys, key);
-	  }
+  isDesactivarLoading(row: any): boolean {
+    const key = this.getRowKey(row, 'desactivar');
+    return hasLoadingKey(this.desactivarLoadingKeys, key);
+  }
 
   private quitarFilaContingencia(item: any): void {
     const citaId = this.resolveCitaId(item);
@@ -677,7 +677,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
   }
 
   private maybeFixMojibake(value: any): string {
-    return maybeFixMojibakeUtil(value);   
+    return maybeFixMojibakeUtil(value);
   }
 
   private normalizarTextoCitas(list: any[]): void {
@@ -688,8 +688,8 @@ export class VistahcComponent implements OnInit, OnDestroy {
     });
   }
 
-  
-    // ── Acciones de citas (mantener los métodos que ya tenías) ────────────────
+
+  // ── Acciones de citas (mantener los métodos que ya tenías) ────────────────
 
   irA(item: any, tipo: string): void {
     // tu implementación existente
@@ -818,7 +818,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
           }
 
           // Facturacion (no bloqueante)
-          this.medicoServices.facturarCitas(String(citaId)).subscribe({ next: () => {}, error: () => {} });
+          this.medicoServices.facturarCitas(String(citaId)).subscribe({ next: () => { }, error: () => { } });
 
           this.medicoServices.finalizar(String(citaId)).subscribe({
             next: (resp: any) => {
@@ -857,8 +857,8 @@ export class VistahcComponent implements OnInit, OnDestroy {
       return;
     }
 
-	    const loadingKey = this.getRowKey(item, 'desactivar');
-	    if (hasLoadingKey(this.desactivarLoadingKeys, loadingKey)) return;
+    const loadingKey = this.getRowKey(item, 'desactivar');
+    if (hasLoadingKey(this.desactivarLoadingKeys, loadingKey)) return;
 
     Swal.fire({
       title: 'Esta seguro que desea desactivar la cita?',
@@ -870,55 +870,55 @@ export class VistahcComponent implements OnInit, OnDestroy {
       const confirmed = result?.isConfirmed ?? result?.value;
       if (!confirmed) return;
 
-	      this.loading = true;
-	      setLoadingKey(this.desactivarLoadingKeys, loadingKey, true);
-	      this.medicoServices
-	        .desactivarCitasAnteriores(String(citaId))
-	        .pipe(
-	          timeout(TIMEOUT_DESACTIVAR_CITA_MS),
-	          finalize(() => {
-	            this.loading = false;
-	            setLoadingKey(this.desactivarLoadingKeys, loadingKey, false);
-	          })
-	        )
+      this.loading = true;
+      setLoadingKey(this.desactivarLoadingKeys, loadingKey, true);
+      this.medicoServices
+        .desactivarCitasAnteriores(String(citaId))
+        .pipe(
+          timeout(TIMEOUT_DESACTIVAR_CITA_MS),
+          finalize(() => {
+            this.loading = false;
+            setLoadingKey(this.desactivarLoadingKeys, loadingKey, false);
+          })
+        )
         .subscribe({
-        next: (resp: any) => {
-          const normalized = String(resp ?? '')
-            .trim()
-            .replace(/^\"|\"$/g, '')
-            .toLowerCase();
+          next: (resp: any) => {
+            const normalized = String(resp ?? '')
+              .trim()
+              .replace(/^\"|\"$/g, '')
+              .toLowerCase();
 
-          const ok =
-            normalized === '1' ||
-            normalized.length === 0 ||
-            normalized.includes('true') ||
-            normalized.includes('ok') ||
-            normalized.includes('success') ||
-            normalized.includes('exito');
+            const ok =
+              normalized === '1' ||
+              normalized.length === 0 ||
+              normalized.includes('true') ||
+              normalized.includes('ok') ||
+              normalized.includes('success') ||
+              normalized.includes('exito');
 
-          // Si el HTTP fue 200, en la práctica ya se desactivó; evitar mensaje confuso al usuario.
-          Swal.fire('Listo', 'Cita desactivada.', 'success');
-          if (!ok) {
-            // Solo para diagnóstico: el backend a veces responde textos no estándar.
-            // eslint-disable-next-line no-console
-            console.warn('[DesactivarCita] Respuesta inesperada:', resp);
+            // Si el HTTP fue 200, en la práctica ya se desactivó; evitar mensaje confuso al usuario.
+            Swal.fire('Listo', 'Cita desactivada.', 'success');
+            if (!ok) {
+              // Solo para diagnóstico: el backend a veces responde textos no estándar.
+              // eslint-disable-next-line no-console
+              console.warn('[DesactivarCita] Respuesta inesperada:', resp);
+            }
+
+            // Solo quitar la fila seleccionada (evita que el refresh esconda todas las citas).
+            this.quitarFilaContingencia(item);
+          },
+          error: (err: any) => {
+            if (err?.name === 'TimeoutError') {
+              Swal.fire('Tiempo de espera', 'El servicio no respondió a tiempo al desactivar la cita.', 'warning');
+              return;
+            }
+            const msg =
+              err?.error?.mensaje ??
+              err?.message ??
+              (typeof err === 'string' ? err : 'Error al desactivar la cita.');
+            Swal.fire('Error', msg, 'error');
           }
-
-          // Solo quitar la fila seleccionada (evita que el refresh esconda todas las citas).
-          this.quitarFilaContingencia(item);
-        },
-        error: (err: any) => {
-          if (err?.name === 'TimeoutError') {
-            Swal.fire('Tiempo de espera', 'El servicio no respondió a tiempo al desactivar la cita.', 'warning');
-            return;
-          }
-          const msg =
-            err?.error?.mensaje ??
-            err?.message ??
-            (typeof err === 'string' ? err : 'Error al desactivar la cita.');
-          Swal.fire('Error', msg, 'error');
-        }
-      });
+        });
     });
   }
 
@@ -955,59 +955,59 @@ export class VistahcComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-      next: (res: any) => {
-        if (res?.ticketId === 0) {
-          Swal.fire('Informacion', res?.mensaje ?? 'No fue posible llamar al paciente.', 'info');
-          return;
-        }
+        next: (res: any) => {
+          if (res?.ticketId === 0) {
+            Swal.fire('Informacion', res?.mensaje ?? 'No fue posible llamar al paciente.', 'info');
+            return;
+          }
 
-        const seguirLlamando = res?.swSegirLlamando ?? res?.swSeguirLlamando;
-        if (seguirLlamando) {
-          Swal.fire('Llamado exitoso', 'Llamando al paciente...', 'success');
-          this.medicoServices.ticketId = res.ticketId;
-          this.medicoServices.ticketMensaje = res?.mensaje ?? '';
-          this.consultarEstadoLlamado();
-        } else {
-          Swal.fire('Informacion', res?.mensaje ?? 'No se puede realizar el llamado.', 'info');
+          const seguirLlamando = res?.swSegirLlamando ?? res?.swSeguirLlamando;
+          if (seguirLlamando) {
+            Swal.fire('Llamado exitoso', 'Llamando al paciente...', 'success');
+            this.medicoServices.ticketId = res.ticketId;
+            this.medicoServices.ticketMensaje = res?.mensaje ?? '';
+            this.consultarEstadoLlamado();
+          } else {
+            Swal.fire('Informacion', res?.mensaje ?? 'No se puede realizar el llamado.', 'info');
+          }
+        },
+        error: (err: any) => {
+          if (err?.name === 'TimeoutError') {
+            Swal.fire('Tiempo de espera', 'Digiturno no respondió a tiempo al llamar el turno.', 'warning');
+            return;
+          }
+          const msg =
+            err?.error?.mensaje ??
+            err?.message ??
+            (typeof err === 'string' ? err : 'Error realizando el llamado.');
+          Swal.fire('Error', msg, 'error');
         }
-      },
-      error: (err: any) => {
-        if (err?.name === 'TimeoutError') {
-          Swal.fire('Tiempo de espera', 'Digiturno no respondió a tiempo al llamar el turno.', 'warning');
-          return;
-        }
-        const msg =
-          err?.error?.mensaje ??
-          err?.message ??
-          (typeof err === 'string' ? err : 'Error realizando el llamado.');
-        Swal.fire('Error', msg, 'error');
-      }
-    });
+      });
   }
 
- abrirModal(item: any): void {
-  if (!item) return;
+  abrirModal(item: any): void {
+    if (!item) return;
 
-  this.loading = true;
-  this.rs.ObtenerPacientePorId(item.pacienteId).subscribe({
-    next: (response: any) => {
-      this.loading = false;
-      this.datoUsuario = response;
+    this.loading = true;
+    this.rs.ObtenerPacientePorId(item.pacienteId).subscribe({
+      next: (response: any) => {
+        this.loading = false;
+        this.datoUsuario = response;
 
-      this.arrayContacto = [];
-      const telefono = String(response?.telefono ?? '').trim();
-      const celular = String(response?.celular ?? '').trim();
-      if (telefono && telefono.toUpperCase() !== 'NO') this.arrayContacto.push(telefono);
-      if (celular && celular.toUpperCase() !== 'NO') this.arrayContacto.push(celular);
+        this.arrayContacto = [];
+        const telefono = String(response?.telefono ?? '').trim();
+        const celular = String(response?.celular ?? '').trim();
+        if (telefono && telefono.toUpperCase() !== 'NO') this.arrayContacto.push(telefono);
+        if (celular && celular.toUpperCase() !== 'NO') this.arrayContacto.push(celular);
 
-      this.observacion = item?.observacion ?? '';
-      this.videconsulta = String(item?.tipoAgendaAcceso ?? '').toUpperCase() === 'VIDEOCONSULTA';
-      this.colgar = false;
-      this.validadorMute = false;
-      this.minuto = 0;
-      this.segundos = 0;
+        this.observacion = item?.observacion ?? '';
+        this.videconsulta = String(item?.tipoAgendaAcceso ?? '').toUpperCase() === 'VIDEOCONSULTA';
+        this.colgar = false;
+        this.validadorMute = false;
+        this.minuto = 0;
+        this.segundos = 0;
 
-      const html = `
+        const html = `
   <div style="
     max-height:300px; 
     overflow:auto; 
@@ -1123,7 +1123,7 @@ export class VistahcComponent implements OnInit, OnDestroy {
             cursor:pointer;
           ">📴 Colgar</button>
           <div style="font-size:13px; color:#555; font-variant-numeric:tabular-nums;">
-            ${this.minuto}:${String(this.segundos).padStart(2,'0')}
+            ${this.minuto}:${String(this.segundos).padStart(2, '0')}
           </div>
           <button id="btnMute" style="
             background-color:#7f8c8d;
@@ -1163,62 +1163,62 @@ export class VistahcComponent implements OnInit, OnDestroy {
   </div>
 `;
 
-      Swal.fire({
-        html,
-        showConfirmButton: false,
-        width: '650px',
-        padding: '0',           // ← elimina el padding interno de sweetalert
-        background: 'transparent', // ← fondo transparente
-        onOpen: (popup: any) => {
-          popup.querySelector('#btnCerrar')?.addEventListener('click', () => Swal.close());
-          popup.querySelectorAll('.btnCall').forEach((btn: any) => {
-            btn.addEventListener('click', (e: any) => {
-              const tel = (e.currentTarget as HTMLElement).getAttribute('data-tel');
-              if (this.llamadaService?.estado) {
-                this.sipCall('call-audio', tel);
-              } else {
-                Swal.fire({
-                  title: 'Información',
-                  text: 'Debes activar el sistema antes de llamar',
-                  icon: 'info',
-                  showConfirmButton: true,
-                  allowOutsideClick: true
-                });
-              }
+        Swal.fire({
+          html,
+          showConfirmButton: false,
+          width: '650px',
+          padding: '0',           // ← elimina el padding interno de sweetalert
+          background: 'transparent', // ← fondo transparente
+          onOpen: (popup: any) => {
+            popup.querySelector('#btnCerrar')?.addEventListener('click', () => Swal.close());
+            popup.querySelectorAll('.btnCall').forEach((btn: any) => {
+              btn.addEventListener('click', (e: any) => {
+                const tel = (e.currentTarget as HTMLElement).getAttribute('data-tel');
+                if (this.llamadaService?.estado) {
+                  this.sipCall('call-audio', tel);
+                } else {
+                  Swal.fire({
+                    title: 'Información',
+                    text: 'Debes activar el sistema antes de llamar',
+                    icon: 'info',
+                    showConfirmButton: true,
+                    allowOutsideClick: true
+                  });
+                }
+              });
             });
-          });
 
-          popup.querySelector('#btnVideo')?.addEventListener('click', () => this.generarLink(item));
-          popup.querySelector('#btnColgar')?.addEventListener('click', () => this.sipHangUp());
-          popup.querySelector('#btnMute')?.addEventListener('click', () => {
-            this.validadorMute = !this.validadorMute;
-            this.sipToggleMute(this.validadorMute);
-          });
+            popup.querySelector('#btnVideo')?.addEventListener('click', () => this.generarLink(item));
+            popup.querySelector('#btnColgar')?.addEventListener('click', () => this.sipHangUp());
+            popup.querySelector('#btnMute')?.addEventListener('click', () => {
+              this.validadorMute = !this.validadorMute;
+              this.sipToggleMute(this.validadorMute);
+            });
 
-          const btnActivar = popup.querySelector('#btnActivar');
-          btnActivar?.addEventListener('click', () => {
-            this.sipRegister();
-            btnActivar.style.display = 'none';
-            popup.querySelector('#btnDesactivar')!.style.display = 'inline-block';
-          });
+            const btnActivar = popup.querySelector('#btnActivar');
+            btnActivar?.addEventListener('click', () => {
+              this.sipRegister();
+              btnActivar.style.display = 'none';
+              popup.querySelector('#btnDesactivar')!.style.display = 'inline-block';
+            });
 
-          const btnDesactivar = popup.querySelector('#btnDesactivar');
-          btnDesactivar?.addEventListener('click', () => {
-            this.sipUnRegister();
-            btnDesactivar.style.display = 'none';
-            popup.querySelector('#btnActivar')!.style.display = 'inline-block';
-          });
-        }
-      });
+            const btnDesactivar = popup.querySelector('#btnDesactivar');
+            btnDesactivar?.addEventListener('click', () => {
+              this.sipUnRegister();
+              btnDesactivar.style.display = 'none';
+              popup.querySelector('#btnActivar')!.style.display = 'inline-block';
+            });
+          }
+        });
 
-    },
-    error: (err) => {
-      this.loading = false;
-      Swal.fire('Error', 'No se pudo cargar la información del paciente', 'error');
-    }
-  });
-}
-   openZoom(link: string): void {
+      },
+      error: (err) => {
+        this.loading = false;
+        Swal.fire('Error', 'No se pudo cargar la información del paciente', 'error');
+      }
+    });
+  }
+  openZoom(link: string): void {
     if (!link) {
       Swal.fire(SWAL_TITULO_DATO_FALTANTE, SWAL_MSG_NO_HAY_LINK_ABRIR, 'info');
       return;
@@ -1343,6 +1343,6 @@ export class VistahcComponent implements OnInit, OnDestroy {
     this.segundos = 0;
   }
 
-  
-   
+
+
 }

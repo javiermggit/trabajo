@@ -26,12 +26,16 @@
     "target": "http://172.27.83.196:82",
     "changeOrigin": true,
     "secure": false
-  },
+  }, 
   "/APIMedicoHealth": {
-    "target": "http://172.27.83.196:82",
+    "target": "http://localhost:51310",
+    "secure": false,
     "changeOrigin": true,
-    "secure": false
-  },
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/APIMedicoHealth": ""
+    }}
+    ,
   "/APIImpresion": {
     "target": "http://172.27.83.196:82",
     "changeOrigin": true,
