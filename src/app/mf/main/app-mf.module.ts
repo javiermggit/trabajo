@@ -22,6 +22,16 @@ import { HttpClientModule } from '@angular/common/http';
 import { AccordionModule } from 'primeng/accordion';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { environment } from 'src/environments/environment';
+import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
+import { BadgeModule } from 'primeng/badge';
 
 @NgModule({
   imports: [
@@ -42,8 +52,20 @@ import { environment } from 'src/environments/environment';
     MatPaginatorModule,
     HttpClientModule,
     AccordionModule,
-    NgbModule   
-    
+    NgbModule,
+
+    // ✅ Importaciones PrimeNG para VistahcComponent
+    TableModule,
+    PaginatorModule,
+    DialogModule,
+    InputTextModule,
+
+    ToastModule,         // ← nuevo
+    ConfirmDialogModule, // ← nuevo
+    RadioButtonModule,   // ← nuevo
+    TagModule,
+    BadgeModule,
+
   ],
   declarations: [
     AppMfComponent,
@@ -53,6 +75,8 @@ import { environment } from 'src/environments/environment';
   ],
   providers: [
     DatePipe,
+    MessageService,      // ← nuevo
+    ConfirmationService, // ← nuevo
     { provide: 'URLHc', useValue: environment.URLHc },
     { provide: 'URLParametrizacionGeneral', useValue: environment.URLParametrizacion },
     { provide: 'URLParametrizacion', useValue: environment.URLParametrizacion },

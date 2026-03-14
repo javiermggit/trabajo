@@ -1,27 +1,31 @@
 <div class="card-custom vhc-onecard">
 
+  <!-- TOAST Y CONFIRM DIALOG GLOBALES -->
+  <p-toast position="top-right"></p-toast>
+  <p-confirmDialog [style]="{ width: '420px' }"
+    acceptButtonStyleClass="reimp-btn reimp-btn-primary"
+    rejectButtonStyleClass="reimp-btn reimp-btn-secondary ms-2">
+  </p-confirmDialog>
+
   <!-- ── FILTROS ── -->
   <div class="vhc-filters">
     <div class="agenda-filters">
       <div class="filter-row">
-
         <div class="filter-group">
           <span class="p-float-label full-width">
             <p-dropdown inputId="especialidad" appendTo="body" [autoZIndex]="true" [baseZIndex]="10000"
               panelStyleClass="reimp-dropdown-panel" [scrollHeight]="'260px'" [options]="rs.listadoEspecialidad"
-              optionLabel="descripcion" [(ngModel)]="filtro" [filter]="true" filterBy="descripcion" [showClear]="true"
-              styleClass="w-full modern-dropdown">
+              optionLabel="descripcion" [(ngModel)]="filtro" [filter]="true" filterBy="descripcion"
+              [showClear]="true" styleClass="w-full modern-dropdown">
             </p-dropdown>
             <label for="especialidad">Especialidad</label>
           </span>
         </div>
-
         <div class="filter-button">
-          <button type="button" class="btn btn-consult" (click)="consultarCitasGeneral()">
-            <i class="ri-search-line"></i> Consultar
+          <button pButton type="button" label="Consultar" icon="ri-search-line" iconPos="left"
+            class="reimp-btn reimp-btn-compact reimp-btn-primary" (click)="consultarCitasGeneral()">
           </button>
         </div>
-
       </div>
     </div>
   </div>
@@ -34,11 +38,8 @@
       <i class="pi pi-spin pi-spinner"></i>&nbsp; Cargando citas...
     </div>
 
-    <!-- ════════════════════════════════════
-         CITAS DEL DÍA
-    ════════════════════════════════════ -->
+    <!-- CITAS DEL DÍA -->
     <div class="section-block">
-
       <div class="section-head mb-3">
         <h5 class="reimp-section-title m-0">Citas del Día</h5>
         <span class="section-pill" *ngIf="dataSource?.data?.length">
@@ -47,31 +48,35 @@
       </div>
 
       <div class="reimp-table-shell">
-        <div class="table-responsive">
-          <table mat-table [dataSource]="paginatedRows(dataSource?.data ?? [], hcPage, hcPageSize)" matSort
-            class="w-full reimp-table">
+        <p-table [value]="listado_citas" [paginator]="listado_citas?.length > 0" [rows]="hcPageSize"
+          [first]="(hcPage-1)*hcPageSize" class="w-full reimp-table" [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
+          [totalRecords]="listado_citas?.length ?? 0">
 
-            <!-- HORA -->
-            <ng-container matColumnDef="hora">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Hora</th>
-              <td mat-cell *matCellDef="let item">
-                <span class="cell-hora">{{ item.horaMostrar }}</span>
-              </td>
-            </ng-container>
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>Acceso</th>
+              <th>Turno</th>
+              <th>Estado</th>
+              <th>Historias Clínicas</th>
+              <th>Consentimientos</th>
+              <th *ngIf="mostrarHistoricoCitas()">Histórico citas</th>
+            </tr>
+          </ng-template>
 
-            <!-- PACIENTE -->
-            <ng-container matColumnDef="paciente">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Paciente</th>
-              <td mat-cell *matCellDef="let item">
-
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td>{{ item.horaMostrar }}</td>
+              <td>
                 <div class="patient-metaacceso" [ngClass]="{
-                  'mod-video':      item.tipoAgendaAcceso === 'VIDEOCONSULTA' || item.tipoAgendaAcceso === 'VideoConsulta',
+                  'mod-video': item.tipoAgendaAcceso === 'VIDEOCONSULTA' || item.tipoAgendaAcceso === 'VideoConsulta',
                   'mod-presencial': item.tipoAgendaAccesoId === 1 || item.tipoAgendaAccesoId === 6,
-                  'mod-tele':       item.tipoAgendaAcceso === 'TELECONSULTA' || item.tipoAgendaAcceso === 'TeleConsulta',
-                  'mod-tele-sede':  item.tipoAgendaAcceso === 'TELECONSULTA SEDE',
-                  'mod-telexp':     item.tipoModalidad === 'TELEXPERTICIA'
-                }">{{ item.tipoAgendaAcceso }}
-                </div>
+                  'mod-tele': item.tipoAgendaAcceso === 'TELECONSULTA' || item.tipoAgendaAcceso === 'TeleConsulta',
+                  'mod-tele-sede': item.tipoAgendaAcceso === 'TELECONSULTA SEDE',
+                  'mod-telexp': item.tipoModalidad === 'TELEXPERTICIA'
+                }">{{ item.tipoAgendaAcceso }}</div>
                 <div class="patient-meta">
                   {{ item.identificacion }} ·
                   <ng-container *ngIf="item.edadAnios === 0">{{ item.edadMeses }} Meses</ng-container>
@@ -85,104 +90,42 @@
                   </span>
                 </label>
               </td>
-            </ng-container>
-
-            <!-- ACCESO -->
-            <!-- ACCESO -->
-            <ng-container matColumnDef="acceso">
-              <th mat-header-cell *matHeaderCellDef>Acceso</th>
-              <td mat-cell *matCellDef="let item" class="icon-cell2">
-
+              <td class="icon-cell2">
                 <ng-container [ngSwitch]="item.tipoAgendaAccesoId">
-
-                  <!-- PRESENCIAL -->
-                  <button *ngSwitchCase="1"
-  class="icon-btn icon-btn-acceso no-link"
-  [disabled]="true"
-  title="No disponible">
-
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <rect x="3" y="3" width="18" height="18" rx="2"/>
-    <path d="M9 22V12h6v10"/>
-    <path d="M3 9h18"/>
-    <line x1="4" y1="4" x2="20" y2="20"/> <!-- línea de prohibido -->
-  </svg>
-
-</button>
-
-                  <!-- VIDEO -->
-                  <button *ngSwitchCase="2" class="icon-btn icon-btn-acceso" [disabled]="item.disableButton"
-                    title="Videoconsulta"
-                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polygon points="23 7 16 12 23 17 23 7" />
-                      <rect x="1" y="5" width="15" height="14" rx="2" />
-                    </svg>
-                  </button>
-
-                  <!-- TELECONSULTA -->
-                  <button *ngSwitchCase="4" class="icon-btn icon-btn-acceso" [disabled]="item.disableButton"
-                    title="Teleconsulta"
-                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polygon points="23 7 16 12 23 17 23 7" />
-                      <rect x="1" y="5" width="15" height="14" rx="2" />
-                    </svg>
-                  </button>
-
-                  <!-- EXTRAMURAL -->
-                  <button *ngSwitchCase="11" class="icon-btn icon-btn-acceso" [disabled]="item.disableButton"
-                    title="Extramural">
+                  <button *ngSwitchCase="1" pButton type="button" icon="pi pi-ban" [disabled]="true"
+                    class="icon-btn icon-btn-acceso" title="No disponible"></button>
+                  <button *ngSwitchCase="2" pButton type="button" icon="pi pi-video"
+                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Videoconsulta"
+                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
+                  <button *ngSwitchCase="4" pButton type="button" icon="pi pi-phone"
+                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Teleconsulta"
+                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
+                  <button *ngSwitchCase="11" pButton type="button" [disabled]="item.disableButton"
+                    class="icon-btn icon-btn-acceso" title="Extramural" (click)="abrirModal(item)">
                     <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" style="width:28px;height:28px;">
                   </button>
-
-                  <!-- DEFAULT -->
                   <span *ngSwitchDefault>—</span>
-
                 </ng-container>
-
               </td>
-            </ng-container>
-
-
-            <!-- TURNO -->
-            <ng-container matColumnDef="turno">
-              <th mat-header-cell *matHeaderCellDef>Turno</th>
-              <td mat-cell *matCellDef="let item" class="icon-cell2">
-
+              <td class="icon-cell2">
                 <ng-container *ngIf="item.swExcedioLimiteLlamada === 1; else turnoBtnTpl">
                   <span class="status-badge status-consulta">Paciente llamado</span>
                 </ng-container>
-
                 <ng-template #turnoBtnTpl>
-
-                  <ng-container
-                    *ngIf="!(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL'); else turnoNoAplicaTpl">
-                    <button class="icon-btn icon-btn-turno"
-                      [class.disabled]="item.estadoCita !== 'FACT' || (item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
+                  <ng-container *ngIf="!(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL'); else turnoNoAplicaTpl">
+                    <button pButton type="button" class="icon-btn icon-btn-turno"
                       [disabled]="item.estadoCita !== 'FACT' || (item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
-                      title="Llamar turno" (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
-
-                      <img [src]="(item.estadoCita !== 'FACT' || (item.disableButton && item.ticket_Id != null) || isTurnoLoading(item))
-      ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
-      : mfAssetUrl('assets/Iconos/hablando-fuerte.png')" alt="Llamar turno">
-
+                      title="Llamar turno"
+                      (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
+                      <i class="pi pi-volume-up"></i>
                     </button>
                   </ng-container>
-
                   <ng-template #turnoNoAplicaTpl>
                     <span class="patient-meta">—</span>
                   </ng-template>
-
                 </ng-template>
-
               </td>
-            </ng-container>
-
-            <!-- ESTADO -->
-            <ng-container matColumnDef="estado">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
-              <td mat-cell *matCellDef="let item">
+              <td>
                 <span class="status-badge" [ngClass]="{
                   'status-activo':    item.estadoCita === 'ACT',
                   'status-pendiente': item.estadoCita === 'PEN',
@@ -190,85 +133,54 @@
                   'status-consulta':  item.estadoCita === 'CON'
                 }">{{ item.estadoCita }}</span>
               </td>
-            </ng-container>
-
-            <!-- HISTORIAS -->
-            <ng-container matColumnDef="historias">
-              <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
-              <td mat-cell *matCellDef="let item">
+              <td>
                 <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                  <button [disabled]="item.disableButton" type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
-                      'reimp-btn-secondary': item.tipoAgendaAccesoId === 7 || item.tipoAgendaAccesoId === 8,
-                      'reimp-btn-primary':   item.tipoAgendaAccesoId !== 7 && item.tipoAgendaAccesoId !== 8
-                    }" (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
+                  <button pButton type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
+                    'reimp-btn-secondary': item.tipoAgendaAccesoId===7 || item.tipoAgendaAccesoId===8,
+                    'reimp-btn-primary': item.tipoAgendaAccesoId!==7 && item.tipoAgendaAccesoId!==8
+                  }" [disabled]="item.disableButton" (click)="abrirHistoriaClinica(item)">
+                    Historias Clínicas
+                  </button>
                 </ng-container>
-                <ng-container *ngIf="medicoServices.Especialidad.id === 139">
-                  <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                <ng-container *ngIf="medicoServices.Especialidad.id===139">
+                  <button pButton type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
                     (click)="finalizar(item)">Finalizar cita</button>
                 </ng-container>
               </td>
-            </ng-container>
-
-            <!-- CONSENTIMIENTOS -->
-            <ng-container matColumnDef="consentimientos">
-              <th mat-header-cell *matHeaderCellDef>Consentimientos</th>
-              <td mat-cell *matCellDef="let item">
-                <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+              <td>
+                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
                   [disabled]="isConsentimientoLoading(item)" (click)="irAci(item)">
-                  <ng-container *ngIf="!isConsentimientoLoading(item); else ciLoadingTpl">Consentimientos</ng-container>
+                  <ng-container *ngIf="!isConsentimientoLoading(item); else ciLoadingTpl">
+                    Consentimientos
+                  </ng-container>
                   <ng-template #ciLoadingTpl>
-                    <i class="pi pi-spin pi-spinner" style="font-size: 0.85rem; margin-right: 0.35rem;"></i>
+                    <i class="pi pi-spin pi-spinner" style="font-size:0.85rem;margin-right:0.35rem;"></i>
                     Abriendo...
                   </ng-template>
                 </button>
               </td>
-            </ng-container>
-
-            <!-- HISTORICO CITAS -->
-            <ng-container matColumnDef="historico" *ngIf="mostrarHistoricoCitas()">
-              <th mat-header-cell *matHeaderCellDef>Histórico citas</th>
-              <td mat-cell *matCellDef="let item">
-                <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
-                  (click)="obtenerHistoricoAsistioCita(item)">
-                  Histórico citas
-                </button>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell reimp-empty-cell" [attr.colspan]="displayedColumns.length">
-                No hay citas asignadas para el día de hoy.
+              <td *ngIf="mostrarHistoricoCitas()">
+                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                  (click)="obtenerHistoricoAsistioCita(item)">Histórico citas</button>
               </td>
             </tr>
-          </table>
-        </div>
+          </ng-template>
 
-        <!-- Paginación -->
-        <div class="reimp-table-footer">
-          <span class="reimp-counter">{{ buildCounterText(dataSource?.data?.length ?? 0, hcPage, hcPageSize) }}</span>
-          <div class="reimp-pager">
-            <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
-              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="hcPage === 1"
-              (click)="previousPage('hc')"></button>
-            <span class="reimp-page-indicator">{{ hcPage }} / {{ totalPages(dataSource?.data?.length ?? 0, hcPageSize)
-              }}</span>
-            <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
-              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-              [disabled]="!hasNextPage(dataSource?.data?.length ?? 0, hcPage, hcPageSize)"
-              (click)="nextPage('hc')"></button>
-          </div>
-        </div>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td [attr.colspan]="8" class="reimp-empty-cell text-center">
+                No hay citas para el día de hoy.
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     </div>
 
-    <!-- ════════════════════════════════════
-         ACORDEÓN: RECUPERACIÓN + CONTINGENCIA
-    ════════════════════════════════════ -->
+    <!-- ACORDEÓN -->
     <p-accordion [multiple]="true" styleClass="vhc-accordion">
 
-      <!-- ── RECUPERACIÓN ── -->
+      <!-- RECUPERACIÓN -->
       <p-accordionTab>
         <ng-template pTemplate="header">
           <div class="acc-header-tpl">
@@ -280,215 +192,115 @@
           </div>
         </ng-template>
 
-        <div class="reimp-table-shell">
-          <div *ngIf="loadingNotasTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...
-          </div>
-          <div class="table-responsive">
-            <table mat-table [dataSource]="paginatedRows(dataSourceEti?.data ?? [], notasPage, notasPageSize)"
-              class="w-full reimp-table">
+        <p-table [value]="dataSourceEti?.data" [paginator]="dataSourceEti?.data?.length > 0"
+          [rows]="notasPageSize" [first]="(notasPage-1)*notasPageSize" class="w-full reimp-table"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
+          [totalRecords]="dataSourceEti?.data?.length ?? 0">
 
-              <ng-container matColumnDef="hora">
-                <th mat-header-cell *matHeaderCellDef>Hora</th>
-                <td mat-cell *matCellDef="let item">
-                  <span class="cell-hora">{{ item.horaMostrar }}</span>
-                </td>
-              </ng-container>
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Hora</th><th>Paciente</th><th>Acceso</th><th>Turno</th>
+              <th>Estado</th><th>Historias Clínicas</th><th>Consentimientos</th>
+              <th *ngIf="mostrarHistoricoCitas()">Histórico citas</th>
+            </tr>
+          </ng-template>
 
-              <ng-container matColumnDef="paciente">
-                <th mat-header-cell *matHeaderCellDef>Paciente</th>
-                <td mat-cell *matCellDef="let item">
-                  <div class="patient-name">{{ item.nombrePaciente | uppercase }}</div>
-                  <div class="patient-meta">
-                    {{ item.identificacion }} ·
-                    <ng-container *ngIf="item.edadAnios === 0">{{ item.edadMeses }} Meses</ng-container>
-                    <ng-container *ngIf="item.edadAnios !== 0">{{ item.edadAnios }} años</ng-container>
-                  </div>
-                  <span class="modality-tag" [ngClass]="{
-                    'mod-video':      item.tipoModalidad === 'VIDEOCONSULTA',
-                    'mod-presencial': item.tipoModalidad === 'PRESENCIAL',
-                    'mod-tele':       item.tipoModalidad === 'TELECONSULTA',
-                    'mod-telexp':     item.tipoModalidad === 'TELEXPERTICIA'
-                  }">{{ item.tipoAgendaAcceso }}</span>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="acceso">
-                <th mat-header-cell *matHeaderCellDef>Acceso</th>
-                <td mat-cell *matCellDef="let item">
-                  <ng-container *ngIf="item.tipoModalidad === 'VIDEOCONSULTA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Videoconsulta" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td>{{ item.horaMostrar }}</td>
+              <td>
+                <div class="patient-name">{{ item.nombrePaciente | uppercase }}</div>
+                <div class="patient-meta">
+                  {{ item.identificacion }} ·
+                  <ng-container *ngIf="item.edadAnios === 0">{{ item.edadMeses }} Meses</ng-container>
+                  <ng-container *ngIf="item.edadAnios !== 0">{{ item.edadAnios }} años</ng-container>
+                </div>
+                <span class="modality-tag" [ngClass]="{
+                  'mod-video': item.tipoModalidad === 'VIDEOCONSULTA',
+                  'mod-presencial': item.tipoModalidad === 'PRESENCIAL',
+                  'mod-tele': item.tipoModalidad === 'TELECONSULTA',
+                  'mod-telexp': item.tipoModalidad === 'TELEXPERTICIA'
+                }">{{ item.tipoAgendaAcceso }}</span>
+              </td>
+              <td class="icon-cell2">
+                <ng-container [ngSwitch]="item.tipoAgendaAccesoId">
+                  <button *ngSwitchCase="1" pButton type="button" icon="pi pi-ban" [disabled]="true"
+                    class="icon-btn icon-btn-acceso" title="No disponible"></button>
+                  <button *ngSwitchCase="2" pButton type="button" icon="pi pi-video"
+                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Videoconsulta"
+                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
+                  <button *ngSwitchCase="4" pButton type="button" icon="pi pi-phone"
+                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Teleconsulta"
+                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
+                  <button *ngSwitchCase="11" pButton type="button" [disabled]="item.disableButton"
+                    class="icon-btn icon-btn-acceso" title="Extramural" (click)="abrirModal(item)">
+                    <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" style="width:28px;height:28px;">
+                  </button>
+                  <span *ngSwitchDefault>—</span>
+                </ng-container>
+              </td>
+              <td class="icon-cell2">
+                <ng-container *ngIf="item.swExcedioLimiteLlamada === 1; else turnoBtnTpl2">
+                  <span class="status-badge status-consulta">Paciente llamado</span>
+                </ng-container>
+                <ng-template #turnoBtnTpl2>
+                  <ng-container *ngIf="!(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL'); else turnoNoAplica2">
+                    <button pButton type="button" class="icon-btn icon-btn-turno"
+                      [disabled]="item.estadoCita !== 'FACT' || (item.disableButton && item.ticket_Id != null) || isTurnoLoading(item)"
+                      title="Llamar turno"
+                      (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
+                      <i class="pi pi-volume-up"></i>
                     </button>
                   </ng-container>
-                  <ng-container *ngIf="item.tipoModalidad === 'TELEXPERTICIA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Telexperticia" (click)="openZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
-                    </button>
-                  </ng-container>
-                  <ng-container *ngIf="item.tipoModalidad === 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" 
-                    [class.disabled]="item.disableButton"
-                      [disabled]="true" title="Presencial">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                        <path d="M9 22V12h6v10" />
-                        <path d="M3 9h18" />
-                         <!-- línea de prohibido cuando no hay link -->
-                      <line *ngIf="item.tipoModalidad === 'PRESENCIAL'" x1="4" y1="4" x2="20" y2="20" />
-                      </svg>
-                    </button>
-                  </ng-container>
-                  <ng-container *ngIf="item.tipoModalidad === 'TELECONSULTA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Teleconsulta" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path
-                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <ng-container
-                    *ngIf="(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL') && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Extramural">
-                      <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" alt="Extramural"
-                        style="width: 28px; height: 28px;">
-                    </button>
-                  </ng-container>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="turno">
-                <th mat-header-cell *matHeaderCellDef>Turno</th>
-                <td mat-cell *matCellDef="let item">
-                  <ng-container *ngIf="item.swExcedioLimiteLlamada === 1; else turnoBtnRecTpl">
-                    <span class="status-badge status-consulta">Paciente llamado</span>
-                  </ng-container>
-                  <ng-template #turnoBtnRecTpl>
-                    <div class="flex align-items-center gap-2">
-                      <button class="icon-btn icon-btn-turno" [class.disabled]="
-    item.estadoCita !== 'FACT' ||
-    item.disableButton ||
-    !(item.tipoAgendaAccesoId != 11 || item.tipoAgendaAcceso != 'EXTRAMURAL')
-  " [disabled]="
-    item.estadoCita !== 'FACT' ||
-    item.disableButton ||
-    !(item.tipoAgendaAccesoId != 11 || item.tipoAgendaAcceso != 'EXTRAMURAL')
-  " title="Llamar turno" (click)="llamarPaciente(item.identificacion, resolveCitaId(item))">
-
-                        <img [src]="(
-      item.estadoCita !== 'FACT' ||
-      item.disableButton ||
-      !(item.tipoAgendaAccesoId != 11 || item.tipoAgendaAcceso != 'EXTRAMURAL')
-    )
-      ? mfAssetUrl('assets/Iconos/hablando-fuerte-disable.png')
-      : mfAssetUrl('assets/Iconos/hablando-fuerte.png')" alt="Llamar turno">
-
-                      </button>
-                      <span class="patient-meta" *ngIf="item.disableButton && item.ticket_Id != null">
-                        Reintento en {{ item.contador }}s
-                      </span>
-                      <span class="patient-meta" *ngIf="isTurnoLoading(item)">Cargando...</span>
-                    </div>
+                  <ng-template #turnoNoAplica2><span class="patient-meta">—</span></ng-template>
+                </ng-template>
+              </td>
+              <td>
+                <span class="status-badge" [ngClass]="{
+                  'status-activo': item.estadoCita === 'ACT',
+                  'status-pendiente': item.estadoCita === 'PEN',
+                  'status-cancelado': item.estadoCita === 'CAN',
+                  'status-consulta': item.estadoCita === 'CON'
+                }">{{ item.estadoCita }}</span>
+              </td>
+              <td>
+                <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
+                  <button pButton type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
+                    'reimp-btn-secondary': item.tipoAgendaAccesoId===7 || item.tipoAgendaAccesoId===8,
+                    'reimp-btn-primary': item.tipoAgendaAccesoId!==7 && item.tipoAgendaAccesoId!==8
+                  }" [disabled]="item.disableButton" (click)="abrirHistoriaClinica(item)">
+                    Historias Clínicas
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="medicoServices.Especialidad.id===139">
+                  <button pButton type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                    (click)="finalizar(item)">Finalizar cita</button>
+                </ng-container>
+              </td>
+              <td>
+                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                  [disabled]="isConsentimientoLoading(item)" (click)="irAci(item)">
+                  <ng-container *ngIf="!isConsentimientoLoading(item); else ciLoadingTpl2">Consentimientos</ng-container>
+                  <ng-template #ciLoadingTpl2>
+                    <i class="pi pi-spin pi-spinner" style="font-size:0.85rem;margin-right:0.35rem;"></i>Abriendo...
                   </ng-template>
-                </td>
-              </ng-container>
+                </button>
+              </td>
+              <td *ngIf="mostrarHistoricoCitas()">
+                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                  (click)="obtenerHistoricoAsistioCita(item)">Histórico citas</button>
+              </td>
+            </tr>
+          </ng-template>
 
-              <ng-container matColumnDef="estado">
-                <th mat-header-cell *matHeaderCellDef>Estado</th>
-                <td mat-cell *matCellDef="let item">
-                  <span class="status-badge" [ngClass]="{
-                    'status-activo':    item.estadoCita === 'ACT',
-                    'status-pendiente': item.estadoCita === 'PEN',
-                    'status-cancelado': item.estadoCita === 'CAN',
-                    'status-consulta':  item.estadoCita === 'CON'
-                  }">{{ item.estadoCita }}</span>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="historias">
-                <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
-                <td mat-cell *matCellDef="let item">
-                  <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                    <button [disabled]="item.disableButton" type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
-                        'reimp-btn-secondary': item.tipoAgendaAccesoId === 7 || item.tipoAgendaAccesoId === 8,
-                        'reimp-btn-primary':   item.tipoAgendaAccesoId !== 7 && item.tipoAgendaAccesoId !== 8
-                      }" (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
-                  </ng-container>
-                  <ng-container *ngIf="medicoServices.Especialidad.id === 139">
-                    <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
-                      (click)="finalizar(item)">Finalizar cita</button>
-                  </ng-container>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="consentimientos">
-                <th mat-header-cell *matHeaderCellDef>Consentimientos</th>
-                <td mat-cell *matCellDef="let item">
-                  <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
-                    [disabled]="isConsentimientoLoading(item)" (click)="irAci(item)">
-                    <ng-container
-                      *ngIf="!isConsentimientoLoading(item); else ciLoadingTplRec">Consentimientos</ng-container>
-                    <ng-template #ciLoadingTplRec>
-                      <i class="pi pi-spin pi-spinner" style="font-size: 0.85rem; margin-right: 0.35rem;"></i>
-                      Abriendo...
-                    </ng-template>
-                  </button>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="historico" *ngIf="mostrarHistoricoCitas()">
-                <th mat-header-cell *matHeaderCellDef>Histórico citas</th>
-                <td mat-cell *matCellDef="let item">
-                  <button type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
-                    (click)="obtenerHistoricoAsistioCita(item)">
-                    Histórico citas
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-              <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell reimp-empty-cell" [attr.colspan]="displayedColumns.length">
-                  Sin citas en recuperación.
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="reimp-table-footer" *ngIf="dataSourceEti?.data?.length">
-            <span class="reimp-counter">{{ buildCounterText(dataSourceEti?.data?.length ?? 0, notasPage, notasPageSize)
-              }}</span>
-            <div class="reimp-pager">
-              <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
-                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="notasPage === 1"
-                (click)="previousPage('notas')"></button>
-              <span class="reimp-page-indicator">{{ notasPage }} / {{ totalPages(dataSourceEti?.data?.length ?? 0,
-                notasPageSize) }}</span>
-              <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
-                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-                [disabled]="!hasNextPage(dataSourceEti?.data?.length ?? 0, notasPage, notasPageSize)"
-                (click)="nextPage('notas')"></button>
-            </div>
-          </div>
-        </div>
+          <ng-template pTemplate="emptymessage">
+            <tr><td [attr.colspan]="8" class="reimp-empty-cell text-center">No hay citas para el día de hoy.</td></tr>
+          </ng-template>
+        </p-table>
       </p-accordionTab>
 
-      <!-- ── CONTINGENCIA ── -->
+      <!-- CONTINGENCIA -->
       <p-accordionTab>
         <ng-template pTemplate="header">
           <div class="acc-header-tpl">
@@ -500,317 +312,218 @@
           </div>
         </ng-template>
 
-        <div class="reimp-table-shell">
-          <div *ngIf="loadingOtrosTable" style="padding:.5rem 0; font-weight:600; color:#6b7280;">Cargando citas...
-          </div>
-          <div class="table-responsive">
-            <table mat-table [dataSource]="paginatedRows(dataSourceCont?.data ?? [], otrosPage, otrosPageSize)"
-              class="w-full reimp-table">
+        <p-table [value]="dataSourceCont?.data" [paginator]="dataSourceCont?.data?.length > 0"
+          [rows]="otrosPageSize" [first]="(otrosPage-1)*otrosPageSize" class="w-full reimp-table"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
+          [totalRecords]="dataSourceCont?.data?.length ?? 0">
 
-              <ng-container matColumnDef="fecha">
-                <th mat-header-cell *matHeaderCellDef>Fecha</th>
-                <td mat-cell *matCellDef="let item">
-                  <span class="fecha-chip">{{ item.horaConsulta | date:'dd MMM yyyy' }}</span>
-                  <div><span class="cell-hora" style="font-size:.78rem;">{{ item.horaMostrar }}</span></div>
-                </td>
-              </ng-container>
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Fecha</th><th>Paciente</th><th>Acceso</th>
+              <th>Historias Clínicas</th><th>Acciones</th>
+            </tr>
+          </ng-template>
 
-              <ng-container matColumnDef="paciente">
-                <th mat-header-cell *matHeaderCellDef>Paciente</th>
-                <td mat-cell *matCellDef="let item">
-                  <div class="patient-name">{{ item.nombrePaciente | uppercase }}</div>
-                  <div class="patient-meta">
-                    {{ item.identificacion }} ·
-                    <ng-container *ngIf="item.edadAnios === 0">{{ item.edadMeses }} Meses</ng-container>
-                    <ng-container *ngIf="item.edadAnios !== 0">{{ item.edadAnios }} años</ng-container>
-                  </div>
-                </td>
-              </ng-container>
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td>
+                <span class="fecha-chip">{{ item.horaConsulta | date:'dd MMM yyyy' }}</span>
+                <div><span class="cell-hora" style="font-size:.78rem;">{{ item.horaMostrar }}</span></div>
+              </td>
+              <td>
+                <div class="patient-name">{{ item.nombrePaciente | uppercase }}</div>
+                <div class="patient-meta">
+                  {{ item.identificacion }} ·
+                  <ng-container *ngIf="item.edadAnios === 0">{{ item.edadMeses }} Meses</ng-container>
+                  <ng-container *ngIf="item.edadAnios !== 0">{{ item.edadAnios }} años</ng-container>
+                </div>
+              </td>
+              <td class="icon-cell">
+                <i class="pi pi-check" style="color:#10b981;font-size:1.25rem;"></i>
+              </td>
+              <td>
+                <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
+                  <button pButton type="button" class="reimp-btn reimp-btn-compact reimp-btn-primary"
+                    [disabled]="item.disableButton" (click)="abrirHistoriaClinica(item)">
+                    Historias Clínicas
+                  </button>
+                </ng-container>
+                <ng-container *ngIf="medicoServices.Especialidad.id === 139">
+                  <button pButton type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                    (click)="finalizar(item)">Finalizar cita</button>
+                </ng-container>
+              </td>
+              <td>
+                <button pButton type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact"
+                  [disabled]="isDesactivarLoading(item)" (click)="desactivarCita(item)">
+                  {{ isDesactivarLoading(item) ? 'Desactivando...' : 'Desactivar' }}
+                </button>
+              </td>
+            </tr>
+          </ng-template>
 
-              <ng-container matColumnDef="acceso">
-                <th mat-header-cell *matHeaderCellDef>Acceso</th>
-                <td mat-cell *matCellDef="let item">
-
-                  <!-- Video sin link -->
-                  <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
-                    && (item.tipoAgendaAcceso === 'VIDEOCONSULTA' || item.tipoAgendaAcceso === 'VideoConsulta')
-                    && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Iniciar videoconsulta" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Telexperticia -->
-                  <ng-container *ngIf="item.tipoModalidad === 'TELEXPERTICIA'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="openZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Video con link -->
-                  <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
-                    && (item.tipoAgendaAcceso === 'VIDEOCONSULTA' || item.tipoAgendaAcceso === 'VideoConsulta' || item.tipoAgendaAcceso === 'TELEXPERTICIA')
-                    && !!item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="openZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Presencial -->
-                  <ng-container
-                    *ngIf="item.tipoAgendaAccesoId === 1 || item.tipoAgendaAccesoId === 6 || (item.tipoAgendaAcceso === 'PRESENCIAL' && item.tipoAgendaAccesoId !== 7)">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="true" title="Presencial">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                        <path d="M9 22V12h6v10" />
-                        <path d="M3 9h18" />
-                           <!-- línea de prohibido cuando no hay link -->
-                      <line *ngIf="item.tipoModalidad === 'PRESENCIAL'" x1="4" y1="4" x2="20" y2="20" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Tipo 7 presencial sin link -->
-                  <ng-container
-                    *ngIf="item.tipoAgendaAccesoId === 7 && !item.linkVideoconsulta && item.tipoAgendaAcceso === 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Buscar">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.35-4.35" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Extramural -->
-                  <ng-container
-                    *ngIf="(item.tipoAgendaAccesoId === 11 || item.tipoAgendaAcceso === 'EXTRAMURAL') && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Extramural">
-                      <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" alt="Extramural"
-                        style="width: 28px; height: 28px;">
-                    </button>
-                  </ng-container>
-
-                  <!-- Tipo 7 video con link -->
-                  <ng-container
-                    *ngIf="item.tipoAgendaAccesoId === 7 && !!item.linkVideoconsulta && item.tipoAgendaAcceso !== 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="abrirZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Tipo 7 teléfono sin link -->
-                  <ng-container
-                    *ngIf="item.tipoAgendaAccesoId === 7 && !item.linkVideoconsulta && item.tipoAgendaAcceso !== 'PRESENCIAL'">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Llamar" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path
-                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Teleconsulta sin link -->
-                  <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
-                    && (item.tipoAgendaAcceso === 'TELECONSULTA' || item.tipoAgendaAcceso === 'TeleConsulta' || item.tipoAgendaAcceso === 'TELECONSULTA SEDE')
-                    && !item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Llamar" (click)="abrirModal(item)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path
-                          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 5.61 5.61l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                  <!-- Teleconsulta con link -->
-                  <ng-container *ngIf="(item.tipoAgendaAccesoId === 2 || item.tipoAgendaAccesoId === 4)
-                    && (item.tipoAgendaAcceso === 'TELECONSULTA' || item.tipoAgendaAcceso === 'TeleConsulta' || item.tipoAgendaAcceso === 'TELECONSULTA SEDE')
-                    && !!item.linkVideoconsulta">
-                    <button class="icon-btn icon-btn-acceso" [class.disabled]="item.disableButton"
-                      [disabled]="item.disableButton" title="Abrir Zoom" (click)="abrirZoom(item.linkVideoconsulta)">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <polygon points="23 7 16 12 23 17 23 7" />
-                        <rect x="1" y="5" width="15" height="14" rx="2" />
-                      </svg>
-                    </button>
-                  </ng-container>
-
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="verificado">
-                <th mat-header-cell *matHeaderCellDef>Verificado</th>
-                <td mat-cell *matCellDef="let item" class="icon-cell">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="historias">
-                <th mat-header-cell *matHeaderCellDef>Historias Clínicas</th>
-                <td mat-cell *matCellDef="let item">
-                  <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                    <button [disabled]="item.disableButton" type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
-                        'reimp-btn-secondary': item.tipoAgendaAccesoId === 7 || item.tipoAgendaAccesoId === 8,
-                        'reimp-btn-primary':   item.tipoAgendaAccesoId !== 7 && item.tipoAgendaAccesoId !== 8
-                      }" (click)="abrirHistoriaClinica(item)">Historias Clínicas</button>
-                  </ng-container>
-                  <ng-container *ngIf="medicoServices.Especialidad.id === 139">
-                    <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
-                      (click)="finalizar(item)">Finalizar cita</button>
-                  </ng-container>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="acciones">
-                <th mat-header-cell *matHeaderCellDef>Acciones</th>
-                <td mat-cell *matCellDef="let item">
-                  <button type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact"
-                    [disabled]="isDesactivarLoading(item)" (click)="desactivarCita(item)">{{ isDesactivarLoading(item) ?
-                    'Desactivando...' : 'Desactivar' }}</button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumnsCont"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsCont;"></tr>
-              <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell reimp-empty-cell" [attr.colspan]="displayedColumnsCont.length">
-                  Sin citas en contingencia.
-                </td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="reimp-table-footer" *ngIf="dataSourceCont?.data?.length">
-            <span class="reimp-counter">{{ buildCounterText(dataSourceCont?.data?.length ?? 0, otrosPage, otrosPageSize)
-              }}</span>
-            <div class="reimp-pager">
-              <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
-                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn" [disabled]="otrosPage === 1"
-                (click)="previousPage('otros')"></button>
-              <span class="reimp-page-indicator">{{ otrosPage }} / {{ totalPages(dataSourceCont?.data?.length ?? 0,
-                otrosPageSize) }}</span>
-              <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
-                class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-                [disabled]="!hasNextPage(dataSourceCont?.data?.length ?? 0, otrosPage, otrosPageSize)"
-                (click)="nextPage('otros')"></button>
-            </div>
-          </div>
-        </div>
+          <ng-template pTemplate="emptymessage">
+            <tr><td [attr.colspan]="5" class="reimp-empty-cell text-center">No hay citas para el día de hoy.</td></tr>
+          </ng-template>
+        </p-table>
       </p-accordionTab>
 
     </p-accordion>
 
-  </div><!-- /subcard-content -->
-</div><!-- /vhc-onecard -->
+  </div>
 
+  <!-- Loader llamada -->
+  <div *ngIf="llamadaService?.loading" class="vhc-loader">
+    <i class="pi pi-spin pi-spinner"></i>
+  </div>
 
-<!-- ── LOADER LLAMADA ── -->
-<div *ngIf="llamadaService?.loading" class="vhc-loader">
-  <i class="pi pi-spin pi-spinner"></i>
 </div>
 
-<ng-template #informacionPaciente let-modal>
-  <div class="vhc-modal-head">
-    <div class="vhc-modal-titlewrap">
-      <div class="vhc-modal-title">INFORMACIÓN</div>
-      <div class="vhc-modal-calling" *ngIf="colgar">EN LLAMADA</div>
+<!-- ===== MODAL INFORMACIÓN PACIENTE ===== -->
+<p-dialog header="INFORMACIÓN" [(visible)]="modalPacienteVisible"
+  [modal]="true" [closable]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: '600px' }" styleClass="reimp-dialog">
+
+  <div class="flex flex-column gap-3 pt-2" *ngIf="modalPacienteDatos">
+
+    <!-- Nombre -->
+    <div>
+      <span class="font-semibold">Nombre Paciente:</span>
+      <span class="ms-2">{{ modalPacienteDatos?.nombre }} {{ modalPacienteDatos?.primer_Apellido }}</span>
     </div>
-    <button type="button" class="vhc-modal-close" aria-label="Close" (click)="cerraModalLlamada()">
-      <span aria-hidden="true">&times;</span>
+
+    <!-- En llamada -->
+    <div *ngIf="colgar" class="flex align-items-center gap-2">
+      <span class="status-badge status-consulta">EN LLAMADA</span>
+      <span class="font-mono">{{ minuto }}:{{ segundos | number:'2.0' }}</span>
+    </div>
+
+    <!-- Estado SIP -->
+    <div class="flex align-items-center gap-3" *ngIf="!colgar">
+      <span class="font-semibold">Estado:</span>
+      <span class="text-success" *ngIf="llamadaService?.estado">Activo para realizar llamadas</span>
+      <span class="text-danger" *ngIf="!llamadaService?.estado">Inactivo para realizar llamadas</span>
+      <button pButton type="button" label="Activar" class="reimp-btn reimp-btn-primary reimp-btn-compact"
+        *ngIf="!llamadaService?.estado" (click)="sipRegister()"></button>
+      <button pButton type="button" label="Desactivar" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+        *ngIf="llamadaService?.estado" (click)="sipUnRegister()"></button>
+    </div>
+
+    <!-- Tabla teléfonos -->
+    <table class="w-full" *ngIf="modalPacienteContactos.length > 0 && !colgar"
+      style="border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="border-bottom:2px solid #e0e0e0;padding:8px 0;text-align:left;">Teléfono</th>
+          <th style="border-bottom:2px solid #e0e0e0;padding:8px 0;text-align:right;width:90px;">Llamar</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tel of modalPacienteContactos">
+          <td style="padding:8px 0;">{{ tel }}</td>
+          <td style="text-align:right;padding:8px 0;">
+            <button pButton type="button" icon="pi pi-phone"
+              class="icon-btn icon-btn-acceso" title="Llamar"
+              (click)="llamadaService?.estado ? sipCall('call-audio', tel) : toastWarnPublic('Anuncio','Debes activar el sistema antes de llamar')">
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Controles llamada activa -->
+    <div class="flex align-items-center gap-3" *ngIf="colgar">
+      <button pButton type="button" icon="ri-phone-off-line" label="Colgar"
+        class="reimp-btn reimp-btn-danger reimp-btn-compact" (click)="sipHangUp()"></button>
+      <button pButton type="button" [icon]="validadorMute ? 'ri-mic-off-line' : 'ri-mic-line'"
+        [label]="validadorMute ? 'Activar mic' : 'Silenciar'"
+        class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+        (click)="sipToggleMute(!validadorMute)"></button>
+    </div>
+
+    <!-- Botón videoconsulta -->
+    <div *ngIf="videconsulta">
+      <button pButton type="button" icon="pi pi-video" label="Abrir Videoconsulta"
+        class="reimp-btn reimp-btn-primary reimp-btn-compact"
+        (click)="generarLink(modalPacienteItem)"></button>
+    </div>
+
+    <!-- Observación -->
+    <div *ngIf="observacion">
+      <span class="font-semibold">Observación:</span>
+      <span class="ms-2">{{ observacion }}</span>
+    </div>
+
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton type="button" label="Cerrar" icon="ri-close-line"
+      class="reimp-btn reimp-btn-secondary" (click)="cerrarModalPaciente()">
     </button>
-  </div>
+  </ng-template>
+</p-dialog>
 
-  <div class="vhc-modal-body">
-    <div class="vhc-modal-field">
-      <p class="vhc-modal-patient">Nombre Paciente:</p>
-      <div class="patient-meta">{{ datoUsuario?.nombre }} {{ datoUsuario?.primer_Apellido }}</div>
-    </div>
+<!-- ===== MODAL HISTÓRICO ===== -->
+<p-dialog header="Histórico de citas"
+  [(visible)]="modalHistoricoVisible"
+  [modal]="true" [closable]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: '650px', maxWidth: '95vw' }"
+  styleClass="reimp-dialog">
 
-    <div *ngIf="arrayContacto.length > 0">
-      <div class="vhc-sip-row" *ngIf="!colgar">
-        <div>
-          <b class="patient-meta">Estado:</b>&nbsp;
-          <span class="text-success patient-meta" *ngIf="llamadaService?.estado">Activo para realizar llamadas</span>
-          <span class="text-danger patient-meta" *ngIf="!llamadaService?.estado">Inactivo para realizar llamadas</span>
-        </div>
-        <div class="flex gap-2">
-          <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact" *ngIf="!llamadaService?.estado"
-            (click)="sipRegister()">Activar</button>
-          <button type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact" *ngIf="llamadaService?.estado"
-            (click)="sipUnRegister()">Desactivar</button>
-        </div>
-      </div>
+  <p-table [value]="modalHistoricoCitas"
+    styleClass="p-datatable-sm p-datatable-striped reimp-ptable"
+    [scrollable]="true" scrollHeight="320px"
+    [responsiveLayout]="'scroll'" [rowHover]="true">
 
-      <table class="table table-striped table-bordered table-hover vhc-tel-table" *ngIf="!colgar">
-        <thead>
-          <tr>
-            <th scope="col">Teléfono</th>
-            <th scope="col" style="width: 90px;">Llamar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let tel of arrayContacto">
-            <td *ngIf="tel != null && tel !== '' && tel !== 'NO'">{{ tel }}</td>
-            <td *ngIf="tel != null && tel !== '' && tel !== 'NO'" class="text-center">
-              <button type="button" class="icon-btn" title="Llamar" (click)="sipCall('call-audio', tel)">
-                <img [src]="mfAssetUrl('assets/Iconos/phone_icon.png')" alt="Llamar">
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width:90px;">Fecha</th>
+        <th>Profesional</th>
+        <th style="width:70px;text-align:center;">Asistió</th>
+        <th style="width:130px;">Especialidad</th>
+        <th style="width:100px;">Programa</th>
+      </tr>
+    </ng-template>
 
-      <div class="vhc-call-controls" *ngIf="colgar">
-        <button type="button" class="icon-btn vhc-btn-hang" title="Colgar" (click)="sipHangUp()">
-          <i class="ri-phone-off-line"></i>
-        </button>
-        <div class="vhc-timer">{{ minuto }}:{{ segundos | number: '2.0' }}</div>
-        <button type="button" class="icon-btn" [ngClass]="{ 'vhc-muted': validadorMute }"
-          [title]="validadorMute ? 'Activar micrófono' : 'Silenciar micrófono'" (click)="sipToggleMute(!validadorMute)">
-          <i class="ri-mic-line" *ngIf="!validadorMute"></i>
-          <i class="ri-mic-off-line" *ngIf="validadorMute"></i>
-        </button>
-      </div>
-    </div>
+    <ng-template pTemplate="body" let-cita>
+      <tr>
+        <td style="width:90px;font-size:0.82rem;">
+          {{ cita.fechaCita | date:'dd/MM/yyyy' }}
+        </td>
+        <td style="font-size:0.82rem;">
+          {{ cita.nombreProfesional }}
+        </td>
+        <td style="width:70px;text-align:center;">
+          <span style="font-size:0.78rem;font-weight:600;padding:2px 8px;border-radius:10px;"
+            [style.background]="cita.asistioCita ? '#dcfce7' : '#fee2e2'"
+            [style.color]="cita.asistioCita ? '#16a34a' : '#dc2626'">
+            {{ cita.asistioCita ? 'Sí' : 'No' }}
+          </span>
+        </td>
+        <td style="width:130px;font-size:0.82rem;">
+          {{ cita.especialidad }}
+        </td>
+        <td style="width:100px;font-size:0.82rem;">
+          {{ cita.programa }}
+        </td>
+      </tr>
+    </ng-template>
 
-    <div class="vhc-videocall-btn" *ngIf="videconsulta">
-      <button type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact" (click)="generarLink(row_)">
-        <img [src]="mfAssetUrl('assets/Iconos/video_icon.png')" alt="Video"
-          style="width: 16px; height: 16px; margin-right: 6px;">
-        Abrir Videoconsulta
-      </button>
-    </div>
-  </div>
-</ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="reimp-empty-cell">
+          No hay citas en el histórico.
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+
+  <ng-template pTemplate="footer">
+    <button pButton type="button" label="Cerrar" icon="ri-close-line"
+      class="reimp-btn reimp-btn-secondary"
+      (click)="modalHistoricoVisible = false">
+    </button>
+  </ng-template>
+</p-dialog>
