@@ -273,7 +273,7 @@
   font-size: .82rem;
   font-weight: 600;
   white-space: nowrap;
-  box-shadow: 0 3px 12px rgba(0,31,97,.18);
+  box-shadow: none;
   border: none;
   cursor: pointer;
   display: inline-flex;
@@ -284,7 +284,7 @@
 
 .btn-consult:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0,31,97,.28);
+  box-shadow: none;
 }
 
 /* ───────── MAT-TABLE OVERRIDES (clave para producción) ───────── */
@@ -933,6 +933,41 @@
 }
 
 /* ── Overlay global (bloquea UI mientras carga) ───────────────────────────────── */
+.required-asterisk {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+.vhc-helper {
+  display: block;
+  margin-top: 0.25rem;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.vhc-especialidad-unica {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #f8fbff;
+}
+
+.vhc-especialidad-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5b6f86;
+}
+
+.vhc-especialidad-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f2746;
+}
+
 .vhc-onecard { position: relative; }
 
 .vhc-overlay {
@@ -1244,9 +1279,19 @@
 
 /* VistaHC: botones sin sombra */
 :host ::ng-deep .btn-consult,
+:host ::ng-deep .btn-consult:hover,
 :host ::ng-deep .reimp-btn,
 :host ::ng-deep .reimp-btn.p-button,
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button,
+:host ::ng-deep .reimp-btn.reimp-btn-primary.p-button:hover,
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button,
+:host ::ng-deep .reimp-btn.reimp-btn-secondary.p-button:hover,
+:host ::ng-deep .reimp-btn.reimp-btn-danger.p-button,
+:host ::ng-deep .reimp-btn.reimp-btn-danger.p-button:hover,
 :host ::ng-deep .p-button,
+:host ::ng-deep .p-button:hover,
+:host ::ng-deep .p-button:focus,
+:host ::ng-deep .p-button:active,
 :host ::ng-deep .icon-btn {
   box-shadow: none !important;
 }

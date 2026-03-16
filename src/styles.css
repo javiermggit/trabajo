@@ -17,6 +17,15 @@ html, body {
   box-sizing: border-box;
 }
 
+/* PrimeNG: botones sin sombra (consistencia visual) */
+.p-button,
+.p-button:enabled:hover,
+.p-button:enabled:active,
+.p-button:focus,
+.p-button:focus-visible {
+  box-shadow: none !important;
+}
+
 .card-custom {
   border: 1px solid #e5e7eb;
   border-radius: 14px;

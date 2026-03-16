@@ -246,6 +246,7 @@ toastWarnPublic(titulo: string, msg: string): void {
   loadingHcTable: boolean = false;
   loadingNotasTable: boolean = false;
   loadingOtrosTable: boolean = false;
+  especialidadTouched: boolean = false;
 
   constructor(
     public rs: VistahcService,
@@ -325,6 +326,7 @@ toastWarnPublic(titulo: string, msg: string): void {
 
   public consultarCitas(): void {
     if (this.filtro === undefined || this.filtro === null) {
+      this.especialidadTouched = true;
       this.toastWarn(SWAL_TITULO_ADVERTENCIA_DOBLE, SWAL_MSG_DEBE_SELECCIONAR_ESPECIALIDAD);
       return;
     }
@@ -384,6 +386,14 @@ toastWarnPublic(titulo: string, msg: string): void {
   public consultarEspecialidad(): void {
     this.rs.ObtenerEspecialidad().subscribe((x) => {
       this.rs.listadoEspecialidad = x;
+      const items = Array.isArray(x) ? x : [];
+      if (items.length === 1) {
+        this.medicoServices.consultaInmediata = true;
+        this.filtro = items[0] as any;
+        this.medicoServices.Especialidad = this.filtro;
+      } else {
+        this.medicoServices.consultaInmediata = false;
+      }
     }, (error) => {
       const msg = resolveApiErrorMessage(error, 'Ocurrió un error');
       this.toastError('Advertencia', msg);

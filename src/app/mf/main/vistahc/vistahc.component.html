@@ -20,18 +20,34 @@
     <div class="agenda-filters">
       <div class="filter-row">
         <div class="filter-group">
-          <span class="p-float-label full-width">
-            <p-dropdown inputId="especialidad" appendTo="body" [autoZIndex]="true" [baseZIndex]="10000"
-              panelStyleClass="reimp-dropdown-panel" [scrollHeight]="'260px'" [options]="rs.listadoEspecialidad"
-              optionLabel="descripcion" [(ngModel)]="filtro" [filter]="true" filterBy="descripcion"
-              [showClear]="true" styleClass="w-full modern-dropdown">
-            </p-dropdown>
-            <label for="especialidad">Especialidad</label>
-          </span>
+          <ng-container *ngIf="!medicoServices.consultaInmediata; else especialidadUnica">
+            <span class="p-float-label full-width">
+              <p-dropdown inputId="especialidad" appendTo="body" [autoZIndex]="true" [baseZIndex]="10000"
+                panelStyleClass="reimp-dropdown-panel" [scrollHeight]="'260px'" [options]="rs.listadoEspecialidad"
+                optionLabel="descripcion" [(ngModel)]="filtro" [filter]="true" filterBy="descripcion"
+                placeholder="Selecciona una especialidad" [showClear]="true" styleClass="w-full modern-dropdown"
+                (onChange)="especialidadTouched = true" (onHide)="especialidadTouched = true">
+              </p-dropdown>
+              <label for="especialidad">Especialidad <span class="required-asterisk">*</span></label>
+            </span>
+            <small class="vhc-helper" *ngIf="especialidadTouched && (filtro === undefined || filtro === null)">
+              Debes seleccionar una especialidad para consultar.
+            </small>
+          </ng-container>
+
+          <ng-template #especialidadUnica>
+            <div class="vhc-especialidad-unica" title="Especialidad asignada">
+              <span class="vhc-especialidad-label">Especialidad</span>
+              <span class="vhc-especialidad-value">{{ filtro?.descripcion || '—' }}</span>
+            </div>
+          </ng-template>
         </div>
         <div class="filter-button">
           <button pButton type="button" label="Consultar" icon="ri-search-line" iconPos="left"
-            class="reimp-btn reimp-btn-compact reimp-btn-primary" (click)="consultarCitasGeneral()">
+            class="reimp-btn reimp-btn-compact reimp-btn-primary"
+            [disabled]="isBusy || (!medicoServices.consultaInmediata && (filtro === undefined || filtro === null))"
+            [attr.title]="(!medicoServices.consultaInmediata && (filtro === undefined || filtro === null)) ? 'Selecciona una especialidad' : null"
+            (click)="consultarCitasGeneral()">
           </button>
         </div>
       </div>
