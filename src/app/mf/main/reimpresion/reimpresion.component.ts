@@ -2,7 +2,6 @@ import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ReimpresionService } from './reimpresion.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT } from '@angular/common';
-import { MatTableDataSource } from '@angular/material/table';
 import { Reimpresion } from 'src/app/Modelos/Reimpresion';
 import { NotaAdministrativaService } from 'src/app/nota-administrativa/nota-administrativa.service';
 import { EnviarPlantillaCorreo } from 'src/app/Modelos/whatsapp';
@@ -101,9 +100,15 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   link: string = '';
   fechahoy = new Date().toISOString().substring(0, ISO_DATE_ONLY_LENGTH);
 
-  public dataSource: MatTableDataSource<Reimpresion> = new MatTableDataSource<Reimpresion>([]);
-  public dataSource2: MatTableDataSource<any> = new MatTableDataSource<any>([]);
-  public dataSource3: MatTableDataSource<any> = new MatTableDataSource<any>([]);
+  // datos filtrados (sin Angular Material)
+  hcRows: Reimpresion[] = [];
+  notasRows: any[] = [];
+  otrosRows: any[] = [];
+
+  // datos paginados (para pintar en p-table sin recalcular en template)
+  hcRowsPage: Reimpresion[] = [];
+  notasRowsPage: any[] = [];
+  otrosRowsPage: any[] = [];
 
   displayedColumns: string[] = ['medico', 'fecha', 'especialidad', 'link'];
   displayedColumnsHc: string[] = ['paciente', 'identificacion', 'rutaAccesoPdf'];
@@ -128,6 +133,16 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   errorHcTable: string = '';
   errorNotasTable: string = '';
   errorOtrosTable: string = '';
+
+  get isBlockingBusy(): boolean {
+    return !!(this.loadingEnvio || this.loadingImpresion);
+  }
+
+  get blockingOverlayText(): string {
+    if (this.loadingEnvio) return 'Enviando, por favor espere...';
+    if (this.loadingImpresion) return 'Generando documento, por favor espere...';
+    return 'Procesando...';
+  }
 
   hcPage: number = 1;
   notasPage: number = 1;
@@ -426,15 +441,18 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
 
   private limpiarDataSources(): void {
     this.rs.reimpresion = [];
-    this.dataSource = new MatTableDataSource([]);
     this.hcDataOriginal = [];
+    this.hcRows = [];
+    this.hcRowsPage = [];
     this.filtroFechaRango = null;
     this.rs.listadonotas = [];
-    this.dataSource2 = new MatTableDataSource([]);
     this.notasDataOriginal = [];
+    this.notasRows = [];
+    this.notasRowsPage = [];
     this.rs.listadoHcIntegra = [];
-    this.dataSource3 = new MatTableDataSource([]);
     this.otrosDataOriginal = [];
+    this.otrosRows = [];
+    this.otrosRowsPage = [];
     this.errorHcTable = '';
     this.errorNotasTable = '';
     this.errorOtrosTable = '';
@@ -465,7 +483,8 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.loadingHcTable = false;
     }, (error) => {
       this.rs.reimpresion = new Array<Reimpresion>();
-      this.dataSource = new MatTableDataSource(this.rs.reimpresion);
+      this.hcRows = [];
+      this.hcRowsPage = [];
       this.hcDataOriginal = [];
       this.filtroProfesional = null;
       this.construirOpcionesProfesionales();
@@ -482,10 +501,12 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.rs.datoPaciente = x;
       if (!x) {
         this.rs.listadonotas = [];
-        this.dataSource2 = new MatTableDataSource([]);
+        this.notasRows = [];
+        this.notasRowsPage = [];
         this.loadingNotasTable = false;
         this.rs.listadoHcIntegra = [];
-        this.dataSource3 = new MatTableDataSource([]);
+        this.otrosRows = [];
+        this.otrosRowsPage = [];
         this.loadingOtrosTable = false;
         return;
       }
@@ -494,7 +515,8 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.loadingNotasTable = false;
       this.errorNotasTable = 'Error al consultar notas administrativas';
       this.rs.listadonotas = new Array<any>();
-      this.dataSource2 = new MatTableDataSource(this.rs.listadonotas);
+      this.notasRows = [];
+      this.notasRowsPage = [];
     });
   }
 
@@ -511,8 +533,9 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.loadingNotasTable = false;
     }, () => {
       this.rs.listadonotas = new Array<any>();
-      this.dataSource2 = new MatTableDataSource(this.rs.listadonotas);
       this.notasDataOriginal = [];
+      this.notasRows = [];
+      this.notasRowsPage = [];
       this.construirOpcionesProfesionales();
       this.aplicarFiltrosLocalesHC();
       this.loadingNotasTable = false;
@@ -527,7 +550,8 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.rs.datoPaciente = x;
       if (!x) {
         this.rs.listadoHcIntegra = [];
-        this.dataSource3 = new MatTableDataSource([]);
+        this.otrosRows = [];
+        this.otrosRowsPage = [];
         this.loadingOtrosTable = false;
         return;
       }
@@ -540,8 +564,9 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
         this.loadingOtrosTable = false;
       }, () => {
         this.rs.listadoHcIntegra = new Array<any>();
-        this.dataSource3 = new MatTableDataSource([]);
         this.otrosDataOriginal = [];
+        this.otrosRows = [];
+        this.otrosRowsPage = [];
         this.construirOpcionesProfesionales();
         this.aplicarFiltrosLocalesHC();
         this.loadingOtrosTable = false;
@@ -594,6 +619,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   }
 
   imprimirHistoriaClinicaPDF(row: Reimpresion): void {
+    if (this.loadingEnvio || this.loadingImpresion) return;
     this.loadingImpresion = true;
     this.rs.ObtenerHcDatoAsociado(row.consultaId);
     const clientId = Number(this.idcliente);
@@ -632,6 +658,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   }
 
   imprimirUnificadacronica(): void {
+    if (this.loadingEnvio || this.loadingImpresion) return;
     if (!this.rs?.datoPaciente?.id) {
       this.toastWarn(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE);
       return;
@@ -658,6 +685,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   }
 
   imprimirUnificadageneral(): void {
+    if (this.loadingEnvio || this.loadingImpresion) return;
     if (!this.rs?.datoPaciente?.id) {
       this.toastWarn(SWAL_TITULO_ADVERTENCIA, SWAL_MSG_PRIMERO_CONSULTAR_PACIENTE);
       return;
@@ -691,6 +719,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
 ): Promise<void> {
   const tipoTexto = tipoHistoria === 'full' ? 'Full' : 'Lite';
   let linkPdf = '';
+  if (this.loadingEnvio || this.loadingImpresion) return;
   this.loadingEnvio = true;
 
   try {
@@ -800,12 +829,17 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
     if (table === 'hc' && this.hcPage > 1) this.hcPage--;
     else if (table === 'notas' && this.notasPage > 1) this.notasPage--;
     else if (table === 'otros' && this.otrosPage > 1) this.otrosPage--;
+    this.recomputePagedRows();
   }
 
   nextPage(table: 'hc' | 'notas' | 'otros'): void {
-    if (table === 'hc' && this.hasNextPage(this.dataSource.data.length, this.hcPage, this.hcPageSize)) this.hcPage++;
-    else if (table === 'notas' && this.hasNextPage(this.dataSource2.data.length, this.notasPage, this.notasPageSize)) this.notasPage++;
-    else if (table === 'otros' && this.hasNextPage(this.dataSource3.data.length, this.otrosPage, this.otrosPageSize)) this.otrosPage++;
+    const hcTotal = this.hcRows.length;
+    const notasTotal = this.notasRows.length;
+    const otrosTotal = this.otrosRows.length;
+    if (table === 'hc' && this.hasNextPage(hcTotal, this.hcPage, this.hcPageSize)) this.hcPage++;
+    else if (table === 'notas' && this.hasNextPage(notasTotal, this.notasPage, this.notasPageSize)) this.notasPage++;
+    else if (table === 'otros' && this.hasNextPage(otrosTotal, this.otrosPage, this.otrosPageSize)) this.otrosPage++;
+    this.recomputePagedRows();
   }
 
   buildCounterText(total: number, page: number, size: number): string {
@@ -816,12 +850,19 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   }
 
   aplicarFiltrosLocalesHC(): void {
-    this.dataSource = new MatTableDataSource(this.filtrarRowsLocales(this.hcDataOriginal));
-    this.dataSource2 = new MatTableDataSource(this.filtrarRowsLocales(this.notasDataOriginal));
-    this.dataSource3 = new MatTableDataSource(this.filtrarRowsLocales(this.otrosDataOriginal));
+    this.hcRows = this.filtrarRowsLocales(this.hcDataOriginal);
+    this.notasRows = this.filtrarRowsLocales(this.notasDataOriginal);
+    this.otrosRows = this.filtrarRowsLocales(this.otrosDataOriginal);
     this.hcPage = 1;
     this.notasPage = 1;
     this.otrosPage = 1;
+    this.recomputePagedRows();
+  }
+
+  private recomputePagedRows(): void {
+    this.hcRowsPage = this.paginatedRows(this.hcRows, this.hcPage, this.hcPageSize);
+    this.notasRowsPage = this.paginatedRows(this.notasRows, this.notasPage, this.notasPageSize);
+    this.otrosRowsPage = this.paginatedRows(this.otrosRows, this.otrosPage, this.otrosPageSize);
   }
 
   limpiarFiltrosLocalesHC(): void {

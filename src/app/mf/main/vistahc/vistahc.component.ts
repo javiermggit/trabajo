@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { VistahcService } from './vistahc.service';
 import { MedicoService } from 'src/app/medico/medico.service';
-import { MatTableDataSource } from '@angular/material/table';
 import { Citas } from 'src/app/Modelos/Medico';
 import { environment } from 'src/environments/environment';
 import { CookieService } from 'ngx-cookie-service';
@@ -55,6 +54,114 @@ export class VistahcComponent implements OnInit, OnDestroy {
 toastWarnPublic(titulo: string, msg: string): void {
   this.messageService.add({ severity: 'warn', summary: titulo, detail: msg, life: 5000 });
 }
+
+  // ── PrimeNG paging sync ─────────────────────────────────────────────────────────
+  onHcPage(event: any): void { this.syncPrimePage('hc', event); }
+  onNotasPage(event: any): void { this.syncPrimePage('notas', event); }
+  onOtrosPage(event: any): void { this.syncPrimePage('otros', event); }
+
+  get isBusy(): boolean {
+    return !!(
+      this.loading ||
+      (this as any).loadingHcTable ||
+      (this as any).loadingNotasTable ||
+      (this as any).loadingOtrosTable ||
+      this.llamadaService?.loading
+    );
+  }
+
+  get busyText(): string {
+    if (this.llamadaService?.loading && !this.loading) return 'Procesando...';
+    return 'Cargando citas...';
+  }
+
+  private syncPrimePage(kind: 'hc' | 'notas' | 'otros', event: any): void {
+    const rows = Number(event?.rows ?? 0);
+    const first = Number(event?.first ?? 0);
+    if (!Number.isFinite(rows) || rows <= 0) return;
+    const page = Math.floor(Math.max(0, first) / rows) + 1;
+    if (kind === 'hc') { this.hcPageSize = rows; this.hcPage = page; }
+    if (kind === 'notas') { this.notasPageSize = rows; this.notasPage = page; }
+    if (kind === 'otros') { this.otrosPageSize = rows; this.otrosPage = page; }
+  }
+
+  // ── Acceso (icono + validaciones legacy) ────────────────────────────────────────
+  private upper(value: any): string { return String(value ?? '').trim().toUpperCase(); }
+  private getLinkVideoconsulta(item: any): string { return String(item?.linkVideoconsulta ?? '').trim(); }
+  private hasLinkVideoconsulta(item: any): boolean { return this.getLinkVideoconsulta(item).length > 0; }
+
+  getAccesoCase(item: any):
+    'office' | 'lupa' | 'extramural' | 'video_modal' | 'video_zoom' | 'phone_modal' | 'none' {
+    const agendaId = Number(item?.tipoAgendaAccesoId);
+    const acceso = this.upper(item?.tipoAgendaAcceso);
+    const modalidad = this.upper(item?.tipoModalidad);
+    const modalidadId = toNumberOrNull(item?.tipoModalidadId);
+    const hasLink = this.hasLinkVideoconsulta(item);
+
+    if (agendaId === 11 || acceso === 'EXTRAMURAL') return 'extramural';
+
+    if (agendaId === 1 || agendaId === 6) return 'office';
+    if (acceso === 'PRESENCIAL' && agendaId !== 7) return 'office';
+    if (agendaId === 7 && acceso === 'PRESENCIAL') return hasLink ? 'video_zoom' : 'lupa';
+
+    // Reglas "legacy" basadas en tipoModalidadId (prioridad cuando viene del backend)
+    if (agendaId === 7 && modalidadId !== null) {
+      // TELEXPERTICIA Enfermera: lupa cuando NO hay link
+      if (!hasLink && modalidadId === 1) return 'lupa';
+      // TELEXPERTICIA Médico: video si hay link, si no -> teléfono (modal)
+      if (hasLink && modalidadId !== 1) return 'video_zoom';
+      if (!hasLink && modalidadId !== 1) return 'phone_modal';
+    }
+
+    if ((agendaId === 2 || agendaId === 4) && modalidadId !== null) {
+      // Teleconsulta (sin link) por modalidad 2/4/10 -> teléfono
+      if (!hasLink && (modalidadId === 2 || modalidadId === 4 || modalidadId === 10)) return 'phone_modal';
+      // Con link por modalidad 2/4/7 -> video
+      if (hasLink && (modalidadId === 2 || modalidadId === 4 || modalidadId === 7)) return 'video_zoom';
+    }
+
+    if (agendaId === 10 && modalidadId === 10 && !hasLink) return 'phone_modal';
+
+    if (modalidad === 'TELEXPERTICIA' || acceso === 'TELEXPERTICIA') return hasLink ? 'video_zoom' : 'none';
+
+    if ((agendaId === 2 || agendaId === 4) && acceso === 'VIDEOCONSULTA') return hasLink ? 'video_zoom' : 'video_modal';
+    if ((agendaId === 2 || agendaId === 4) && (acceso === 'TELECONSULTA' || acceso === 'TELECONSULTA SEDE')) {
+      return hasLink ? 'video_zoom' : 'phone_modal';
+    }
+
+    if (agendaId === 7 && acceso !== 'PRESENCIAL') return hasLink ? 'video_zoom' : 'phone_modal';
+
+    // fallback por texto (cuando el id viene raro)
+    if (acceso === 'VIDEOCONSULTA') return hasLink ? 'video_zoom' : 'video_modal';
+    if (acceso.startsWith('TELECONSULTA')) return hasLink ? 'video_zoom' : 'phone_modal';
+
+    return 'none';
+  }
+
+  getAccesoTitle(item: any): string {
+    const acceso = this.getAccesoCase(item);
+    if (acceso === 'office') return 'Presencial';
+    if (acceso === 'lupa') return 'Presencial';
+    if (acceso === 'extramural') return 'Extramural';
+    if (acceso === 'video_modal') return 'Videoconsulta';
+    if (acceso === 'phone_modal') return 'Teleconsulta';
+    if (acceso === 'video_zoom') return 'Abrir enlace';
+    return '—';
+  }
+
+  isAccesoDisabled(item: any): boolean {
+    const acceso = this.getAccesoCase(item);
+    if (acceso === 'none' || acceso === 'office' || acceso === 'lupa') return true;
+    if (acceso === 'video_zoom' && !this.hasLinkVideoconsulta(item)) return true;
+    return !!item?.disableButton;
+  }
+
+  onAccesoClick(item: any): void {
+    const acceso = this.getAccesoCase(item);
+    if (this.isAccesoDisabled(item)) return;
+    if (acceso === 'video_zoom') { this.abrirZoom(this.getLinkVideoconsulta(item)); return; }
+    if (acceso === 'video_modal' || acceso === 'phone_modal' || acceso === 'extramural') { this.abrirModal(item); }
+  }
   // ── Modal Paciente ────────────────────────────────────────────────────
   modalPacienteVisible: boolean = false;
   modalPacienteDatos: any = null;
@@ -87,10 +194,6 @@ toastWarnPublic(titulo: string, msg: string): void {
   private desactivarLoadingKeys = new Set<string>();
   citasAMostrar: any[] = [];
   private estadoLlamadoTimer: ReturnType<typeof setInterval> | null = null;
-
-  public dataSource: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
-  public dataSourceEti: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
-  public dataSourceCont: MatTableDataSource<Citas> = new MatTableDataSource<Citas>([]);
 
   public loginId: string;
   row_: any;
@@ -179,9 +282,6 @@ toastWarnPublic(titulo: string, msg: string): void {
       this.normalizarTextoCitas(this.listado_citas as any);
       this.normalizarTextoCitas(this.listado_citas_recuperacion as any);
       this.normalizarTextoCitas(this.listado_contingencia as any);
-      this.dataSource = new MatTableDataSource<Citas>(state.citas ?? []);
-      this.dataSourceEti = new MatTableDataSource<Citas>(state.citasEti ?? []);
-      this.dataSourceCont = new MatTableDataSource<Citas>(state.citasCont ?? []);
       this.hcPage = state.hcPage ?? this.hcPage;
       this.notasPage = state.notasPage ?? this.notasPage;
       this.otrosPage = state.otrosPage ?? this.otrosPage;
@@ -217,7 +317,6 @@ toastWarnPublic(titulo: string, msg: string): void {
           contingencia = x.filter(n => n.estado !== 'PRO');
         }
         this.listado_contingencia = contingencia;
-        this.dataSourceCont = new MatTableDataSource<Citas>(contingencia);
         this.otrosPage = 1;
       },
       () => { this.loadingOtrosTable = false; }
@@ -261,9 +360,6 @@ toastWarnPublic(titulo: string, msg: string): void {
         this.listado_citas = citas;
         this.listado_citas_recuperacion = recuperacion;
         this.listado_contingencia = x.filter(n => n.adicional);
-        this.dataSource = new MatTableDataSource<Citas>(citas);
-        this.dataSourceEti = new MatTableDataSource<Citas>(recuperacion);
-        this.dataSourceCont = new MatTableDataSource<Citas>(this.listado_contingencia);
         this.hcPage = 1;
         this.notasPage = 1;
         this.otrosPage = 1;
@@ -316,9 +412,12 @@ toastWarnPublic(titulo: string, msg: string): void {
   }
 
   nextPage(table: 'hc' | 'notas' | 'otros'): void {
-    if (table === 'hc' && this.hasNextPage(this.dataSource.data.length, this.hcPage, this.hcPageSize)) this.hcPage++;
-    else if (table === 'notas' && this.hasNextPage(this.dataSourceEti.data.length, this.notasPage, this.notasPageSize)) this.notasPage++;
-    else if (table === 'otros' && this.hasNextPage(this.dataSourceCont.data.length, this.otrosPage, this.otrosPageSize)) this.otrosPage++;
+    const hcTotal = Array.isArray(this.listado_citas) ? this.listado_citas.length : 0;
+    const notasTotal = Array.isArray(this.listado_citas_recuperacion) ? this.listado_citas_recuperacion.length : 0;
+    const otrosTotal = Array.isArray(this.listado_contingencia) ? this.listado_contingencia.length : 0;
+    if (table === 'hc' && this.hasNextPage(hcTotal, this.hcPage, this.hcPageSize)) this.hcPage++;
+    else if (table === 'notas' && this.hasNextPage(notasTotal, this.notasPage, this.notasPageSize)) this.notasPage++;
+    else if (table === 'otros' && this.hasNextPage(otrosTotal, this.otrosPage, this.otrosPageSize)) this.otrosPage++;
   }
 
   buildCounterText(total: number, page: number, size: number): string {
@@ -357,8 +456,6 @@ toastWarnPublic(titulo: string, msg: string): void {
         if (!Array.isArray(data)) return;
         this.aplicarEstadoLlamado(this.listado_citas, data);
         this.aplicarEstadoLlamado(this.listado_citas_recuperacion, data);
-        this.dataSource = new MatTableDataSource<Citas>(this.listado_citas || []);
-        this.dataSourceEti = new MatTableDataSource<Citas>(this.listado_citas_recuperacion || []);
       },
       error: () => { }
     });
@@ -390,8 +487,14 @@ toastWarnPublic(titulo: string, msg: string): void {
 
   abrirModal(item: any): void {
     if (!item) return;
+    const pacienteId =
+      item?.pacienteId ?? item?.paciente_Id ?? item?.PacienteId ?? item?.pacienteID ?? item?.idPaciente;
+    if (pacienteId === undefined || pacienteId === null || pacienteId === '') {
+      this.toastWarn(SWAL_TITULO_DATO_FALTANTE, 'No se encontró el paciente para abrir el modal.');
+      return;
+    }
     this.loading = true;
-    this.rs.ObtenerPacientePorId(item.pacienteId).subscribe({
+    this.rs.ObtenerPacientePorId(pacienteId).subscribe({
       next: (response: any) => {
         this.loading = false;
         this.datoUsuario = response;
@@ -806,7 +909,6 @@ toastWarnPublic(titulo: string, msg: string): void {
     const actual = Array.isArray(this.listado_contingencia) ? this.listado_contingencia : [];
     const filtered = actual.filter((row: any) => String(this.resolveCitaId(row)) !== String(citaId));
     this.listado_contingencia = filtered;
-    this.dataSourceCont = new MatTableDataSource<Citas>(filtered as any);
     const maxPage = this.totalPages(filtered.length, this.otrosPageSize);
     if (this.otrosPage > maxPage) this.otrosPage = maxPage;
   }

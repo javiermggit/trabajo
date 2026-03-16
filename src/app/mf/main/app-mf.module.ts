@@ -15,9 +15,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { AvatarModule } from 'primeng/avatar';
 import { TabViewModule } from 'primeng/tabview';
 import { ButtonModule } from 'primeng/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { HttpClientModule } from '@angular/common/http';
 import { AccordionModule } from 'primeng/accordion';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -47,9 +44,6 @@ import { BadgeModule } from 'primeng/badge';
     AvatarModule,
     TabViewModule,
     ButtonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
     HttpClientModule,
     AccordionModule,
     NgbModule,

@@ -100,10 +100,12 @@
             <div class="flex gap-3 mt-4 reimp-search-row">
               <button pButton type="button" label="Buscar" icon="ri-search-line"
                 class="reimp-btn reimp-btn-primary reimp-btn-search"
+                [disabled]="isBlockingBusy || loadingReimpresion || loadingHcTable || loadingNotasTable || loadingOtrosTable"
                 (click)="consultarDatoGenerales()">
               </button>
               <button pButton type="button" label="Limpiar filtros" icon="ri-refresh-line"
                 class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                [disabled]="isBlockingBusy"
                 (click)="limpiarTodosFiltros()">
               </button>
             </div>
@@ -130,12 +132,12 @@
               <h2 class="reimp-section-title m-0 mb-2">Historias Clínicas</h2>
               <div *ngIf="SwBoton" class="flex flex-wrap gap-2">
                 <button pButton type="button" label="Historia Clínica Unificada" icon="ri-printer-line"
-                  title="Imprimir historia clínica unificada" [disabled]="loadingImpresion"
+                  title="Imprimir historia clínica unificada" [disabled]="isBlockingBusy"
                   class="reimp-btn reimp-btn-primary reimp-btn-action-top"
                   (click)="imprimirUnificadageneral()">
                 </button>
                 <button pButton type="button" label="Historia Clínica Ruta Crónica" icon="ri-printer-line"
-                  title="Imprimir historia clínica de ruta crónica" [disabled]="loadingImpresion"
+                  title="Imprimir historia clínica de ruta crónica" [disabled]="isBlockingBusy"
                   class="reimp-btn reimp-btn-secondary reimp-btn-action-top"
                   (click)="imprimirUnificadacronica()">
                 </button>
@@ -150,7 +152,7 @@
                 {{ errorHcTable }}
               </div>
               <ng-container *ngIf="!loadingHcTable && !errorHcTable">
-                <p-table [value]="paginatedRows(dataSource.data, hcPage, hcPageSize)"
+                <p-table [value]="hcRowsPage"
                   styleClass="p-datatable-sm p-datatable-striped reimp-ptable"
                   [responsiveLayout]="'scroll'" [rowHover]="true">
                   <ng-template pTemplate="header">
@@ -169,12 +171,12 @@
                       <td>
                         <div class="acciones-cinta">
                           <button pButton type="button" icon="ri-printer-line" label="Imprimir"
-                            title="Imprimir historia clínica" [disabled]="loadingImpresion"
+                            title="Imprimir historia clínica" [disabled]="isBlockingBusy"
                             class="reimp-btn reimp-btn-primary reimp-btn-compact reimp-btn-action-row"
                             (click)="seleccionarTipoImpresion(row)">
                           </button>
                           <button pButton type="button" icon="ri-send-plane-line" label="Enviar"
-                            title="Enviar historia clínica" [disabled]="loadingImpresion"
+                            title="Enviar historia clínica" [disabled]="isBlockingBusy"
                             class="reimp-btn reimp-btn-success reimp-btn-compact reimp-btn-action-row"
                             (click)="abrirModalEnvio(row)">
                           </button>
@@ -191,17 +193,17 @@
                   </ng-template>
                 </p-table>
                 <div class="reimp-table-footer">
-                  <span class="reimp-counter">{{ buildCounterText(dataSource.data.length, hcPage, hcPageSize) }}</span>
+                  <span class="reimp-counter">{{ buildCounterText(hcRows.length, hcPage, hcPageSize) }}</span>
                   <div class="reimp-pager">
                     <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
                       class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
                       [disabled]="hcPage === 1" (click)="previousPage('hc')"></button>
                     <span class="reimp-page-indicator">
-                      {{ hcPage }} / {{ totalPages(dataSource.data.length, hcPageSize) }}
+                      {{ hcPage }} / {{ totalPages(hcRows.length, hcPageSize) }}
                     </span>
                     <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
                       class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-                      [disabled]="!hasNextPage(dataSource.data.length, hcPage, hcPageSize)"
+                      [disabled]="!hasNextPage(hcRows.length, hcPage, hcPageSize)"
                       (click)="nextPage('hc')"></button>
                   </div>
                 </div>
@@ -227,7 +229,7 @@
                 {{ errorNotasTable }}
               </div>
               <ng-container *ngIf="!loadingNotasTable && !errorNotasTable">
-                <p-table [value]="paginatedRows(dataSource2.data, notasPage, notasPageSize)"
+                <p-table [value]="notasRowsPage"
                   styleClass="p-datatable-sm p-datatable-striped reimp-ptable"
                   [responsiveLayout]="'scroll'" [rowHover]="true">
                   <ng-template pTemplate="header">
@@ -258,17 +260,17 @@
                   </ng-template>
                 </p-table>
                 <div class="reimp-table-footer">
-                  <span class="reimp-counter">{{ buildCounterText(dataSource2.data.length, notasPage, notasPageSize) }}</span>
+                  <span class="reimp-counter">{{ buildCounterText(notasRows.length, notasPage, notasPageSize) }}</span>
                   <div class="reimp-pager">
                     <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
                       class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
                       [disabled]="notasPage === 1" (click)="previousPage('notas')"></button>
                     <span class="reimp-page-indicator">
-                      {{ notasPage }} / {{ totalPages(dataSource2.data.length, notasPageSize) }}
+                      {{ notasPage }} / {{ totalPages(notasRows.length, notasPageSize) }}
                     </span>
                     <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
                       class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-                      [disabled]="!hasNextPage(dataSource2.data.length, notasPage, notasPageSize)"
+                      [disabled]="!hasNextPage(notasRows.length, notasPage, notasPageSize)"
                       (click)="nextPage('notas')"></button>
                   </div>
                 </div>
@@ -294,7 +296,7 @@
                 {{ errorOtrosTable }}
               </div>
               <ng-container *ngIf="!loadingOtrosTable && !errorOtrosTable">
-                <p-table [value]="paginatedRows(dataSource3.data, otrosPage, otrosPageSize)"
+                <p-table [value]="otrosRowsPage"
                   styleClass="p-datatable-sm p-datatable-striped reimp-ptable"
                   [responsiveLayout]="'scroll'" [rowHover]="true">
                   <ng-template pTemplate="header">
@@ -325,17 +327,17 @@
                   </ng-template>
                 </p-table>
                 <div class="reimp-table-footer">
-                  <span class="reimp-counter">{{ buildCounterText(dataSource3.data.length, otrosPage, otrosPageSize) }}</span>
+                  <span class="reimp-counter">{{ buildCounterText(otrosRows.length, otrosPage, otrosPageSize) }}</span>
                   <div class="reimp-pager">
                     <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
                       class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
                       [disabled]="otrosPage === 1" (click)="previousPage('otros')"></button>
                     <span class="reimp-page-indicator">
-                      {{ otrosPage }} / {{ totalPages(dataSource3.data.length, otrosPageSize) }}
+                      {{ otrosPage }} / {{ totalPages(otrosRows.length, otrosPageSize) }}
                     </span>
                     <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
                       class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
-                      [disabled]="!hasNextPage(dataSource3.data.length, otrosPage, otrosPageSize)"
+                      [disabled]="!hasNextPage(otrosRows.length, otrosPage, otrosPageSize)"
                       (click)="nextPage('otros')"></button>
                   </div>
                 </div>
@@ -372,11 +374,11 @@
       <ng-template pTemplate="footer">
         <button pButton type="button" label="Cancelar" icon="ri-close-line"
           class="reimp-btn reimp-btn-secondary"
-          (click)="onCerrarModalImpresion()">
+          [disabled]="isBlockingBusy" (click)="onCerrarModalImpresion()">
         </button>
         <button pButton type="button" label="Imprimir" icon="ri-printer-line"
           class="reimp-btn reimp-btn-primary ms-2"
-          (click)="onConfirmarImpresion()">
+          [disabled]="isBlockingBusy" (click)="onConfirmarImpresion()">
         </button>
       </ng-template>
     </p-dialog>
@@ -404,11 +406,11 @@
       <ng-template pTemplate="footer">
         <button pButton type="button" label="Cancelar" icon="ri-close-line"
           class="reimp-btn reimp-btn-secondary"
-          (click)="onCerrarModalEnvioTipo()">
+          [disabled]="isBlockingBusy" (click)="onCerrarModalEnvioTipo()">
         </button>
         <button pButton type="button" label="Siguiente" icon="ri-arrow-right-line"
           class="reimp-btn reimp-btn-primary ms-2"
-          (click)="onConfirmarEnvioTipo()">
+          [disabled]="isBlockingBusy" (click)="onConfirmarEnvioTipo()">
         </button>
       </ng-template>
     </p-dialog>
@@ -436,11 +438,11 @@
       <ng-template pTemplate="footer">
         <button pButton type="button" label="Cancelar" icon="ri-close-line"
           class="reimp-btn reimp-btn-secondary"
-          (click)="onCerrarModalEnvioCanal()">
+          [disabled]="isBlockingBusy" (click)="onCerrarModalEnvioCanal()">
         </button>
         <button pButton type="button" label="Siguiente" icon="ri-arrow-right-line"
           class="reimp-btn reimp-btn-primary ms-2"
-          (click)="onConfirmarEnvioCanal()">
+          [disabled]="isBlockingBusy" (click)="onConfirmarEnvioCanal()">
         </button>
       </ng-template>
     </p-dialog>
@@ -465,24 +467,22 @@
       <ng-template pTemplate="footer">
         <button pButton type="button" label="Cancelar" icon="ri-close-line"
           class="reimp-btn reimp-btn-secondary"
-          (click)="onCerrarModalEnvioDestino()">
+          [disabled]="isBlockingBusy" (click)="onCerrarModalEnvioDestino()">
         </button>
         <button pButton type="button" label="Enviar" icon="ri-send-plane-line"
           class="reimp-btn reimp-btn-success ms-2"
-          [disabled]="loadingImpresion"
+          [disabled]="isBlockingBusy"
           (click)="onConfirmarEnvioDestino()">
         </button>
       </ng-template>
     </p-dialog>
 
-     <!-- ===== OVERLAY ENVIANDO ===== -->
-    <div *ngIf="loadingEnvio"
-      style="position:fixed;top:0;left:0;width:100%;height:100%;
-             background:rgba(0,0,0,0.45);z-index:99999;
-             display:flex;flex-direction:column;
-             align-items:center;justify-content:center;gap:12px">
-      <i class="pi pi-spin pi-spinner" style="font-size:2.5rem;color:#fff"></i>
-      <span style="color:#fff;font-size:1rem;font-weight:500">Enviando, por favor espere...</span>
+    <!-- ===== OVERLAY BLOQUEANTE (ENVIAR / IMPRIMIR) ===== -->
+    <div class="reimp-overlay" *ngIf="isBlockingBusy" role="status" aria-live="polite">
+      <div class="reimp-overlay-panel">
+        <i class="pi pi-spin pi-spinner"></i>
+        <span>{{ blockingOverlayText }}</span>
+      </div>
     </div>
 
   </div>

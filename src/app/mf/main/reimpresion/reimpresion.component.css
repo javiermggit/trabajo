@@ -90,6 +90,34 @@
   overflow: hidden;
 }
 
+/* ── Overlay bloqueante (enviar / imprimir) ─────────────────────────────────── */
+.reimp-onecard { position: relative; }
+
+.reimp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(1px);
+}
+
+.reimp-overlay-panel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.95rem 1.15rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-weight: 650;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.35);
+}
+
+.reimp-overlay-panel .pi-spinner { font-size: 1.6rem; }
+
 .reimp-onecard .card-custom {
   border: none;
   box-shadow: none;
@@ -108,12 +136,11 @@
 }
 
 /* Una sola card: mantener estilo de tabla, pero sin sombras extra */
-:host ::ng-deep .reimp-onecard .reimp-table {
+:host ::ng-deep .reimp-onecard .reimp-ptable {
   box-shadow: none;
 }
 
-:host ::ng-deep .reimp-onecard .reimp-table .mat-mdc-header-row,
-:host ::ng-deep .reimp-onecard .reimp-table .mat-header-row {
+:host ::ng-deep .reimp-onecard .reimp-ptable .p-datatable-thead > tr {
   border-top: 1px solid var(--reimp-border-soft);
 }
 
@@ -313,7 +340,7 @@
   font-size: 0.86rem;
 }
 
-:host ::ng-deep .reimp-table {
+:host ::ng-deep .reimp-ptable {
   border-collapse: separate;
   border-spacing: 0;
   background: #fff;
@@ -324,13 +351,11 @@
   min-width: 100%;
 }
 
-:host ::ng-deep .reimp-table .mat-mdc-header-row,
-:host ::ng-deep .reimp-table .mat-header-row {
+:host ::ng-deep .reimp-ptable .p-datatable-thead > tr {
   background: var(--reimp-header-bg);
 }
 
-:host ::ng-deep .reimp-table .mat-mdc-header-cell,
-:host ::ng-deep .reimp-table .mat-header-cell {
+:host ::ng-deep .reimp-ptable .p-datatable-thead > tr > th {
   color: var(--reimp-text-muted);
   font-weight: 700;
   font-size: 0.9rem;
@@ -340,42 +365,23 @@
   letter-spacing: 0.02em;
 }
 
-:host ::ng-deep .reimp-table .mat-mdc-cell,
-:host ::ng-deep .reimp-table .mat-cell {
+:host ::ng-deep .reimp-ptable .p-datatable-tbody > tr > td {
   color: #0f172a;
   border-bottom: 1px solid var(--reimp-border-soft);
   padding: 0.85rem 1rem;
    align-items: center;
 }
 
-:host ::ng-deep .reimp-table .mat-mdc-row:nth-child(even),
-:host ::ng-deep .reimp-table .mat-row:nth-child(even) {
+:host ::ng-deep .reimp-ptable .p-datatable-tbody > tr:nth-child(even) {
   background: #fcfdff;
 }
 
-:host ::ng-deep .reimp-table .mat-mdc-row:last-child .mat-mdc-cell,
-:host ::ng-deep .reimp-table .mat-row:last-child .mat-cell {
+:host ::ng-deep .reimp-ptable .p-datatable-tbody > tr:last-child > td {
   border-bottom: 0;
 }
 
-:host ::ng-deep .reimp-table .mat-mdc-row:hover,
-:host ::ng-deep .reimp-table .mat-row:hover {
+:host ::ng-deep .reimp-ptable .p-datatable-tbody > tr:hover {
   background: #f8fbff;
-}
-
-:host ::ng-deep .reimp-table .mat-column-fecha {
-  text-align: left;
-}
-
-:host ::ng-deep .reimp-table .mat-column-fecha .mat-sort-header-container {
-  justify-content: flex-start;
-}
-
-:host ::ng-deep .reimp-table .mat-column-link,
-:host ::ng-deep .reimp-table .mat-column-rutaAccesoPdf {
-  text-align: center;
-  white-space: nowrap;
-  min-width: 230px;
 }
 
 :host ::ng-deep .reimp-section-title + .flex {
@@ -523,16 +529,9 @@
     display: none;
   }
 
-  :host ::ng-deep .reimp-table .mat-mdc-header-cell,
-  :host ::ng-deep .reimp-table .mat-header-cell,
-  :host ::ng-deep .reimp-table .mat-mdc-cell,
-  :host ::ng-deep .reimp-table .mat-cell {
+  :host ::ng-deep .reimp-ptable .p-datatable-thead > tr > th,
+  :host ::ng-deep .reimp-ptable .p-datatable-tbody > tr > td {
     padding: 0.72rem 0.75rem;
-  }
-
-  :host ::ng-deep .reimp-table .mat-column-link,
-  :host ::ng-deep .reimp-table .mat-column-rutaAccesoPdf {
-    min-width: 120px;
   }
 
   .reimp-table-footer {

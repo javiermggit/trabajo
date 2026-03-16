@@ -1,4 +1,12 @@
-<div class="card-custom vhc-onecard">
+<div class="card-custom vhc-onecard" [attr.aria-busy]="isBusy ? 'true' : 'false'">
+
+  <!-- Overlay global para bloquear interacciones mientras carga -->
+  <div class="vhc-overlay" *ngIf="isBusy">
+    <div class="vhc-overlay-panel" role="status" aria-live="polite">
+      <i class="pi pi-spin pi-spinner"></i>
+      <span>{{ busyText }}</span>
+    </div>
+  </div>
 
   <!-- TOAST Y CONFIRM DIALOG GLOBALES -->
   <p-toast position="top-right"></p-toast>
@@ -33,17 +41,12 @@
   <!-- ── CONTENIDO ── -->
   <div class="vhc-content">
 
-    <!-- Loader -->
-    <div *ngIf="loading" class="vhc-loader">
-      <i class="pi pi-spin pi-spinner"></i>&nbsp; Cargando citas...
-    </div>
-
     <!-- CITAS DEL DÍA -->
     <div class="section-block">
       <div class="section-head mb-3">
         <h5 class="reimp-section-title m-0">Citas del Día</h5>
-        <span class="section-pill" *ngIf="dataSource?.data?.length">
-          {{ dataSource?.data?.length }} cita{{ (dataSource?.data?.length ?? 1) !== 1 ? 's' : '' }}
+        <span class="section-pill" *ngIf="listado_citas?.length">
+          {{ listado_citas?.length }} cita{{ (listado_citas?.length ?? 1) !== 1 ? 's' : '' }}
         </span>
       </div>
 
@@ -51,7 +54,8 @@
         <p-table [value]="listado_citas" [paginator]="listado_citas?.length > 0" [rows]="hcPageSize"
           [first]="(hcPage-1)*hcPageSize" class="w-full reimp-table" [showCurrentPageReport]="true"
           currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
-          [totalRecords]="listado_citas?.length ?? 0">
+          [totalRecords]="listado_citas?.length ?? 0"
+          (onPage)="onHcPage($event)">
 
           <ng-template pTemplate="header">
             <tr>
@@ -91,19 +95,25 @@
                 </label>
               </td>
               <td class="icon-cell2">
-                <ng-container [ngSwitch]="item.tipoAgendaAccesoId">
-                  <button *ngSwitchCase="1" pButton type="button" icon="pi pi-ban" [disabled]="true"
-                    class="icon-btn icon-btn-acceso" title="No disponible"></button>
-                  <button *ngSwitchCase="2" pButton type="button" icon="pi pi-video"
-                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Videoconsulta"
-                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
-                  <button *ngSwitchCase="4" pButton type="button" icon="pi pi-phone"
-                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Teleconsulta"
-                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
-                  <button *ngSwitchCase="11" pButton type="button" [disabled]="item.disableButton"
-                    class="icon-btn icon-btn-acceso" title="Extramural" (click)="abrirModal(item)">
+                <ng-container [ngSwitch]="getAccesoCase(item)">
+                  <button *ngSwitchCase="'office'" pButton type="button" [disabled]="true"
+                    icon="pi pi-building" class="icon-btn icon-btn-acceso" [title]="getAccesoTitle(item)"></button>
+                  <button *ngSwitchCase="'lupa'" pButton type="button" [disabled]="true"
+                    icon="pi pi-search" class="icon-btn icon-btn-acceso" [title]="getAccesoTitle(item)"></button>
+                  <button *ngSwitchCase="'extramural'" pButton type="button"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)">
                     <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" style="width:28px;height:28px;">
                   </button>
+                  <button *ngSwitchCase="'video_modal'" pButton type="button" icon="pi pi-video"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
+                  <button *ngSwitchCase="'phone_modal'" pButton type="button" icon="pi pi-phone"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
+                  <button *ngSwitchCase="'video_zoom'" pButton type="button" icon="pi pi-video"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
                   <span *ngSwitchDefault>—</span>
                 </ng-container>
               </td>
@@ -185,18 +195,19 @@
         <ng-template pTemplate="header">
           <div class="acc-header-tpl">
             <span class="acc-title">Recuperación</span>
-            <span class="section-pill section-pill-warn" *ngIf="dataSourceEti?.data?.length">
-              {{ dataSourceEti?.data?.length }} cita{{ (dataSourceEti?.data?.length ?? 1) !== 1 ? 's' : '' }}
+            <span class="section-pill section-pill-warn" *ngIf="listado_citas_recuperacion?.length">
+              {{ listado_citas_recuperacion?.length }} cita{{ (listado_citas_recuperacion?.length ?? 1) !== 1 ? 's' : '' }}
             </span>
-            <span class="acc-empty-hint" *ngIf="!dataSourceEti?.data?.length">Sin citas</span>
+            <span class="acc-empty-hint" *ngIf="!listado_citas_recuperacion?.length">Sin citas</span>
           </div>
         </ng-template>
 
-        <p-table [value]="dataSourceEti?.data" [paginator]="dataSourceEti?.data?.length > 0"
+        <p-table [value]="listado_citas_recuperacion" [paginator]="listado_citas_recuperacion?.length > 0"
           [rows]="notasPageSize" [first]="(notasPage-1)*notasPageSize" class="w-full reimp-table"
           [showCurrentPageReport]="true"
           currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
-          [totalRecords]="dataSourceEti?.data?.length ?? 0">
+          [totalRecords]="listado_citas_recuperacion?.length ?? 0"
+          (onPage)="onNotasPage($event)">
 
           <ng-template pTemplate="header">
             <tr>
@@ -224,19 +235,25 @@
                 }">{{ item.tipoAgendaAcceso }}</span>
               </td>
               <td class="icon-cell2">
-                <ng-container [ngSwitch]="item.tipoAgendaAccesoId">
-                  <button *ngSwitchCase="1" pButton type="button" icon="pi pi-ban" [disabled]="true"
-                    class="icon-btn icon-btn-acceso" title="No disponible"></button>
-                  <button *ngSwitchCase="2" pButton type="button" icon="pi pi-video"
-                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Videoconsulta"
-                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
-                  <button *ngSwitchCase="4" pButton type="button" icon="pi pi-phone"
-                    [disabled]="item.disableButton" class="icon-btn icon-btn-acceso" title="Teleconsulta"
-                    (click)="item.linkVideoconsulta ? abrirZoom(item.linkVideoconsulta) : abrirModal(item)"></button>
-                  <button *ngSwitchCase="11" pButton type="button" [disabled]="item.disableButton"
-                    class="icon-btn icon-btn-acceso" title="Extramural" (click)="abrirModal(item)">
+                <ng-container [ngSwitch]="getAccesoCase(item)">
+                  <button *ngSwitchCase="'office'" pButton type="button" [disabled]="true"
+                    icon="pi pi-building" class="icon-btn icon-btn-acceso" [title]="getAccesoTitle(item)"></button>
+                  <button *ngSwitchCase="'lupa'" pButton type="button" [disabled]="true"
+                    icon="pi pi-search" class="icon-btn icon-btn-acceso" [title]="getAccesoTitle(item)"></button>
+                  <button *ngSwitchCase="'extramural'" pButton type="button"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)">
                     <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" style="width:28px;height:28px;">
                   </button>
+                  <button *ngSwitchCase="'video_modal'" pButton type="button" icon="pi pi-video"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
+                  <button *ngSwitchCase="'phone_modal'" pButton type="button" icon="pi pi-phone"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
+                  <button *ngSwitchCase="'video_zoom'" pButton type="button" icon="pi pi-video"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
                   <span *ngSwitchDefault>—</span>
                 </ng-container>
               </td>
@@ -305,18 +322,19 @@
         <ng-template pTemplate="header">
           <div class="acc-header-tpl">
             <span class="acc-title">Contingencia</span>
-            <span class="section-pill section-pill-success" *ngIf="dataSourceCont?.data?.length">
-              {{ dataSourceCont?.data?.length }} cita{{ (dataSourceCont?.data?.length ?? 1) !== 1 ? 's' : '' }}
+            <span class="section-pill section-pill-success" *ngIf="listado_contingencia?.length">
+              {{ listado_contingencia?.length }} cita{{ (listado_contingencia?.length ?? 1) !== 1 ? 's' : '' }}
             </span>
-            <span class="acc-empty-hint" *ngIf="!dataSourceCont?.data?.length">Sin citas</span>
+            <span class="acc-empty-hint" *ngIf="!listado_contingencia?.length">Sin citas</span>
           </div>
         </ng-template>
 
-        <p-table [value]="dataSourceCont?.data" [paginator]="dataSourceCont?.data?.length > 0"
+        <p-table [value]="listado_contingencia" [paginator]="listado_contingencia?.length > 0"
           [rows]="otrosPageSize" [first]="(otrosPage-1)*otrosPageSize" class="w-full reimp-table"
           [showCurrentPageReport]="true"
           currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
-          [totalRecords]="dataSourceCont?.data?.length ?? 0">
+          [totalRecords]="listado_contingencia?.length ?? 0"
+          (onPage)="onOtrosPage($event)">
 
           <ng-template pTemplate="header">
             <tr>
@@ -339,8 +357,28 @@
                   <ng-container *ngIf="item.edadAnios !== 0">{{ item.edadAnios }} años</ng-container>
                 </div>
               </td>
-              <td class="icon-cell">
-                <i class="pi pi-check" style="color:#10b981;font-size:1.25rem;"></i>
+              <td class="icon-cell2">
+                <ng-container [ngSwitch]="getAccesoCase(item)">
+                  <button *ngSwitchCase="'office'" pButton type="button" [disabled]="true"
+                    icon="pi pi-building" class="icon-btn icon-btn-acceso" [title]="getAccesoTitle(item)"></button>
+                  <button *ngSwitchCase="'lupa'" pButton type="button" [disabled]="true"
+                    icon="pi pi-search" class="icon-btn icon-btn-acceso" [title]="getAccesoTitle(item)"></button>
+                  <button *ngSwitchCase="'extramural'" pButton type="button"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)">
+                    <img [src]="mfAssetUrl('assets/Iconos/ExtramuralIcon.png')" style="width:28px;height:28px;">
+                  </button>
+                  <button *ngSwitchCase="'video_modal'" pButton type="button" icon="pi pi-video"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
+                  <button *ngSwitchCase="'phone_modal'" pButton type="button" icon="pi pi-phone"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
+                  <button *ngSwitchCase="'video_zoom'" pButton type="button" icon="pi pi-video"
+                    [disabled]="isAccesoDisabled(item)" class="icon-btn icon-btn-acceso"
+                    [title]="getAccesoTitle(item)" (click)="onAccesoClick(item)"></button>
+                  <span *ngSwitchDefault>—</span>
+                </ng-container>
               </td>
               <td>
                 <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
@@ -371,11 +409,6 @@
 
     </p-accordion>
 
-  </div>
-
-  <!-- Loader llamada -->
-  <div *ngIf="llamadaService?.loading" class="vhc-loader">
-    <i class="pi pi-spin pi-spinner"></i>
   </div>
 
 </div>

@@ -932,6 +932,33 @@
   margin-bottom: 1rem;
 }
 
+/* ── Overlay global (bloquea UI mientras carga) ───────────────────────────────── */
+.vhc-onecard { position: relative; }
+
+.vhc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(1px);
+}
+
+.vhc-overlay-panel {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .85rem 1.1rem;
+  background: #0b2a5f;
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(11, 42, 95, 0.28);
+  font-weight: 600;
+}
+
+.vhc-overlay-panel .pi-spinner { font-size: 1.2rem; }
+
 /* ───────── MODAL ───────── */
 .vhc-modal-header {
   display: flex;
