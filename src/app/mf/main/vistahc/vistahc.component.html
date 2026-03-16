@@ -51,6 +51,11 @@
       </div>
 
       <div class="reimp-table-shell">
+        <div *ngIf="loadingHcTable" class="reimp-state reimp-state-loading">
+          <i class="pi pi-spin pi-spinner"></i>&nbsp; Cargando citas...
+        </div>
+
+        <ng-container *ngIf="!loadingHcTable">
         <p-table [value]="listado_citas" [paginator]="listado_citas?.length > 0" [rows]="hcPageSize"
           [first]="(hcPage-1)*hcPageSize" class="w-full reimp-table" [showCurrentPageReport]="true"
           currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
@@ -184,6 +189,7 @@
             </tr>
           </ng-template>
         </p-table>
+        </ng-container>
       </div>
     </div>
 
@@ -202,6 +208,12 @@
           </div>
         </ng-template>
 
+        <div class="reimp-table-shell">
+        <div *ngIf="loadingNotasTable" class="reimp-state reimp-state-loading">
+          <i class="pi pi-spin pi-spinner"></i>&nbsp; Cargando recuperación...
+        </div>
+
+        <ng-container *ngIf="!loadingNotasTable">
         <p-table [value]="listado_citas_recuperacion" [paginator]="listado_citas_recuperacion?.length > 0"
           [rows]="notasPageSize" [first]="(notasPage-1)*notasPageSize" class="w-full reimp-table"
           [showCurrentPageReport]="true"
@@ -315,6 +327,8 @@
             <tr><td [attr.colspan]="8" class="reimp-empty-cell text-center">No hay citas para el día de hoy.</td></tr>
           </ng-template>
         </p-table>
+        </ng-container>
+        </div>
       </p-accordionTab>
 
       <!-- CONTINGENCIA -->
@@ -329,6 +343,12 @@
           </div>
         </ng-template>
 
+        <div class="reimp-table-shell">
+        <div *ngIf="loadingOtrosTable" class="reimp-state reimp-state-loading">
+          <i class="pi pi-spin pi-spinner"></i>&nbsp; Cargando contingencia...
+        </div>
+
+        <ng-container *ngIf="!loadingOtrosTable">
         <p-table [value]="listado_contingencia" [paginator]="listado_contingencia?.length > 0"
           [rows]="otrosPageSize" [first]="(otrosPage-1)*otrosPageSize" class="w-full reimp-table"
           [showCurrentPageReport]="true"
@@ -405,6 +425,8 @@
             <tr><td [attr.colspan]="5" class="reimp-empty-cell text-center">No hay citas para el día de hoy.</td></tr>
           </ng-template>
         </p-table>
+        </ng-container>
+        </div>
       </p-accordionTab>
 
     </p-accordion>

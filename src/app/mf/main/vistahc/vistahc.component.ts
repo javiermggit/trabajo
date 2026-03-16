@@ -60,19 +60,19 @@ toastWarnPublic(titulo: string, msg: string): void {
   onNotasPage(event: any): void { this.syncPrimePage('notas', event); }
   onOtrosPage(event: any): void { this.syncPrimePage('otros', event); }
 
+  private busyLabel: string = 'Procesando...';
+
   get isBusy(): boolean {
     return !!(
       this.loading ||
-      (this as any).loadingHcTable ||
-      (this as any).loadingNotasTable ||
-      (this as any).loadingOtrosTable ||
       this.llamadaService?.loading
     );
   }
 
   get busyText(): string {
-    if (this.llamadaService?.loading && !this.loading) return 'Procesando...';
-    return 'Cargando citas...';
+    if (this.loading) return this.busyLabel || 'Procesando...';
+    if (this.llamadaService?.loading) return 'Llamando turno...';
+    return 'Procesando...';
   }
 
   private syncPrimePage(kind: 'hc' | 'notas' | 'otros', event: any): void {
@@ -328,6 +328,7 @@ toastWarnPublic(titulo: string, msg: string): void {
       this.toastWarn(SWAL_TITULO_ADVERTENCIA_DOBLE, SWAL_MSG_DEBE_SELECCIONAR_ESPECIALIDAD);
       return;
     }
+    this.busyLabel = 'Cargando citas...';
     this.loading = true;
     this.loadingHcTable = true;
     this.loadingNotasTable = true;
@@ -493,6 +494,7 @@ toastWarnPublic(titulo: string, msg: string): void {
       this.toastWarn(SWAL_TITULO_DATO_FALTANTE, 'No se encontró el paciente para abrir el modal.');
       return;
     }
+    this.busyLabel = 'Cargando paciente...';
     this.loading = true;
     this.rs.ObtenerPacientePorId(pacienteId).subscribe({
       next: (response: any) => {
@@ -545,6 +547,7 @@ toastWarnPublic(titulo: string, msg: string): void {
     this.toastWarn(SWAL_TITULO_DATO_FALTANTE, 'No se encontró la especialidad para consultar el histórico de citas.');
     return;
   }
+  this.busyLabel = 'Consultando histórico...';
   this.loading = true;
   this.medicoServices.obtenerHistoricoAsistioCita(especialidadId, Number(pacienteId), true).subscribe({
     next: (res: any[]) => {
@@ -592,6 +595,7 @@ toastWarnPublic(titulo: string, msg: string): void {
       this.toastWarn(SWAL_TITULO_DATO_FALTANTE, 'No se encontro citaId para finalizar la cita.');
       return;
     }
+    this.busyLabel = 'Validando cita...';
     this.loading = true;
     const citaIdEncoded = encodeURIComponent(btoa(String(citaId)));
     this.medicoServices.validHC(citaIdEncoded).subscribe({
@@ -609,6 +613,7 @@ toastWarnPublic(titulo: string, msg: string): void {
           acceptLabel: 'Finalizar',
           rejectLabel: 'Cancelar',
           accept: () => {
+            this.busyLabel = 'Finalizando cita...';
             this.loading = true;
             this.medicoServices.facturarCitas(String(citaId)).subscribe({ next: () => { }, error: () => { } });
             this.medicoServices.finalizar(String(citaId)).subscribe({
@@ -652,6 +657,7 @@ toastWarnPublic(titulo: string, msg: string): void {
       acceptLabel: 'Desactivar',
       rejectLabel: 'Cancelar',
       accept: () => {
+        this.busyLabel = 'Desactivando cita...';
         this.loading = true;
         setLoadingKey(this.desactivarLoadingKeys, loadingKey, true);
         this.medicoServices.desactivarCitasAnteriores(String(citaId))
@@ -860,6 +866,7 @@ toastWarnPublic(titulo: string, msg: string): void {
       this.toastWarn(SWAL_TITULO_DATO_FALTANTE, 'No se encontró citaId para generar el link.');
       return;
     }
+    this.busyLabel = 'Generando enlace...';
     this.loading = true;
     this.medicoServices.consultarLink(String(citaId))
       .pipe(timeout(15000), finalize(() => { this.loading = false; }))
