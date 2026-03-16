@@ -1,4 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ReimpresionService } from './reimpresion.service';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DOCUMENT } from '@angular/common';
@@ -134,6 +135,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   errorHcTable: string = '';
   errorNotasTable: string = '';
   errorOtrosTable: string = '';
+  hcNoPaciente: boolean = false;
 
   get isBlockingBusy(): boolean {
     return !!(this.loadingEnvio || this.loadingImpresion);
@@ -437,7 +439,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.identificacionNoTemporal = '';
       this.tipoNoTemporal = '';
       this.especialidadNoTemporal = '';
-      this.toastWarn('Advertencia', 'Faltan campos por digitar');
+      this.toastWarn('Advertencia', 'Revisa los campos obligatorios.');
     }
   }
 
@@ -458,6 +460,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
     this.errorHcTable = '';
     this.errorNotasTable = '';
     this.errorOtrosTable = '';
+    this.hcNoPaciente = false;
     this.loadingHcTable = false;
     this.loadingNotasTable = false;
     this.loadingOtrosTable = false;
@@ -470,6 +473,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
     this.loadingReimpresion = true;
     this.loadingHcTable = true;
     this.errorHcTable = '';
+    this.hcNoPaciente = false;
     this.SwBoton = false;
     this.rs.ObtenerConsulta(this.identificacion, this.tipo, this.especialidad).subscribe((x) => {
       this.rs.reimpresion = x;
@@ -491,9 +495,14 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       this.filtroProfesional = null;
       this.construirOpcionesProfesionales();
       this.loadingReimpresion = false;
-      const msg = resolveApiErrorMessage(error, 'Error al consultar historias clínicas');
-      this.errorHcTable = msg;
-      this.toastWarn('Advertencia', msg);
+      if (this.isPacienteNoEncontrado(error)) {
+        this.hcNoPaciente = true;
+        this.toastInfo('Info', 'No se encontró ningún paciente relacionado.');
+      } else {
+        const msg = resolveApiErrorMessage(error, 'Error al consultar historias clínicas');
+        this.errorHcTable = msg;
+        this.toastWarn('Advertencia', msg);
+      }
       this.loadingHcTable = false;
     });
   }
@@ -513,7 +522,23 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
         return;
       }
       this.consultarNotaAdministrativas(x.id);
-    }, () => {
+    }, (err) => {
+      // Si el paciente no existe, esto es un "sin datos" (no un error visual por tabla).
+      if (this.isPacienteNoEncontrado(err)) {
+        this.rs.datoPaciente = null as any;
+        this.rs.listadonotas = [];
+        this.notasRows = [];
+        this.notasRowsPage = [];
+        this.errorNotasTable = '';
+        this.loadingNotasTable = false;
+
+        this.rs.listadoHcIntegra = [];
+        this.otrosRows = [];
+        this.otrosRowsPage = [];
+        this.errorOtrosTable = '';
+        this.loadingOtrosTable = false;
+        return;
+      }
       this.loadingNotasTable = false;
       this.errorNotasTable = 'Error al consultar notas administrativas';
       this.rs.listadonotas = new Array<any>();
@@ -574,10 +599,27 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
         this.loadingOtrosTable = false;
         this.errorOtrosTable = 'Error al consultar historias de otros sistemas';
       });
-    }, () => {
+    }, (err) => {
+      if (this.isPacienteNoEncontrado(err)) {
+        this.rs.datoPaciente = null as any;
+        this.rs.listadoHcIntegra = [];
+        this.otrosRows = [];
+        this.otrosRowsPage = [];
+        this.errorOtrosTable = '';
+        this.loadingOtrosTable = false;
+        return;
+      }
       this.loadingOtrosTable = false;
       this.errorOtrosTable = 'Error al consultar historias de otros sistemas';
     });
+  }
+
+  private isPacienteNoEncontrado(err: any): boolean {
+    const status = (err as HttpErrorResponse)?.status ?? err?.status ?? err?.error?.status;
+    if (status === 404) return true;
+    const msg = String(err?.error?.mensaje ?? err?.error?.message ?? err?.message ?? '').toLowerCase();
+    // mensajes típicos backend
+    return msg.includes('no se encontro') || msg.includes('no se encontró') || msg.includes('not found');
   }
 
   public consultarEspecialidad(): void {

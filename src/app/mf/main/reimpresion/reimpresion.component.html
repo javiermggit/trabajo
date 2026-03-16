@@ -212,7 +212,7 @@
                   <ng-template pTemplate="emptymessage">
                     <tr>
                       <td colspan="4" class="reimp-empty-cell">
-                        Sin resultados para los filtros seleccionados.
+                        {{ hcNoPaciente ? 'No hay historias clínicas asociadas al documento ingresado.' : 'Sin resultados para los filtros seleccionados.' }}
                       </td>
                     </tr>
                   </ng-template>

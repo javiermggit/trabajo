@@ -447,6 +447,12 @@
   border-color: #f0cdcd;
 }
 
+.reimp-state-info {
+  background: #eff6ff;
+  color: #0a2d82;
+  border-color: #bfdbfe;
+}
+
 .reimp-empty-cell {
   text-align: center;
   color: var(--reimp-text-muted);
