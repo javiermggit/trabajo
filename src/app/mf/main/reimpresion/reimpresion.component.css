@@ -25,6 +25,15 @@
   font-weight: 700;
 }
 
+.reimp-field-error {
+  display: block;
+  margin-top: 0.3rem;
+  color: #dc2626;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 .reimp-field-label {
   display: block;
   margin: 0 0 0.28rem;
@@ -613,6 +622,38 @@
 :host ::ng-deep .reimp-dropdown-panel .p-dropdown-item {
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+/* Tipo documento: mostrar código + descripción (más claro y profesional) */
+:host ::ng-deep .reimp-tipo-doc-item,
+:host ::ng-deep .reimp-tipo-doc-selected {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+:host ::ng-deep .reimp-tipo-doc-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4rem;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--reimp-text-strong);
+  background: #eef4ff;
+  border: 1px solid var(--reimp-border-soft);
+}
+
+:host ::ng-deep .reimp-tipo-doc-sep {
+  color: var(--reimp-text-muted);
+}
+
+:host ::ng-deep .reimp-tipo-doc-desc {
+  color: var(--reimp-text-strong);
+  font-weight: 600;
 }
 
 /* En viewport bajo (inspector / móviles), limita altura para que el panel pueda abrir hacia abajo. */

@@ -89,6 +89,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
 
   loadingReimpresion: boolean = false;
   loadingImpresion: boolean = false;
+  filtrosTouched: boolean = false;
   identificacion!: string;
   tipo!: string;
   especialidad?: string;
@@ -422,6 +423,7 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   }
 
   consultarDatoGenerales(): void {
+    this.filtrosTouched = true;
     if (this.tipo != undefined && this.identificacion != '' && this.identificacion != undefined) {
       this.limpiarDataSources();
       this.identificacionNoTemporal = this.identificacion;

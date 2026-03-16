@@ -25,22 +25,47 @@
                   <p-dropdown inputId="tipoDoc" appendTo="body" [autoZIndex]="true" [baseZIndex]="10000"
                     panelStyleClass="reimp-dropdown-panel" [scrollHeight]="'260px'"
                     [options]="rs.ListadoTipoDocumento" optionLabel="descripcion" optionValue="valor"
-                    placeholder="Ninguna opción seleccionada" [filter]="true" [resetFilterOnHide]="true"
-                    [virtualScroll]="true" [virtualScrollItemSize]="38" [(ngModel)]="tipo" [showClear]="true"
-                    (onShow)="ajustarPanelDropdown('tipoDoc')" styleClass="w-full">
+                    placeholder="Selecciona tipo" [filter]="true" filterPlaceholder="Buscar tipo..."
+                    [resetFilterOnHide]="true" [virtualScroll]="true" [virtualScrollItemSize]="38"
+                    [(ngModel)]="tipo" (onShow)="ajustarPanelDropdown('tipoDoc')"
+                    [ngClass]="{ 'p-invalid': filtrosTouched && (!tipo || tipo === '') }"
+                    styleClass="w-full reimp-tipo-doc">
+                    <ng-template pTemplate="selectedItem" let-selected>
+                      <span *ngIf="selected; else tipoDocPlaceholder" class="reimp-tipo-doc-selected">
+                        <span class="reimp-tipo-doc-code">{{ selected?.valor ?? selected?.id ?? selected }}</span>
+                        <span class="reimp-tipo-doc-sep">—</span>
+                        <span class="reimp-tipo-doc-desc">{{ selected?.descripcion ?? selected?.label ?? '' }}</span>
+                      </span>
+                      <ng-template #tipoDocPlaceholder>
+                        <span class="p-dropdown-label p-placeholder">Selecciona tipo</span>
+                      </ng-template>
+                    </ng-template>
+                    <ng-template pTemplate="item" let-opt>
+                      <div class="reimp-tipo-doc-item">
+                        <span class="reimp-tipo-doc-code">{{ opt?.valor ?? opt?.id ?? '' }}</span>
+                        <span class="reimp-tipo-doc-sep">—</span>
+                        <span class="reimp-tipo-doc-desc">{{ opt?.descripcion ?? '' }}</span>
+                      </div>
+                    </ng-template>
                   </p-dropdown>
                   <label for="tipoDoc">Tipo de documento <span class="required-asterisk">*</span></label>
                 </span>
+                <small class="reimp-field-error" *ngIf="filtrosTouched && (!tipo || tipo === '')">
+                  Selecciona un tipo de documento.
+                </small>
               </div>
 
               <!-- Número Documento -->
               <div class="field col-12 md:col-6 lg:col-4 reimp-field-plain">
                 <span class="p-float-label">
                   <p-inputNumber inputId="numDoc" [useGrouping]="false" [(ngModel)]="identificacion"
-                    styleClass="w-full">
+                    placeholder="Ej: 1023456789" styleClass="w-full">
                   </p-inputNumber>
                   <label for="numDoc">Número de documento <span class="required-asterisk">*</span></label>
                 </span>
+                <small class="reimp-field-error" *ngIf="filtrosTouched && (!identificacion || identificacion === '')">
+                  Digita el número de documento.
+                </small>
               </div>
 
               <!-- Especialidad -->
