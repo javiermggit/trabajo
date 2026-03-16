@@ -166,7 +166,7 @@
               </td>
               <td>
                 <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                  <button pButton type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
+                  <button pButton type="button" icon="pi pi-file" iconPos="left" class="reimp-btn reimp-btn-compact vhc-hc-btn" [ngClass]="{
                     'reimp-btn-secondary': item.tipoAgendaAccesoId===7 || item.tipoAgendaAccesoId===8,
                     'reimp-btn-primary': item.tipoAgendaAccesoId!==7 && item.tipoAgendaAccesoId!==8
                   }" [disabled]="item.disableButton" (click)="abrirHistoriaClinica(item)">
@@ -174,12 +174,14 @@
                   </button>
                 </ng-container>
                 <ng-container *ngIf="medicoServices.Especialidad.id===139">
-                  <button pButton type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
-                    (click)="finalizar(item)">Finalizar cita</button>
+                  <button pButton type="button" icon="pi pi-check" iconPos="left"
+                    class="reimp-btn reimp-btn-primary reimp-btn-compact" (click)="finalizar(item)">
+                    Finalizar cita
+                  </button>
                 </ng-container>
               </td>
               <td>
-                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                <button pButton type="button" icon="pi pi-id-card" iconPos="left" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
                   [disabled]="isConsentimientoLoading(item)" (click)="irAci(item)">
                   <ng-container *ngIf="!isConsentimientoLoading(item); else ciLoadingTpl">
                     Consentimientos
@@ -191,7 +193,7 @@
                 </button>
               </td>
               <td *ngIf="mostrarHistoricoCitas()">
-                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                <button pButton type="button" icon="pi pi-history" iconPos="left" class="reimp-btn reimp-btn-tertiary reimp-btn-compact"
                   (click)="obtenerHistoricoAsistioCita(item)">Histórico citas</button>
               </td>
             </tr>
@@ -311,7 +313,7 @@
               </td>
               <td>
                 <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                  <button pButton type="button" class="reimp-btn reimp-btn-compact" [ngClass]="{
+                  <button pButton type="button" icon="pi pi-file" iconPos="left" class="reimp-btn reimp-btn-compact vhc-hc-btn" [ngClass]="{
                     'reimp-btn-secondary': item.tipoAgendaAccesoId===7 || item.tipoAgendaAccesoId===8,
                     'reimp-btn-primary': item.tipoAgendaAccesoId!==7 && item.tipoAgendaAccesoId!==8
                   }" [disabled]="item.disableButton" (click)="abrirHistoriaClinica(item)">
@@ -319,12 +321,14 @@
                   </button>
                 </ng-container>
                 <ng-container *ngIf="medicoServices.Especialidad.id===139">
-                  <button pButton type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
-                    (click)="finalizar(item)">Finalizar cita</button>
+                  <button pButton type="button" icon="pi pi-check" iconPos="left"
+                    class="reimp-btn reimp-btn-primary reimp-btn-compact" (click)="finalizar(item)">
+                    Finalizar cita
+                  </button>
                 </ng-container>
               </td>
               <td>
-                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                <button pButton type="button" icon="pi pi-id-card" iconPos="left" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
                   [disabled]="isConsentimientoLoading(item)" (click)="irAci(item)">
                   <ng-container *ngIf="!isConsentimientoLoading(item); else ciLoadingTpl2">Consentimientos</ng-container>
                   <ng-template #ciLoadingTpl2>
@@ -333,7 +337,7 @@
                 </button>
               </td>
               <td *ngIf="mostrarHistoricoCitas()">
-                <button pButton type="button" class="reimp-btn reimp-btn-secondary reimp-btn-compact"
+                <button pButton type="button" icon="pi pi-history" iconPos="left" class="reimp-btn reimp-btn-tertiary reimp-btn-compact"
                   (click)="obtenerHistoricoAsistioCita(item)">Histórico citas</button>
               </td>
             </tr>
@@ -418,18 +422,18 @@
               </td>
               <td>
                 <ng-container *ngIf="medicoServices.Especialidad.id !== 139">
-                  <button pButton type="button" class="reimp-btn reimp-btn-compact reimp-btn-primary"
+                  <button pButton type="button" icon="pi pi-file" iconPos="left" class="reimp-btn reimp-btn-compact vhc-hc-btn reimp-btn-primary"
                     [disabled]="item.disableButton" (click)="abrirHistoriaClinica(item)">
                     Historias Clínicas
                   </button>
                 </ng-container>
                 <ng-container *ngIf="medicoServices.Especialidad.id === 139">
-                  <button pButton type="button" class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                  <button pButton type="button" icon="pi pi-check" iconPos="left" class="reimp-btn reimp-btn-primary reimp-btn-compact"
                     (click)="finalizar(item)">Finalizar cita</button>
                 </ng-container>
               </td>
               <td>
-                <button pButton type="button" class="reimp-btn reimp-btn-danger reimp-btn-compact"
+                <button pButton type="button" icon="pi pi-ban" iconPos="left" class="reimp-btn reimp-btn-danger reimp-btn-compact"
                   [disabled]="isDesactivarLoading(item)" (click)="desactivarCita(item)">
                   {{ isDesactivarLoading(item) ? 'Desactivando...' : 'Desactivar' }}
                 </button>
