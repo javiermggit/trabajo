@@ -1,7 +1,7 @@
 
 import { environment } from 'src/environments/environment';
 import { catchError, EMPTY, map, Observable, throwError } from 'rxjs';
-import { HttpClient, HttpErrorResponse, HttpParams, HttpResponse, } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams, HttpResponse } from '@angular/common/http';
 import { delayedRetry } from 'src/app/pipes/reintentoApi';
 import { Especialidad, Citas } from 'src/app/Modelos/Medico';
 import { Reimpresion } from 'src/app/Modelos/Reimpresion';
@@ -19,6 +19,7 @@ import { CitaDetalles } from 'src/app/Modelos/Impresion';
 export class ReimpresionService {
   // Servicio base para habilitar pruebas de navegación
    celularEnvio: any;
+  private static readonly PROGRAMS_PES = 'Pes';
   public firmaMedico: string;
    profesional: Profesional;
    _baseUrl: string;
@@ -52,6 +53,37 @@ export class ReimpresionService {
    
   }
 
+  private static throwPdfError(error: HttpErrorResponse): Observable<never> {
+    if (error.status === 404) {
+      return throwError(() => new Error('NOT_FOUND'));
+    }
+
+    if (error.status === 500) {
+      return throwError(() => new Error('SERVER_ERROR'));
+    }
+
+    return throwError(() => new Error('UNKNOWN_ERROR'));
+  }
+
+  private static extractNonEmptyBlob(response: HttpResponse<Blob>): Blob {
+    if (!response.body || response.body.size === 0) {
+      throw new Error('NO_DATA');
+    }
+
+    return response.body;
+  }
+
+  private getPdfBlob(url: string, params?: HttpParams): Observable<Blob> {
+    return this.http.get(url, {
+      responseType: 'blob',
+      observe: 'response',
+      params,
+    }).pipe(
+      map(ReimpresionService.extractNonEmptyBlob),
+      catchError(ReimpresionService.throwPdfError)
+    );
+  }
+
     
 /* abrirMorbidity(tipo :string,clientId: number, pacienteId: number, citaId: string): void {
   
@@ -66,35 +98,8 @@ export class ReimpresionService {
   citaId: string
 ): Observable<Blob> {
 
-  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}/${citaId}`;
-
-  return this.http.get(url, {
-    responseType: 'blob',
-    observe: 'response'
-  }).pipe(
-
-    map((response: HttpResponse<Blob>) => {
-
-      if (!response.body || response.body.size === 0) {
-        throw new Error('NO_DATA');
-      }
-
-      return response.body;
-    }),
-
-    catchError((error: HttpErrorResponse) => {
-
-      if (error.status === 404) {
-        return throwError(() => new Error('NOT_FOUND'));
-      }
-
-      if (error.status === 500) {
-        return throwError(() => new Error('SERVER_ERROR'));
-      }
-
-      return throwError(() => new Error('UNKNOWN_ERROR'));
-    })
-  );
+  const url = `${this._baseUrlPdf}/${encodeURIComponent(tipo)}/${clientId}/${pacienteId}/${citaId}`;
+  return this.getPdfBlob(url);
 }
 
  abrircronica(
@@ -103,34 +108,10 @@ export class ReimpresionService {
   pacienteId: number
 ): Observable<Blob> {
 
-  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}?programs=Pes`;
+  const url = `${this._baseUrlPdf}/${encodeURIComponent(tipo)}/${clientId}/${pacienteId}`;
+  const params = new HttpParams().set('programs', ReimpresionService.PROGRAMS_PES);
 
-  return this.http.get(url, {
-    responseType: 'blob',
-    observe: 'response'
-  }).pipe(
-    map(response => {
-
-      // Si viene vacío
-      if (!response.body || response.body.size === 0) {
-        throw new Error('NO_DATA');
-      }
-
-      return response.body;
-    }),
-    catchError((error: HttpErrorResponse) => {
-
-      if (error.status === 404) {
-        return throwError(() => new Error('NOT_FOUND'));
-      }
-
-      if (error.status === 500) {
-        return throwError(() => new Error('SERVER_ERROR'));
-      }
-
-      return throwError(() => new Error('UNKNOWN_ERROR'));
-    })
-  );
+  return this.getPdfBlob(url, params);
 }
 
  abrirunificada(
@@ -139,39 +120,13 @@ export class ReimpresionService {
   pacienteId: number
 ): Observable<Blob> {
 
-  const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}`;
-
-  return this.http.get(url, {
-    responseType: 'blob',
-    observe: 'response'
-  }).pipe(
-    map(response => {
-
-      // Si viene vacío
-      if (!response.body || response.body.size === 0) {
-        throw new Error('NO_DATA');
-      }
-
-      return response.body;
-    }),
-    catchError((error: HttpErrorResponse) => {
-
-      if (error.status === 404) {
-        return throwError(() => new Error('NOT_FOUND'));
-      }
-
-      if (error.status === 500) {
-        return throwError(() => new Error('SERVER_ERROR'));
-      }
-
-      return throwError(() => new Error('UNKNOWN_ERROR'));
-    })
-  );
+  const url = `${this._baseUrlPdf}/${encodeURIComponent(tipo)}/${clientId}/${pacienteId}`;
+  return this.getPdfBlob(url);
 }
 
 
- descargarPdfDesdeUrl(tipo :string,clientId: number, pacienteId: number, citaId: string) {
-   const url = `${this._baseUrlPdf}/${tipo}/${clientId}/${pacienteId}/${citaId}`;
+ descargarPdfDesdeUrl(tipo: string, clientId: number, pacienteId: number, citaId: string): Observable<Blob> {
+   const url = `${this._baseUrlPdf}/${encodeURIComponent(tipo)}/${clientId}/${pacienteId}/${citaId}`;
   return this.http.get(url, { responseType: 'blob' });
 }
 
@@ -179,8 +134,9 @@ export class ReimpresionService {
     return this.http.post<UploadHCResponse>(this.getUploadPdfEndpoint(), formData);
   }
 
-sendWhatsapp(link: string, hc: any,row:any) {
-const fechaFormateada = row.fecha.replace('T', ' ').split('.')[0];
+sendWhatsapp(link: string, hc: any, row: any) {
+  const rawFecha = String(row?.fecha ?? '').trim();
+  const fechaFormateada = rawFecha ? rawFecha.replace('T', ' ').split('.')[0] : undefined;
   const payload: EnviarPlantillaGupshup = {
     from: environment.telefonocliente,
     to: "57" + this.celularEnvio,

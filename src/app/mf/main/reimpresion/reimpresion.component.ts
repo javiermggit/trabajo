@@ -901,6 +901,11 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
       const key = this.normalizarTexto(this.profesionalLogueadoOption.value);
       if (key && !optionsByKey.has(key)) optionsByKey.set(key, this.profesionalLogueadoOption);
     }
+    if (this.filtroProfesional && this.filtroProfesional !== this.profesionalFallbackValue) {
+      const value = String(this.filtroProfesional ?? '').trim();
+      const key = this.normalizarTexto(value);
+      if (key && !optionsByKey.has(key)) optionsByKey.set(key, { label: value, value });
+    }
     for (const opt of (this.catalogoProfesionalesOptions ?? [])) {
       const key = this.normalizarTexto(opt.value);
       if (key && !optionsByKey.has(key)) optionsByKey.set(key, opt);
