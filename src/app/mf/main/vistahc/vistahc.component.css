@@ -117,6 +117,24 @@
 .filter-group { flex: 1; }
 .full-width { display: block; width: 100%; }
 
+/* Mantiene el botón "Consultar" alineado aunque aparezca el helper */
+@media (min-width: 769px) {
+  .agenda-filters .filter-group {
+    position: relative;
+  }
+
+  .agenda-filters .filter-group .vhc-helper {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 0.25rem);
+    margin-top: 0;
+  }
+
+  .vhc-filters {
+    margin-bottom: 2.25rem;
+  }
+}
+
 .reimp-filter-card { backdrop-filter: blur(3px); }
 .reimp-filter-card .p-4 {
   padding-top: 1rem !important;
