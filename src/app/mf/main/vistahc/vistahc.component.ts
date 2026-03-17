@@ -192,6 +192,7 @@ toastWarnPublic(titulo: string, msg: string): void {
   private consentimientoLoadingKey: string | null = null;
   private turnoLoadingKeys = new Set<string>();
   private desactivarLoadingKeys = new Set<string>();
+  private finalizarLoadingKeys = new Set<string>();
   citasAMostrar: any[] = [];
   private estadoLlamadoTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -605,46 +606,45 @@ toastWarnPublic(titulo: string, msg: string): void {
       this.toastWarn(SWAL_TITULO_DATO_FALTANTE, 'No se encontro citaId para finalizar la cita.');
       return;
     }
-    this.busyLabel = 'Validando cita...';
-    this.loading = true;
+    const loadingKey = this.getRowKey(item, 'finalizar');
+    if (hasLoadingKey(this.finalizarLoadingKeys, loadingKey)) return;
+    setLoadingKey(this.finalizarLoadingKeys, loadingKey, true);
     const citaIdEncoded = encodeURIComponent(btoa(String(citaId)));
     this.medicoServices.validHC(citaIdEncoded).subscribe({
       next: (res: any) => {
         if (res?.swEstadoPro === true) {
-          this.loading = false;
           this.toastError('Error', res?.mensaje ?? 'La cita ya esta finalizada.');
+          setLoadingKey(this.finalizarLoadingKeys, loadingKey, false);
           return;
         }
-        this.loading = false;
         this.confirmationService.confirm({
           message: '¿Desea finalizar la cita?',
           header: 'Confirmar',
           icon: 'pi pi-question-circle',
           acceptLabel: 'Finalizar',
           rejectLabel: 'Cancelar',
+          reject: () => { setLoadingKey(this.finalizarLoadingKeys, loadingKey, false); },
           accept: () => {
-            this.busyLabel = 'Finalizando cita...';
-            this.loading = true;
             this.medicoServices.facturarCitas(String(citaId)).subscribe({ next: () => { }, error: () => { } });
-            this.medicoServices.finalizar(String(citaId)).subscribe({
-              next: (resp: any) => {
-                this.toastSuccess('Listo', resp?.mensaje ?? 'Cita finalizada.');
-                this.consultarCitasGeneral();
-              },
-              error: (err: any) => {
-                const msg = err?.error?.mensaje ?? err?.message ?? 'Error finalizando la cita.';
-                this.toastError('Error', msg);
-                this.loading = false;
-              },
-              complete: () => { this.loading = false; }
-            });
+            this.medicoServices.finalizar(String(citaId))
+              .pipe(finalize(() => { setLoadingKey(this.finalizarLoadingKeys, loadingKey, false); }))
+              .subscribe({
+                next: (resp: any) => {
+                  this.toastSuccess('Listo', resp?.mensaje ?? 'Cita finalizada.');
+                  this.quitarFilaLocal(item);
+                },
+                error: (err: any) => {
+                  const msg = err?.error?.mensaje ?? err?.message ?? 'Error finalizando la cita.';
+                  this.toastError('Error', msg);
+                }
+              });
           }
         });
       },
       error: (err: any) => {
         const msg = err?.error?.mensaje ?? err?.message ?? 'Error validando el estado de la cita.';
         this.toastError('Error', msg);
-        this.loading = false;
+        setLoadingKey(this.finalizarLoadingKeys, loadingKey, false);
       }
     });
   }
@@ -905,7 +905,7 @@ toastWarnPublic(titulo: string, msg: string): void {
     return resolveCitaIdUtil(rowOrId);
   }
 
-  private getRowKey(row: any, prefix: 'turno' | 'desactivar'): string | null {
+  private getRowKey(row: any, prefix: 'turno' | 'desactivar' | 'finalizar'): string | null {
     const citaId = this.resolveCitaId(row);
     if (citaId !== null) return `${prefix}:cita:${String(citaId)}`;
     if (row?.identificacion) return `${prefix}:ident:${String(row.identificacion)}`;
@@ -918,6 +918,34 @@ toastWarnPublic(titulo: string, msg: string): void {
 
   isDesactivarLoading(row: any): boolean {
     return hasLoadingKey(this.desactivarLoadingKeys, this.getRowKey(row, 'desactivar'));
+  }
+
+  isFinalizarLoading(row: any): boolean {
+    return hasLoadingKey(this.finalizarLoadingKeys, this.getRowKey(row, 'finalizar'));
+  }
+
+  private quitarFilaLocal(item: any): void {
+    this.quitarFilaEnListado('listado_contingencia', 'otrosPage', 'otrosPageSize', item);
+    this.quitarFilaEnListado('listado_citas_recuperacion', 'notasPage', 'notasPageSize', item);
+    this.quitarFilaEnListado('listado_citas', 'hcPage', 'hcPageSize', item);
+  }
+
+  private quitarFilaEnListado(
+    listadoKey: 'listado_citas' | 'listado_citas_recuperacion' | 'listado_contingencia',
+    pageKey: 'hcPage' | 'notasPage' | 'otrosPage',
+    sizeKey: 'hcPageSize' | 'notasPageSize' | 'otrosPageSize',
+    item: any
+  ): void {
+    const citaId = this.resolveCitaId(item);
+    if (citaId === null) return;
+
+    const actual = Array.isArray((this as any)[listadoKey]) ? (this as any)[listadoKey] : [];
+    const filtered = actual.filter((row: any) => String(this.resolveCitaId(row)) !== String(citaId));
+    (this as any)[listadoKey] = filtered;
+
+    const pageSize = Number((this as any)[sizeKey] ?? DEFAULT_TABLE_PAGE_SIZE);
+    const maxPage = this.totalPages(filtered.length, pageSize);
+    if (Number((this as any)[pageKey] ?? 1) > maxPage) (this as any)[pageKey] = maxPage;
   }
 
   private quitarFilaContingencia(item: any): void {
