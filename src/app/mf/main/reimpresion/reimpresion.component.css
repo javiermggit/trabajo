@@ -125,7 +125,12 @@
   box-shadow: 0 20px 55px rgba(11, 42, 95, 0.38);
 }
 
-.reimp-overlay-panel .pi-spinner { font-size: 1.6rem; }
+.reimp-overlay-panel .pi-spinner { font-size: 1.6rem; color: #ffffff !important; }
+
+.reimp-overlay-panel span {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.28);
+}
 
 .reimp-onecard .card-custom {
   border: none;
