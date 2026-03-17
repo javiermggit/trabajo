@@ -175,8 +175,9 @@
                 </ng-container>
                 <ng-container *ngIf="medicoServices.Especialidad.id===139">
                   <button pButton type="button" icon="pi pi-check" iconPos="left"
-                    class="reimp-btn reimp-btn-primary reimp-btn-compact" (click)="finalizar(item)">
-                    Finalizar cita
+                    class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                    [disabled]="isFinalizarLoading(item)" (click)="finalizar(item)">
+                    {{ isFinalizarLoading(item) ? 'Finalizando...' : 'Finalizar cita' }}
                   </button>
                 </ng-container>
               </td>
@@ -322,8 +323,9 @@
                 </ng-container>
                 <ng-container *ngIf="medicoServices.Especialidad.id===139">
                   <button pButton type="button" icon="pi pi-check" iconPos="left"
-                    class="reimp-btn reimp-btn-primary reimp-btn-compact" (click)="finalizar(item)">
-                    Finalizar cita
+                    class="reimp-btn reimp-btn-primary reimp-btn-compact"
+                    [disabled]="isFinalizarLoading(item)" (click)="finalizar(item)">
+                    {{ isFinalizarLoading(item) ? 'Finalizando...' : 'Finalizar cita' }}
                   </button>
                 </ng-container>
               </td>
