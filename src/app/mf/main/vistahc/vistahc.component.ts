@@ -162,6 +162,22 @@ toastWarnPublic(titulo: string, msg: string): void {
     if (acceso === 'video_zoom') { this.abrirZoom(this.getLinkVideoconsulta(item)); return; }
     if (acceso === 'video_modal' || acceso === 'phone_modal' || acceso === 'extramural') { this.abrirModal(item); }
   }
+
+  getTurnoTitle(item: any): string {
+    if (!item) return 'â€”';
+    if (item.swExcedioLimiteLlamada === 1) return 'Paciente ya fue llamado';
+
+    const agendaId = Number(item?.tipoAgendaAccesoId);
+    const acceso = this.upper(item?.tipoAgendaAcceso);
+    if (agendaId === 11 || acceso === 'EXTRAMURAL') return 'Turno no aplica (Extramural)';
+
+    if (this.isTurnoLoading(item)) return 'Llamando turno...';
+
+    if (item.estadoCita !== 'FACT') return 'Turno disponible solo cuando la cita estÃ© FACT';
+    if (item.disableButton && item.ticket_Id != null) return 'Turno no disponible (ticket activo)';
+
+    return 'Llamar turno';
+  }
   // ── Modal Paciente ────────────────────────────────────────────────────
   modalPacienteVisible: boolean = false;
   modalPacienteDatos: any = null;

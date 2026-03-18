@@ -43,6 +43,17 @@
   line-height: 1.2;
 }
 
+.reimp-required-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--reimp-text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin: 0.05rem 0 0.55rem;
+  opacity: 0.9;
+}
+
 .reimp-page-header {
   margin: 0 0 1.1rem;
 }
@@ -304,12 +315,24 @@
 
 :host ::ng-deep .reimp-filtros .reimp-calendar-local .p-inputtext {
   border-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 :host ::ng-deep .reimp-filtros .reimp-calendar-local .p-datepicker-trigger {
   border-left: 0;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
+  box-sizing: border-box;
+  padding: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host ::ng-deep .reimp-filtros .reimp-calendar-local.p-calendar {
+  gap: 0;
 }
 
 :host ::ng-deep .reimp-calendar-shortcuts {

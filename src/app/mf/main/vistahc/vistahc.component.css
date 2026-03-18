@@ -3,11 +3,11 @@
   --navy: #001f61;
   --navy-mid: #0a2d82;
   --navy-soft: #1a3f99;
-  --accent: #3b82f6;
+  --accent: #3f6fd0;
   --accent2: #00c9a7;
   --danger: #ef4444;
   --warn: #f59e0b;
-  --success: #10b981;
+  --success: #1f8f6e;
   --bg: #f0f4fb;
   --surface: #ffffff;
   --border: #dde4f0;
@@ -522,7 +522,6 @@
 /* Pills de estado (sí tipo badge) */
 .section-pill-warn,
 .section-pill-success {
-  background: var(--warn);
   color: #fff;
   border-color: transparent;
   padding: 0.22rem 0.6rem;
@@ -532,6 +531,7 @@
   letter-spacing: 0.01em;
 }
 
+.section-pill-warn { background: var(--accent); } /* azul informativo */
 .section-pill-success { background: var(--success); }
 
 /* ───────── PACIENTE ───────── */
@@ -927,7 +927,6 @@
   font-weight: 700;
   font-size: .92rem;
   color: var(--navy);
-  flex: 1;
 }
 
 .acc-empty-hint {
