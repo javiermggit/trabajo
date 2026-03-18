@@ -72,11 +72,8 @@
         </div>
 
         <ng-container *ngIf="!loadingHcTable">
-        <p-table [value]="listado_citas" [paginator]="listado_citas?.length > 0" [rows]="hcPageSize"
-          [first]="(hcPage-1)*hcPageSize" class="w-full reimp-table" [showCurrentPageReport]="true"
-          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
-          [totalRecords]="listado_citas?.length ?? 0"
-          (onPage)="onHcPage($event)">
+        <p-table [value]="paginatedRows(listado_citas || [], hcPage, hcPageSize)"
+          class="w-full reimp-table">
 
           <ng-template pTemplate="header">
             <tr>
@@ -208,6 +205,21 @@
             </tr>
           </ng-template>
         </p-table>
+        <div class="reimp-table-footer">
+          <span class="reimp-counter">{{ buildCounterText((listado_citas?.length ?? 0), hcPage, hcPageSize) }}</span>
+          <div class="reimp-pager">
+            <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
+              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
+              [disabled]="hcPage === 1" (click)="previousPage('hc')"></button>
+            <span class="reimp-page-indicator">
+              {{ hcPage }} / {{ totalPages((listado_citas?.length ?? 0), hcPageSize) }}
+            </span>
+            <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
+              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
+              [disabled]="!hasNextPage((listado_citas?.length ?? 0), hcPage, hcPageSize)"
+              (click)="nextPage('hc')"></button>
+          </div>
+        </div>
         </ng-container>
       </div>
     </div>
@@ -233,12 +245,8 @@
         </div>
 
         <ng-container *ngIf="!loadingNotasTable">
-        <p-table [value]="listado_citas_recuperacion" [paginator]="listado_citas_recuperacion?.length > 0"
-          [rows]="notasPageSize" [first]="(notasPage-1)*notasPageSize" class="w-full reimp-table"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
-          [totalRecords]="listado_citas_recuperacion?.length ?? 0"
-          (onPage)="onNotasPage($event)">
+        <p-table [value]="paginatedRows(listado_citas_recuperacion || [], notasPage, notasPageSize)"
+          class="w-full reimp-table">
 
           <ng-template pTemplate="header">
             <tr>
@@ -349,6 +357,21 @@
             <tr><td [attr.colspan]="8" class="reimp-empty-cell text-center">No hay citas para el día de hoy.</td></tr>
           </ng-template>
         </p-table>
+        <div class="reimp-table-footer">
+          <span class="reimp-counter">{{ buildCounterText((listado_citas_recuperacion?.length ?? 0), notasPage, notasPageSize) }}</span>
+          <div class="reimp-pager">
+            <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
+              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
+              [disabled]="notasPage === 1" (click)="previousPage('notas')"></button>
+            <span class="reimp-page-indicator">
+              {{ notasPage }} / {{ totalPages((listado_citas_recuperacion?.length ?? 0), notasPageSize) }}
+            </span>
+            <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
+              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
+              [disabled]="!hasNextPage((listado_citas_recuperacion?.length ?? 0), notasPage, notasPageSize)"
+              (click)="nextPage('notas')"></button>
+          </div>
+        </div>
         </ng-container>
         </div>
       </p-accordionTab>
@@ -371,12 +394,8 @@
         </div>
 
         <ng-container *ngIf="!loadingOtrosTable">
-        <p-table [value]="listado_contingencia" [paginator]="listado_contingencia?.length > 0"
-          [rows]="otrosPageSize" [first]="(otrosPage-1)*otrosPageSize" class="w-full reimp-table"
-          [showCurrentPageReport]="true"
-          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
-          [totalRecords]="listado_contingencia?.length ?? 0"
-          (onPage)="onOtrosPage($event)">
+        <p-table [value]="paginatedRows(listado_contingencia || [], otrosPage, otrosPageSize)"
+          class="w-full reimp-table">
 
           <ng-template pTemplate="header">
             <tr>
@@ -449,6 +468,21 @@
             <tr><td [attr.colspan]="5" class="reimp-empty-cell text-center">No hay citas para el día de hoy.</td></tr>
           </ng-template>
         </p-table>
+        <div class="reimp-table-footer">
+          <span class="reimp-counter">{{ buildCounterText((listado_contingencia?.length ?? 0), otrosPage, otrosPageSize) }}</span>
+          <div class="reimp-pager">
+            <button pButton type="button" label="Anterior" icon="ri-arrow-left-s-line" iconPos="left"
+              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
+              [disabled]="otrosPage === 1" (click)="previousPage('otros')"></button>
+            <span class="reimp-page-indicator">
+              {{ otrosPage }} / {{ totalPages((listado_contingencia?.length ?? 0), otrosPageSize) }}
+            </span>
+            <button pButton type="button" label="Siguiente" icon="ri-arrow-right-s-line" iconPos="right"
+              class="reimp-btn reimp-btn-compact reimp-btn-page reimp-pager-btn"
+              [disabled]="!hasNextPage((listado_contingencia?.length ?? 0), otrosPage, otrosPageSize)"
+              (click)="nextPage('otros')"></button>
+          </div>
+        </div>
         </ng-container>
         </div>
       </p-accordionTab>
