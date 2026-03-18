@@ -137,13 +137,18 @@ export class ReimpresionComponent implements OnInit, OnDestroy {
   errorOtrosTable: string = '';
   hcNoPaciente: boolean = false;
 
+  get isSearchBusy(): boolean {
+    return !!(this.loadingReimpresion || this.loadingHcTable || this.loadingNotasTable || this.loadingOtrosTable);
+  }
+
   get isBlockingBusy(): boolean {
-    return !!(this.loadingEnvio || this.loadingImpresion);
+    return !!(this.loadingEnvio || this.loadingImpresion || this.isSearchBusy);
   }
 
   get blockingOverlayText(): string {
     if (this.loadingEnvio) return 'Enviando, por favor espere...';
     if (this.loadingImpresion) return 'Generando documento, por favor espere...';
+    if (this.isSearchBusy) return 'Buscando, por favor espere...';
     return 'Procesando...';
   }
 

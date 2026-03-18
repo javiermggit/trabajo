@@ -140,8 +140,8 @@
       </div>
     </div>
 
-    <!-- Loader general -->
-    <div *ngIf="loadingReimpresion" class="flex justify-content-center mt-4">
+    <!-- Loader general (solo si no hay overlay bloqueante) -->
+    <div *ngIf="loadingReimpresion && !isBlockingBusy" class="flex justify-content-center mt-4">
       <i class="pi pi-spin pi-spinner" style="font-size:2rem"></i>
     </div>
 
